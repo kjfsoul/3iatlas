@@ -6,7 +6,6 @@
 
 import { generate3IAtlasVectors } from './atlas-orbital-data';
 import { type VectorData } from './horizons-api';
-import { swissEphemerisCalculator } from "./swiss-ephemeris-calculator";
 
 // ============================================================================
 // SOLAR SYSTEM OBJECTS (NASA Horizons COMMAND codes)
@@ -52,51 +51,13 @@ export async function fetchSolarSystemData(
   endDate: string,
   stepSize: string = "6h"
 ): Promise<Record<string, VectorData[]>> {
-  console.log(
-    "[Solar System] 🚀 Using Swiss Ephemeris for astronomical calculations"
+  // Directly use the original NASA API fallback logic, which is the documented, stable approach.
+  return await fetchSolarSystemDataFallback(
+    objects,
+    startDate,
+    endDate,
+    stepSize
   );
-
-  try {
-    // Use Swiss Ephemeris for all calculations
-    const results = await swissEphemerisCalculator.getAllSolarSystemData(
-      startDate,
-      endDate,
-      stepSize
-    );
-
-    // Filter results to only include requested objects
-    const filteredResults: Record<string, VectorData[]> = {};
-    for (const objKey of objects) {
-      if (results[objKey]) {
-        filteredResults[objKey] = results[objKey];
-      } else {
-        console.warn(`[Solar System] ⚠️ No data available for ${objKey}`);
-        // Use fallback for missing objects
-        filteredResults[objKey] = createMinimalFallbackData(
-          objKey,
-          startDate,
-          endDate,
-          stepSize
-        );
-      }
-    }
-
-    console.log("[Solar System] ✅ Swiss Ephemeris calculations complete");
-    return filteredResults;
-  } catch (error) {
-    console.error(
-      "[Solar System] ❌ Swiss Ephemeris failed, using fallback:",
-      error
-    );
-
-    // Fallback to original NASA API approach if Swiss Ephemeris fails
-    return await fetchSolarSystemDataFallback(
-      objects,
-      startDate,
-      endDate,
-      stepSize
-    );
-  }
 }
 
 /**

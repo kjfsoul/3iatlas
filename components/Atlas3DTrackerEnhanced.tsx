@@ -321,11 +321,11 @@ export default function Atlas3DTrackerEnhanced({
 
     // Sun - made more prominent for visibility
     const sunGeo = new THREE.SphereGeometry(0.3, 32, 32); // Increased from 0.15
-    const sunMat = new THREE.MeshBasicMaterial({
+    const sunMat = new THREE.MeshStandardMaterial({
       color: 0xffaa00,
+      emissive: 0xffaa00,
+      emissiveIntensity: 0.5,
     });
-    (sunMat as any).emissive = new THREE.Color(0xffaa00);
-    (sunMat as any).emissiveIntensity = 0.5;
     const sun = new THREE.Mesh(sunGeo, sunMat);
     sun.name = "sun";
     scene.add(sun);
