@@ -1,0 +1,10 @@
+
+> 3iatlas-landing@0.1.0 dev
+> ./start-dev.sh
+
+Starting dev server on port 3030...
+   ▲ Next.js 15.5.4
+   - Local:        http://localhost:3030
+   - Network:      http://192.168.0.2:3030
+
+ ✓ Starting...

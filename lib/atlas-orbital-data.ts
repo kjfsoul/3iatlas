@@ -86,7 +86,7 @@ function calculateHyperbolicPosition(
   const nu = 2 * Math.atan(Math.sqrt((e + 1) / (e - 1)) * Math.tanh(F / 2));
   
   // Distance from Sun
-  const r = q * (e + 1) / (1 + e * Math.cos(nu));
+  const r = q * (e + 1) / (1 + e * Math.cos(nu) + 1e-9); // Add epsilon to prevent division by zero
   
   // Position in orbital plane
   const xOrb = r * Math.cos(nu);
