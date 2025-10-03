@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PORTS=(3030 3031 3032)
+PORTS=(3030 3031 3032 3033 3034 3035)
 
 for PORT in "${PORTS[@]}"; do
   if ! lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null 2>&1 ; then

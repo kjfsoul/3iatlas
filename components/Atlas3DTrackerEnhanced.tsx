@@ -10,46 +10,188 @@ import { type VectorData } from '@/lib/horizons-api';
 import { fetchSolarSystemData, SOLAR_SYSTEM_OBJECTS, type SolarSystemObjectKey } from '@/lib/solar-system-data';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 interface Props {
   startDate?: string;
   endDate?: string;
-  stepSize?: '1h' | '6h' | '12h' | '1d';
+  stepSize?: "1h" | "6h" | "12h" | "1d";
   autoPlay?: boolean;
   playbackSpeed?: number;
   className?: string;
+  animationKey?: 'warning' | 'artifact' | 'discovery' | null; // NEW: Narrative trigger
 }
 
 export default function Atlas3DTrackerEnhanced({
-  startDate = '2025-10-01',
-  endDate = '2025-10-31',
-  stepSize = '6h',
+  startDate = "2025-10-01",
+  endDate = "2025-10-31",
+  stepSize = "6h",
   autoPlay = true,
   playbackSpeed = 2,
-  className = '',
+  className = "",
+  animationKey = null, // NEW: Animation hook for narrative engine
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
-    objects: Map<string, THREE.Mesh>;
+    objects: Map<string, THREE.Object3D>;
+    controls: OrbitControls;
   } | null>(null);
+
+  // Camera state management (no re-renders)
+  const cameraStateRef = useRef<{
+    mode: "free-look" | "follow";
+    target: THREE.Vector3 | null;
+  }>({
+    mode: "free-look",
+    target: null,
+  });
+
+  // Zoom functions
+  const handleZoomIn = () => {
+    if (!sceneRef.current) return;
+    const { camera } = sceneRef.current;
+    const delta = 1.0;
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    const newPos = camera.position.clone().add(dir.multiplyScalar(-delta));
+    if (newPos.length() > 0.5 && newPos.length() < 100) {
+      camera.position.copy(newPos);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (!sceneRef.current) return;
+    const { camera } = sceneRef.current;
+    const delta = 1.0;
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    const newPos = camera.position.clone().add(dir.multiplyScalar(delta));
+    if (newPos.length() > 0.5 && newPos.length() < 100) {
+      camera.position.copy(newPos);
+    }
+  };
+
+  // Follow mode parameters (user-configurable)
+  const followParamsRef = useRef<{
+    distance: number;
+    height: number;
+    smoothing: number;
+  }>({
+    distance: 5,
+    height: 2,
+    smoothing: 0.02, // Reduced from 0.05 for more stable camera
+  });
+
+  // Motion amplification parameters
+  const motionParamsRef = useRef<{
+    cometMotionMultiplier: number;
+    interpolationEnabled: boolean;
+    trailLength: number;
+  }>({
+    cometMotionMultiplier: 10.0, // Increased from 3.0 for much better visibility
+    interpolationEnabled: true,
+    trailLength: 30, // Increased from 20 for longer visible trail
+  });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [solarSystemData, setSolarSystemData] = useState<Record<string, VectorData[]>>({});
+  const [solarSystemData, setSolarSystemData] = useState<
+    Record<string, VectorData[]>
+  >({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [speed, setSpeed] = useState(playbackSpeed);
-  const [cameraView, setCameraView] = useState<'default' | 'followComet' | 'topDown' | 'closeup'>('default');
+  const [cameraView, setCameraView] = useState<
+    "default" | "followComet" | "topDown" | "closeup" | "marsApproach"
+  >("default");
+  const [showLabels, setShowLabels] = useState(true); // NEW: Toggle planetary labels
 
   const isPlayingRef = useRef(isPlaying);
   const speedRef = useRef(speed);
   const currentIndexRef = useRef(0);
 
-  useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
-  useEffect(() => { speedRef.current = speed; }, [speed]);
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+  useEffect(() => {
+    speedRef.current = speed;
+  }, [speed]);
+
+  useEffect(() => {
+    if (!animationKey || !sceneRef.current) return;
+
+    const { objects } = sceneRef.current;
+
+    // Execute animation sequence based on key
+    switch (animationKey) {
+      case 'warning':
+        // Trajectory line color shift to red
+        console.log('[Animation] Triggering WARNING sequence');
+        // Future: Change orbital path color, add pulsing effect
+        break;
+      case 'artifact':
+        // Pan camera to Mars, highlight region
+        console.log('[Animation] Triggering ARTIFACT sequence');
+        setCameraView('marsApproach');
+        break;
+      case 'discovery':
+        // Comet flicker effect, zoom to closeup
+        console.log('[Animation] Triggering DISCOVERY sequence');
+        setCameraView('closeup');
+        // Future: Add flicker animation to comet
+        break;
+    }
+  }, [animationKey]);
+
+  // Handle camera mode switching
+  const handleCameraModeChange = (
+    newMode: "default" | "followComet" | "topDown" | "closeup" | "marsApproach"
+  ) => {
+    if (!sceneRef.current) return;
+
+    const { controls, camera } = sceneRef.current;
+
+    if (newMode === "followComet") {
+      // Switch to follow mode
+      cameraStateRef.current.mode = "follow";
+      controls.enabled = false;
+
+      // Smoothly transition camera to follow position
+      const atlasData = solarSystemData["atlas"];
+      if (atlasData && atlasData.length > 0) {
+        const currentIdx = Math.floor(currentIndexRef.current);
+        if (currentIdx < atlasData.length) {
+          const cometPos = atlasData[currentIdx].position;
+          const cometPosition3D = new THREE.Vector3(
+            cometPos.x,
+            cometPos.z,
+            -cometPos.y
+          );
+
+          // Set camera to a stable follow position
+          const followDistance = followParamsRef.current.distance;
+          const followHeight = followParamsRef.current.height;
+          const cameraOffset = new THREE.Vector3(1, 0, 0)
+            .normalize()
+            .multiplyScalar(followDistance);
+          cameraOffset.y += followHeight;
+
+          const targetPosition = cometPosition3D.clone().add(cameraOffset);
+          camera.position.copy(targetPosition);
+          camera.lookAt(cometPosition3D);
+        }
+      }
+    } else {
+      // Switch to free-look mode
+      cameraStateRef.current.mode = "free-look";
+      cameraStateRef.current.target = null;
+      controls.enabled = true;
+      controls.target.set(0, 0, 0); // Reset target to scene center
+    }
+  };
 
   // Fetch all solar system data
   useEffect(() => {
@@ -58,31 +200,37 @@ export default function Atlas3DTrackerEnhanced({
       setError(null);
 
       try {
-        console.log('[Enhanced Tracker] Loading solar system data...');
-        
+        console.log("[Enhanced Tracker] Loading solar system data...");
+
         const objectsToLoad: SolarSystemObjectKey[] = [
-          'atlas',      // 3I/ATLAS - the star!
-          'earth',
-          'mars',
-          'jupiter',
-          'saturn',
-          'mercury',
-          'venus',
+          "atlas", // 3I/ATLAS - the star!
+          "earth",
+          "mars",
+          "jupiter",
+          "saturn",
+          "mercury",
+          "venus",
         ];
 
-        const data = await fetchSolarSystemData(objectsToLoad, startDate, endDate, stepSize);
-        
+        const data = await fetchSolarSystemData(
+          objectsToLoad,
+          startDate,
+          endDate,
+          stepSize
+        );
+
         if (Object.keys(data).length === 0) {
-          throw new Error('No data received from NASA Horizons');
+          throw new Error("No data received from NASA Horizons");
         }
 
         setSolarSystemData(data);
         setLoading(false);
-        console.log(`[Enhanced Tracker] Loaded ${Object.keys(data).length} objects`);
-        
+        console.log(
+          `[Enhanced Tracker] Loaded ${Object.keys(data).length} objects`
+        );
       } catch (err) {
-        console.error('[Enhanced Tracker] Load failed:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load data');
+        console.error("[Enhanced Tracker] Load failed:", err);
+        setError(err instanceof Error ? err.message : "Failed to load data");
         setLoading(false);
       }
     }
@@ -92,12 +240,59 @@ export default function Atlas3DTrackerEnhanced({
 
   // Initialize Three.js scene
   useEffect(() => {
-    if (!containerRef.current || loading || error || Object.keys(solarSystemData).length === 0) {
+    if (
+      !containerRef.current ||
+      loading ||
+      error ||
+      Object.keys(solarSystemData).length === 0
+    ) {
       return;
     }
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000508);
+    scene.background = new THREE.Color(0x000011); // Dark blue space
+
+    // Add starfield background
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 2000;
+    const starPositions = new Float32Array(starCount * 3);
+    const starColors = new Float32Array(starCount * 3);
+
+    for (let i = 0; i < starCount; i++) {
+      // Random positions in a large sphere
+      const radius = 50 + Math.random() * 100;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+
+      starPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+      starPositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      starPositions[i * 3 + 2] = radius * Math.cos(phi);
+
+      // Random star colors (white to blue-white)
+      const intensity = 0.5 + Math.random() * 0.5;
+      starColors[i * 3] = intensity; // R
+      starColors[i * 3 + 1] = intensity; // G
+      starColors[i * 3 + 2] = intensity + Math.random() * 0.3; // B (slightly blue)
+    }
+
+    starGeometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(starPositions, 3)
+    );
+    starGeometry.setAttribute(
+      "color",
+      new THREE.BufferAttribute(starColors, 3)
+    );
+
+    const starMaterial = new THREE.PointsMaterial({
+      size: 0.5,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8,
+    });
+
+    const starField = new THREE.Points(starGeometry, starMaterial);
+    scene.add(starField);
 
     const camera = new THREE.PerspectiveCamera(
       60,
@@ -109,7 +304,10 @@ export default function Atlas3DTrackerEnhanced({
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    renderer.setSize(
+      containerRef.current.clientWidth,
+      containerRef.current.clientHeight
+    );
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
@@ -121,25 +319,31 @@ export default function Atlas3DTrackerEnhanced({
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
 
-    // Sun
-    const sunGeo = new THREE.SphereGeometry(0.15, 32, 32);
-    const sunMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+    // Sun - made more prominent for visibility
+    const sunGeo = new THREE.SphereGeometry(0.3, 32, 32); // Increased from 0.15
+    const sunMat = new THREE.MeshBasicMaterial({
+      color: 0xffaa00,
+    });
+    (sunMat as any).emissive = new THREE.Color(0xffaa00);
+    (sunMat as any).emissiveIntensity = 0.5;
     const sun = new THREE.Mesh(sunGeo, sunMat);
+    sun.name = "sun";
     scene.add(sun);
 
-    const sunGlowGeo = new THREE.SphereGeometry(0.25, 32, 32);
+    const sunGlowGeo = new THREE.SphereGeometry(0.5, 32, 32); // Increased from 0.25
     const sunGlowMat = new THREE.MeshBasicMaterial({
       color: 0xffaa00,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.6, // Increased from 0.3
     });
     const sunGlow = new THREE.Mesh(sunGlowGeo, sunGlowMat);
+    sunGlow.name = "sunGlow";
     scene.add(sunGlow);
 
     // Create meshes for each object
-    const objectMeshes = new Map<string, THREE.Mesh>();
+    const objectMeshes = new Map<string, THREE.Object3D>();
 
-    console.log('[3D Scene] Available data:', Object.keys(solarSystemData));
+    console.log("[3D Scene] Available data:", Object.keys(solarSystemData));
 
     for (const [key, obj] of Object.entries(SOLAR_SYSTEM_OBJECTS)) {
       if (!solarSystemData[key]) {
@@ -147,47 +351,121 @@ export default function Atlas3DTrackerEnhanced({
         continue;
       }
 
-      const isAtlas = key === 'atlas';
+      const isAtlas = key === "atlas";
       if (isAtlas) {
-        console.log(`[3D Scene] Creating 3I/ATLAS: color=${obj.color.toString(16)}, size=${obj.size}`);
+        console.log(
+          `[3D Scene] Creating 3I/ATLAS: color=${obj.color.toString(
+            16
+          )}, size=${obj.size}`
+        );
       }
-      
-      const geometry = new THREE.SphereGeometry(obj.size, isAtlas ? 32 : 20, isAtlas ? 32 : 20);
-      const material = new THREE.MeshBasicMaterial({ color: obj.color });
+
+      const geometry = new THREE.SphereGeometry(
+        obj.size,
+        isAtlas ? 32 : 20,
+        isAtlas ? 32 : 20
+      );
+
+      // Enhanced materials for better visual realism
+      const material = new THREE.MeshBasicMaterial({
+        color: obj.color,
+      });
+
       const mesh = new THREE.Mesh(geometry, material);
+
+      // Make Mars more prominent for Mars approach view
+      if (key === "mars") {
+        mesh.userData.isMars = true;
+      }
       scene.add(mesh);
       objectMeshes.set(key, mesh);
-      
+
       if (isAtlas) {
         console.log(`[3D Scene] ✅ Added GREEN 3I/ATLAS to scene`);
       }
 
-      // Add glow to 3I/ATLAS
+      // Add enhanced visual effects to 3I/ATLAS
       if (isAtlas) {
-        const glowGeo = new THREE.SphereGeometry(obj.size * 1.5, 24, 24);
+        // Enhanced glow effect
+        const glowGeo = new THREE.SphereGeometry(obj.size * 2.0, 32, 32);
         const glowMat = new THREE.MeshBasicMaterial({
           color: obj.color,
           transparent: true,
-          opacity: 0.4,
+          opacity: 0.6,
         });
         const glow = new THREE.Mesh(glowGeo, glowMat);
         scene.add(glow);
-        objectMeshes.set('atlas_glow', glow);
+        objectMeshes.set("atlas_glow", glow);
+
+        // Outer bloom effect
+        const bloomGeo = new THREE.SphereGeometry(obj.size * 3.0, 24, 24);
+        const bloomMat = new THREE.MeshBasicMaterial({
+          color: obj.color,
+          transparent: true,
+          opacity: 0.2,
+        });
+        const bloom = new THREE.Mesh(bloomGeo, bloomMat);
+        scene.add(bloom);
+        objectMeshes.set("atlas_bloom", bloom);
+
+        // Create particle trail system
+        const trailGeometry = new THREE.BufferGeometry();
+        const trailPositions = new Float32Array(
+          motionParamsRef.current.trailLength * 3
+        );
+        const trailColors = new Float32Array(
+          motionParamsRef.current.trailLength * 3
+        );
+
+        // Initialize trail with comet color
+        for (let i = 0; i < motionParamsRef.current.trailLength; i++) {
+          const color = new THREE.Color(obj.color);
+          trailColors[i * 3] = color.r;
+          trailColors[i * 3 + 1] = color.g;
+          trailColors[i * 3 + 2] = color.b;
+        }
+
+        trailGeometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(trailPositions, 3)
+        );
+        trailGeometry.setAttribute(
+          "color",
+          new THREE.BufferAttribute(trailColors, 3)
+        );
+
+        const trailMaterial = new THREE.PointsMaterial({
+          size: 0.05, // Increased from 0.02 for better visibility
+          vertexColors: true,
+          transparent: true,
+          opacity: 1.0, // Increased from 0.8 for better visibility
+          blending: THREE.AdditiveBlending,
+        });
+
+        const trail = new THREE.Points(trailGeometry, trailMaterial);
+        scene.add(trail);
+        objectMeshes.set("atlas_trail", trail);
       }
 
       // Draw orbital path
       if (solarSystemData[key].length > 0) {
         const pathPoints = solarSystemData[key].map(
-          v => new THREE.Vector3(v.position.x, v.position.z, -v.position.y)
+          (v) => new THREE.Vector3(v.position.x, v.position.z, -v.position.y)
         );
         const pathGeo = new THREE.BufferGeometry().setFromPoints(pathPoints);
         const pathMat = new THREE.LineBasicMaterial({
-          color: key === 'atlas' ? 0x00ff88 : obj.color,
-          opacity: key === 'atlas' ? 0.8 : 0.3,
+          color: key === "atlas" ? 0x00ff88 : obj.color,
+          opacity: key === "atlas" ? 0.8 : 0.3,
           transparent: true,
         });
         const path = new THREE.Line(pathGeo, pathMat);
         scene.add(path);
+      }
+
+      // NEW: Add 3D text labels for planets
+      if (key === 'earth' || key === 'mars') {
+        // Labels will be rendered via CSS overlay using screen projection
+        mesh.userData.label = obj.name;
       }
     }
 
@@ -204,74 +482,84 @@ export default function Atlas3DTrackerEnhanced({
         r * Math.cos(phi)
       );
     }
-    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVerts, 3));
-    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1, sizeAttenuation: true });
+    starGeo.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(starVerts, 3)
+    );
+    const starMat = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.1,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 1.0,
+    });
     const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
 
-    sceneRef.current = { scene, camera, renderer, objects: objectMeshes };
+    // Initialize OrbitControls for free-look mode
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 1;
+    controls.maxDistance = 100;
+    controls.maxPolarAngle = Math.PI;
 
-    // Mouse controls
-    let isDragging = false;
-    let prevMouse = { x: 0, y: 0 };
-
-    const onMouseDown = (e: MouseEvent) => {
-      isDragging = true;
-      prevMouse = { x: e.clientX, y: e.clientY };
+    sceneRef.current = {
+      scene,
+      camera,
+      renderer,
+      objects: objectMeshes,
+      controls,
     };
 
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      const deltaX = (e.clientX - prevMouse.x) * 0.01;
-      const deltaY = (e.clientY - prevMouse.y) * 0.01;
+    // OrbitControls handles all mouse interactions
+    // Add double-click zoom as alternative to scrolling
+    let clickCount = 0;
+    let clickTimer: NodeJS.Timeout | null = null;
 
-      const rotY = new THREE.Matrix4().makeRotationY(deltaX);
-      camera.position.applyMatrix4(rotY);
-
-      const camDir = new THREE.Vector3();
-      camera.getWorldDirection(camDir);
-      const right = new THREE.Vector3().crossVectors(camera.up, camDir).normalize();
-      const rotX = new THREE.Matrix4().makeRotationAxis(right, deltaY);
-      camera.position.applyMatrix4(rotX);
-
-      camera.lookAt(0, 0, 0);
-      prevMouse = { x: e.clientX, y: e.clientY };
-    };
-
-    const onMouseUp = () => { isDragging = false; };
-
-    const onWheel = (e: WheelEvent) => {
+    const handleDoubleClick = (e: MouseEvent) => {
       e.preventDefault();
-      const delta = e.deltaY > 0 ? 0.5 : -0.5;
+      const delta = 1.0; // Zoom in amount
       const dir = new THREE.Vector3();
       camera.getWorldDirection(dir);
-      const newPos = camera.position.clone().add(dir.multiplyScalar(delta));
-      if (newPos.length() > 1 && newPos.length() < 100) {
+      const newPos = camera.position.clone().add(dir.multiplyScalar(-delta));
+      if (newPos.length() > 0.5 && newPos.length() < 100) {
         camera.position.copy(newPos);
       }
     };
 
-    renderer.domElement.addEventListener('mousedown', onMouseDown);
-    renderer.domElement.addEventListener('mousemove', onMouseMove);
-    renderer.domElement.addEventListener('mouseup', onMouseUp);
-    renderer.domElement.addEventListener('mouseleave', onMouseUp);
-    renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
+    const handleClick = (e: MouseEvent) => {
+      clickCount++;
+      if (clickCount === 1) {
+        clickTimer = setTimeout(() => {
+          clickCount = 0;
+        }, 300);
+      } else if (clickCount === 2) {
+        clearTimeout(clickTimer!);
+        clickCount = 0;
+        handleDoubleClick(e);
+      }
+    };
+
+    renderer.domElement.addEventListener("click", handleClick);
 
     const handleResize = () => {
       if (!containerRef.current) return;
-      camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
+      camera.aspect =
+        containerRef.current.clientWidth / containerRef.current.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+      renderer.setSize(
+        containerRef.current.clientWidth,
+        containerRef.current.clientHeight
+      );
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      renderer.domElement.removeEventListener('mousedown', onMouseDown);
-      renderer.domElement.removeEventListener('mousemove', onMouseMove);
-      renderer.domElement.removeEventListener('mouseup', onMouseUp);
-      renderer.domElement.removeEventListener('mouseleave', onMouseUp);
-      renderer.domElement.removeEventListener('wheel', onWheel);
-      window.removeEventListener('resize', handleResize);
+      controls.dispose();
+      renderer.domElement.removeEventListener("click", handleClick);
+      window.removeEventListener("resize", handleResize);
       renderer.dispose();
       if (containerRef.current?.contains(renderer.domElement)) {
         containerRef.current.removeChild(renderer.domElement);
@@ -291,6 +579,14 @@ export default function Atlas3DTrackerEnhanced({
     function animate() {
       animationId = requestAnimationFrame(animate);
 
+      // Safety check for sceneRef
+      if (!sceneRef.current) {
+        console.warn("[Animation] sceneRef.current is null, skipping frame");
+        return;
+      }
+
+      const { scene, camera, renderer, objects } = sceneRef.current;
+
       if (isPlayingRef.current) {
         const now = Date.now();
         const dt = (now - lastTime) / 1000;
@@ -298,7 +594,9 @@ export default function Atlas3DTrackerEnhanced({
 
         localIndex += dt * speedRef.current * 3; // 3 frames/sec at 1x
 
-        const maxFrames = Math.max(...Object.values(solarSystemData).map(v => v.length));
+        const maxFrames = Math.max(
+          ...Object.values(solarSystemData).map((v) => v.length)
+        );
         if (localIndex >= maxFrames) {
           localIndex = 0;
         }
@@ -310,34 +608,297 @@ export default function Atlas3DTrackerEnhanced({
         }
       }
 
-      // Update ALL object positions from NASA data
-      const idx = Math.floor(localIndex);
+      // Update ALL object positions with smooth interpolation
+      const { cometMotionMultiplier, interpolationEnabled } =
+        motionParamsRef.current;
+
       for (const [key, vectors] of Object.entries(solarSystemData)) {
-        if (idx >= vectors.length) continue;
-        
-        const vec = vectors[idx];
+        if (vectors.length === 0) continue;
+
+        // CRITICAL FIX: Skip sun - it must stay at origin
+        if (key === 'sun') continue;
+
         const mesh = objects.get(key);
-        if (mesh && vec) {
-          mesh.position.set(vec.position.x, vec.position.z, -vec.position.y);
+        if (!mesh) continue;
+
+        let finalPosition: THREE.Vector3;
+
+        if (interpolationEnabled && localIndex < vectors.length - 1) {
+          // Smooth interpolation between data points
+          const idx = Math.floor(localIndex);
+          const nextIdx = Math.min(idx + 1, vectors.length - 1);
+          const t = localIndex - idx; // Interpolation factor (0-1)
+
+          const currentVec = vectors[idx];
+          const nextVec = vectors[nextIdx];
+
+          if (currentVec && nextVec) {
+            // Interpolate position
+            const currentPos = new THREE.Vector3(
+              currentVec.position.x,
+              currentVec.position.z,
+              -currentVec.position.y
+            );
+            const nextPos = new THREE.Vector3(
+              nextVec.position.x,
+              nextVec.position.z,
+              -nextVec.position.y
+            );
+
+            finalPosition = currentPos.clone().lerp(nextPos, t);
+
+            // Apply motion multiplier for 3I/ATLAS
+            if (key === "atlas") {
+              const basePosition = finalPosition.clone();
+              const motionOffset = nextPos
+                .clone()
+                .sub(currentPos)
+                .multiplyScalar(cometMotionMultiplier - 1);
+              finalPosition = basePosition.add(motionOffset);
+            }
+          } else {
+            // Fallback to discrete positioning
+            const idx = Math.floor(localIndex);
+            const vec = vectors[idx];
+            if (vec) {
+              finalPosition = new THREE.Vector3(
+                vec.position.x,
+                vec.position.z,
+                -vec.position.y
+              );
+            } else {
+              continue;
+            }
+          }
+        } else {
+          // Discrete positioning (fallback)
+          const idx = Math.floor(localIndex);
+          if (idx >= vectors.length) continue;
+          const vec = vectors[idx];
+          if (vec) {
+            finalPosition = new THREE.Vector3(
+              vec.position.x,
+              vec.position.z,
+              -vec.position.y
+            );
+          } else {
+            continue;
+          }
         }
 
-        // Update glow for 3I/ATLAS
-        if (key === 'atlas') {
-          const glow = objects.get('atlas_glow');
-          if (glow && vec) {
-            glow.position.set(vec.position.x, vec.position.z, -vec.position.y);
+        // Apply final position
+        mesh.position.copy(finalPosition);
+
+        // Update visual effects for 3I/ATLAS
+        if (key === "atlas") {
+          const glow = objects.get("atlas_glow");
+          if (glow) {
+            glow.position.copy(finalPosition);
+          }
+
+          const bloom = objects.get("atlas_bloom");
+          if (bloom) {
+            bloom.position.copy(finalPosition);
+          }
+
+          // Update particle trail
+          const trail = objects.get("atlas_trail") as THREE.Points;
+          if (trail) {
+            const positions = trail.geometry.attributes.position
+              .array as Float32Array;
+            const colors = trail.geometry.attributes.color
+              .array as Float32Array;
+
+            // Shift trail positions (move each point to previous position)
+            for (
+              let i = (motionParamsRef.current.trailLength - 1) * 3;
+              i >= 3;
+              i -= 3
+            ) {
+              positions[i] = positions[i - 3];
+              positions[i + 1] = positions[i - 2];
+              positions[i + 2] = positions[i - 1];
+
+              // Fade colors more gradually for better visibility
+              colors[i] = colors[i - 3] * 0.95; // Slower fade
+              colors[i + 1] = colors[i - 2] * 0.95;
+              colors[i + 2] = colors[i - 1] * 0.95;
+            }
+
+            // Set new head position
+            positions[0] = finalPosition.x;
+            positions[1] = finalPosition.y;
+            positions[2] = finalPosition.z;
+
+            // Set head color (bright)
+            colors[0] = 0.0; // R
+            colors[1] = 1.0; // G
+            colors[2] = 0.5; // B
+
+            trail.geometry.attributes.position.needsUpdate = true;
+            trail.geometry.attributes.color.needsUpdate = true;
           }
         }
       }
 
-      // Camera views
-      if (cameraView === 'followComet') {
-        const atlasData = solarSystemData['atlas'];
-        if (atlasData && idx < atlasData.length) {
-          const cometPos = atlasData[idx].position;
-          camera.position.set(cometPos.x + 2, cometPos.z + 2, -cometPos.y + 2);
-          camera.lookAt(cometPos.x, cometPos.z, -cometPos.y);
+      // Ensure Sun stays at origin (fixes drift issue)
+      const sun = scene.getObjectByName("sun");
+      if (sun) {
+        sun.position.set(0, 0, 0);
+      }
+      const sunGlow = scene.getObjectByName("sunGlow");
+      if (sunGlow) {
+        sunGlow.position.set(0, 0, 0);
+      }
+
+      // Camera system with smooth tracking
+      if (cameraStateRef.current.mode === "follow") {
+        // Follow mode: smooth camera tracking
+        const atlasData = solarSystemData["atlas"];
+        const currentIdx = Math.floor(localIndex);
+        if (atlasData && currentIdx < atlasData.length) {
+          const cometPos = atlasData[currentIdx].position;
+          const cometPosition3D = new THREE.Vector3(
+            cometPos.x,
+            cometPos.z,
+            -cometPos.y
+          );
+
+          // Calculate ideal camera position with user-configurable offset
+          const {
+            distance: followDistance,
+            height,
+            smoothing,
+          } = followParamsRef.current;
+
+          // Create offset vector (distance from comet, height above)
+          const cameraOffset = new THREE.Vector3(1, 0, 0)
+            .normalize()
+            .multiplyScalar(followDistance);
+          cameraOffset.y += height;
+
+          // Calculate target position relative to comet
+          const idealPosition = cometPosition3D.clone().add(cameraOffset);
+
+          // IMPROVED: More responsive camera positioning with adaptive smoothing
+          const currentPos = camera.position.clone();
+          const distance = currentPos.distanceTo(idealPosition);
+
+          // Adaptive smoothing - faster response for large distance changes
+          const adaptiveSmoothing =
+            distance > 1.0 ? smoothing * 3.0 : smoothing;
+          
+          // Move camera with improved threshold for better responsiveness
+          if (distance > 0.01) {
+            camera.position.lerp(idealPosition, adaptiveSmoothing);
+          }
+
+          // Direct look-at for stability
+          camera.lookAt(cometPosition3D);
         }
+      } else if (cameraView === "topDown") {
+        // Top-down view: camera high above looking down at solar system
+        camera.position.set(0, 25, 0);
+        camera.lookAt(0, 0, 0);
+        // Set a wider field of view for better overview
+        camera.fov = 90;
+        camera.updateProjectionMatrix();
+      } else if (cameraView === "closeup") {
+        // Perihelion closeup: camera positioned to show sun approach
+        const atlasData = solarSystemData["atlas"];
+        const currentIdx = Math.floor(localIndex);
+        if (atlasData && currentIdx < atlasData.length) {
+          const cometPos = atlasData[currentIdx].position;
+          const cometPosition3D = new THREE.Vector3(
+            cometPos.x,
+            cometPos.z,
+            -cometPos.y
+          );
+
+          // Position camera to show comet approaching sun
+          // Camera is positioned between comet and sun, looking at comet
+          const sunPosition = new THREE.Vector3(0, 0, 0);
+          const cometToSun = sunPosition
+            .clone()
+            .sub(cometPosition3D)
+            .normalize();
+
+          // Position camera 2 units away from comet, towards sun
+          const cameraDistance = 2.0;
+          const cameraPosition = cometPosition3D
+            .clone()
+            .add(cometToSun.multiplyScalar(cameraDistance));
+
+          camera.position.copy(cameraPosition);
+          camera.lookAt(cometPosition3D);
+        }
+      } else if (cameraView === "marsApproach") {
+        // Mars approach: camera positioned to show comet approaching Mars
+        const atlasData = solarSystemData["atlas"];
+        const marsData = solarSystemData["mars"];
+        const currentIdx = Math.floor(localIndex);
+
+        if (
+          atlasData &&
+          marsData &&
+          currentIdx < atlasData.length &&
+          currentIdx < marsData.length
+        ) {
+          const cometPos = atlasData[currentIdx].position;
+          const marsPos = marsData[currentIdx].position;
+
+          const cometPosition3D = new THREE.Vector3(
+            cometPos.x,
+            cometPos.z,
+            -cometPos.y
+          );
+          const marsPosition3D = new THREE.Vector3(
+            marsPos.x,
+            marsPos.z,
+            -marsPos.y
+          );
+
+          // Position camera to show comet approaching Mars
+          const cometToMars = marsPosition3D
+            .clone()
+            .sub(cometPosition3D)
+            .normalize();
+
+          // Position camera 3 units away from comet, towards Mars
+          const cameraDistance = 3.0;
+          const cameraPosition = cometPosition3D
+            .clone()
+            .add(cometToMars.multiplyScalar(cameraDistance));
+
+          camera.position.copy(cameraPosition);
+          camera.lookAt(cometPosition3D);
+
+          // Scale up Mars for better visibility in Mars approach view
+          const marsMesh = objects.get("mars");
+          if (marsMesh) {
+            marsMesh.scale.setScalar(3.0); // Make Mars 3x larger
+          }
+        }
+      } else {
+        // Reset Mars scale for other views
+        const marsMesh = objects.get("mars");
+        if (marsMesh) {
+          marsMesh.scale.setScalar(1.0); // Normal size
+        }
+      }
+
+      if (cameraView === "default") {
+        // Solar System View: cinematic overview with moderate distance
+        camera.position.set(8, 5, 8);
+        camera.lookAt(0, 0, 0);
+        // Reset field of view to normal
+        camera.fov = 60;
+        camera.updateProjectionMatrix();
+      }
+
+      // Update OrbitControls (only in free-look mode)
+      if (cameraStateRef.current.mode === "free-look" && sceneRef.current) {
+        sceneRef.current.controls.update();
       }
 
       renderer.render(scene, camera);
@@ -350,13 +911,58 @@ export default function Atlas3DTrackerEnhanced({
     };
   }, [solarSystemData, cameraView]);
 
-  const atlasData = solarSystemData['atlas'] || [];
+  const atlasData = solarSystemData["atlas"] || [];
+  const earthData = solarSystemData["earth"] || [];
   const currentDate = atlasData[currentIndex]?.date || startDate;
-  const progress = atlasData.length > 0 ? (currentIndex / atlasData.length) * 100 : 0;
+  const progress =
+    atlasData.length > 0 ? (currentIndex / atlasData.length) * 100 : 0;
+
+  // Calculate distance from Earth and Sun
+  let distanceFromEarth = 0;
+  let distanceFromSun = 0;
+  let cometSpeed = 0;
   
+  if (atlasData[currentIndex] && earthData[currentIndex]) {
+    const atlasPos = atlasData[currentIndex].position;
+    const earthPos = earthData[currentIndex].position;
+    
+    // Distance from Earth (in AU)
+    distanceFromEarth = Math.sqrt(
+      Math.pow(atlasPos.x - earthPos.x, 2) +
+      Math.pow(atlasPos.y - earthPos.y, 2) +
+      Math.pow(atlasPos.z - earthPos.z, 2)
+    );
+    
+    // Distance from Sun (in AU)
+    distanceFromSun = Math.sqrt(
+      Math.pow(atlasPos.x, 2) +
+      Math.pow(atlasPos.y, 2) +
+      Math.pow(atlasPos.z, 2)
+    );
+    
+    // Speed (from velocity vector in AU/day) - ADD NULL CHECK
+    const vel = atlasData[currentIndex]?.velocity;
+    if (vel) {
+      cometSpeed = Math.sqrt(
+        Math.pow(vel.vx, 2) +
+        Math.pow(vel.vy, 2) +
+        Math.pow(vel.vz, 2)
+      );
+    }
+  }
+
   // Debug: Why aren't controls showing? (only log once per state change)
   useEffect(() => {
-    console.log('[Controls] loading:', loading, 'error:', error, 'atlasData.length:', atlasData.length, 'should show:', !loading && !error && atlasData.length > 0);
+    console.log(
+      "[Controls] loading:",
+      loading,
+      "error:",
+      error,
+      "atlasData.length:",
+      atlasData.length,
+      "should show:",
+      !loading && !error && atlasData.length > 0
+    );
   }, [loading, error, atlasData.length]);
 
   return (
@@ -365,7 +971,9 @@ export default function Atlas3DTrackerEnhanced({
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10">
           <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500 mb-4" />
           <p className="text-white text-lg">Loading Solar System Data...</p>
-          <p className="text-white/60 text-sm mt-2">Fetching from NASA JPL Horizons</p>
+          <p className="text-white/60 text-sm mt-2">
+            Fetching from NASA JPL Horizons
+          </p>
         </div>
       )}
 
@@ -373,24 +981,90 @@ export default function Atlas3DTrackerEnhanced({
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10">
           <div className="text-red-500 text-xl mb-2">⚠ Error</div>
           <p className="text-white text-center max-w-md px-4">{error}</p>
+          <div className="text-white/60 text-sm mt-4 text-center max-w-md px-4">
+            <p>
+              If you see "Service Unavailable" errors, the NASA Horizons API is
+              temporarily down.
+            </p>
+            <p>
+              The tracker will use fallback orbital calculations for 3I/ATLAS.
+            </p>
+          </div>
         </div>
       )}
 
-      <div ref={containerRef} className="w-full h-full bg-black rounded-xl overflow-hidden" />
+      <div
+        ref={containerRef}
+        className="w-full h-full bg-black rounded-xl overflow-hidden"
+      />
 
       {!loading && !error && atlasData.length > 0 && (
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 to-transparent p-6 space-y-3">
           <div className="text-center">
             <div className="text-green-400 text-3xl font-mono font-bold">
-              {currentDate.split('T')[0]}
+              {currentDate.split("T")[0]}
             </div>
             <div className="text-white/70 text-sm mt-1">
-              {currentDate.split('T')[1]?.substring(0, 8)} UTC • 3I/ATLAS Perihelion Approach
+              {currentDate.split("T")[1]?.substring(0, 8)} UTC • 3I/ATLAS
+              Perihelion Approach
+            </div>
+            
+            {/* NEW: Enhanced data overlay */}
+            <div className="grid grid-cols-3 gap-4 mt-3 text-xs">
+              <div className="bg-black/50 rounded-lg p-2">
+                <div className="text-white/50">Distance from Sun</div>
+                <div className="text-green-400 font-mono font-bold">
+                  {distanceFromSun.toFixed(3)} AU
+                </div>
+                <div className="text-white/40 text-[10px]">
+                  {(distanceFromSun * 149.6).toFixed(1)} M km
+                </div>
+              </div>
+              <div className="bg-black/50 rounded-lg p-2">
+                <div className="text-white/50">Distance from Earth</div>
+                <div className="text-blue-400 font-mono font-bold">
+                  {distanceFromEarth.toFixed(3)} AU
+                </div>
+                <div className="text-white/40 text-[10px]">
+                  {(distanceFromEarth * 149.6).toFixed(1)} M km
+                </div>
+              </div>
+              <div className="bg-black/50 rounded-lg p-2">
+                <div className="text-white/50">Speed</div>
+                <div className="text-purple-400 font-mono font-bold">
+                  {(cometSpeed * 1.731).toFixed(1)} km/s
+                </div>
+                <div className="text-white/40 text-[10px]">
+                  {(cometSpeed * 1.731 * 3600).toFixed(0)} km/h
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
-            <div className="bg-green-500 h-full transition-all" style={{ width: `${progress}%` }} />
+          {/* NEW: Interactive timeline scrubber */}
+          <div className="w-full space-y-2">
+            <div className="flex items-center gap-2 text-white/70 text-xs">
+              <span className="whitespace-nowrap">Timeline:</span>
+              <input
+                type="range"
+                min="0"
+                max={atlasData.length - 1}
+                value={currentIndex}
+                onChange={(e) => {
+                  const newIndex = Number(e.target.value);
+                  setCurrentIndex(newIndex);
+                  currentIndexRef.current = newIndex;
+                  setIsPlaying(false); // Pause when manually scrubbing
+                }}
+                className="flex-1 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-green-500"
+              />
+            </div>
+            <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+              <div
+                className="bg-green-500 h-full transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
 
           <div className="flex items-center justify-center gap-3 flex-wrap">
@@ -398,14 +1072,25 @@ export default function Atlas3DTrackerEnhanced({
               onClick={() => setIsPlaying(!isPlaying)}
               className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
             >
-              {isPlaying ? '⏸ Pause' : '▶ Play'}
+              {isPlaying ? "⏸ Pause" : "▶ Play"}
             </button>
 
             <button
-              onClick={() => { setCurrentIndex(0); setIsPlaying(false); }}
+              onClick={() => {
+                setCurrentIndex(0);
+                setIsPlaying(false);
+              }}
               className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
             >
               ⏮ Reset
+            </button>
+
+            <button
+              onClick={() => setShowLabels(!showLabels)}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
+              title="Toggle planetary labels"
+            >
+              {showLabels ? "🏷️ Labels On" : "🏷️ Labels Off"}
             </button>
 
             <select
@@ -422,32 +1107,183 @@ export default function Atlas3DTrackerEnhanced({
 
             <select
               value={cameraView}
-              onChange={(e) => setCameraView(e.target.value as typeof cameraView)}
+              onChange={(e) => {
+                const newMode = e.target.value as typeof cameraView;
+                setCameraView(newMode);
+                handleCameraModeChange(newMode);
+              }}
               className="px-4 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:outline-none focus:border-green-500"
             >
               <option value="default">Solar System View</option>
               <option value="followComet">Follow 3I/ATLAS</option>
               <option value="topDown">Top-Down View</option>
               <option value="closeup">Perihelion Closeup</option>
+              <option value="marsApproach">Mars Approach</option>
             </select>
+
+            {cameraView === "followComet" && (
+              <>
+                <div className="flex items-center gap-2 text-white/70 text-sm">
+                  <span>Distance:</span>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    step="0.5"
+                    value={followParamsRef.current.distance}
+                    onChange={(e) => {
+                      followParamsRef.current.distance = Number(e.target.value);
+                    }}
+                    className="flex-1"
+                  />
+                  <span className="text-xs w-8">
+                    {followParamsRef.current.distance.toFixed(1)}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 text-white/70 text-sm">
+                  <span>Height:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="5"
+                    step="0.5"
+                    value={followParamsRef.current.height}
+                    onChange={(e) => {
+                      followParamsRef.current.height = Number(e.target.value);
+                    }}
+                    className="flex-1"
+                  />
+                  <span className="text-xs w-8">
+                    {followParamsRef.current.height.toFixed(1)}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 text-white/70 text-sm">
+                  <span>Smooth:</span>
+                  <input
+                    type="range"
+                    min="0.01"
+                    max="0.5"
+                    step="0.01"
+                    value={followParamsRef.current.smoothing}
+                    onChange={(e) => {
+                      followParamsRef.current.smoothing = Number(
+                        e.target.value
+                      );
+                    }}
+                    className="flex-1"
+                  />
+                  <span className="text-xs w-8">
+                    {followParamsRef.current.smoothing.toFixed(2)}
+                  </span>
+                </div>
+              </>
+            )}
+
+            {/* Motion Controls */}
+            <div className="flex items-center gap-2 text-white/70 text-sm">
+              <span title="Amplifies 3I/ATLAS movement speed for better visibility">
+                Motion:
+              </span>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                step="0.5"
+                value={motionParamsRef.current.cometMotionMultiplier}
+                onChange={(e) => {
+                  motionParamsRef.current.cometMotionMultiplier = Number(
+                    e.target.value
+                  );
+                }}
+                className="flex-1"
+              />
+              <span className="text-xs w-8">
+                {motionParamsRef.current.cometMotionMultiplier.toFixed(1)}x
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-white/70 text-sm">
+              <span title="Smooth motion: On = fluid movement between data points, Off = jumpy discrete steps">
+                Smooth:
+              </span>
+              <input
+                type="checkbox"
+                checked={motionParamsRef.current.interpolationEnabled}
+                onChange={(e) => {
+                  motionParamsRef.current.interpolationEnabled =
+                    e.target.checked;
+                }}
+                className="w-4 h-4"
+              />
+              <span className="text-xs">
+                {motionParamsRef.current.interpolationEnabled ? "On" : "Off"}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-white/70 text-sm">
+              <span title="Length of particle trail behind 3I/ATLAS">
+                Trail:
+              </span>
+              <input
+                type="range"
+                min="5"
+                max="50"
+                step="5"
+                value={motionParamsRef.current.trailLength}
+                onChange={(e) => {
+                  motionParamsRef.current.trailLength = Number(e.target.value);
+                }}
+                className="flex-1"
+              />
+              <span className="text-xs w-8">
+                {motionParamsRef.current.trailLength}
+              </span>
+            </div>
           </div>
 
           <div className="text-center text-white/50 text-xs">
-            Frame {currentIndex + 1} / {atlasData.length} • NASA JPL Horizons Data
+            Frame {currentIndex + 1} / {atlasData.length} • NASA JPL Horizons
+            Data
           </div>
         </div>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && showLabels && (
         <div className="absolute top-4 right-4 bg-black/80 text-white/90 text-sm p-4 rounded-lg max-w-xs backdrop-blur-sm border border-white/10">
-          <div className="font-semibold mb-2 text-green-400">🌌 Interactive Solar System</div>
+          <div className="font-semibold mb-2 text-green-400">
+            🌌 Interactive Solar System
+          </div>
           <div className="space-y-1 text-xs">
             <div>🟢 Green: 3I/ATLAS (Interstellar Comet)</div>
             <div>🔵 Blue: Earth</div>
             <div>🔴 Red: Mars</div>
-            <div>🟡 Yellow: Sun</div>
+            <div>🟡 Yellow: Sun (Center)</div>
+            <div>🟠 Orange: Jupiter</div>
+            <div>🟤 Ringed: Saturn</div>
             <div className="pt-2 border-t border-white/20 mt-2">
-              <strong>Controls:</strong> Click + drag to rotate • Scroll to zoom
+              <strong>Controls:</strong> Click + drag to rotate • Scroll or
+              double-click to zoom • Use timeline to scrub
+            </div>
+            {animationKey && (
+              <div className="pt-2 border-t border-white/20 mt-2 text-yellow-400">
+                <strong>Narrative Mode:</strong> {animationKey.toUpperCase()}
+              </div>
+            )}
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={handleZoomOut}
+                className="px-3 py-1 bg-white/10 text-white rounded border border-white/20 hover:bg-white/20 text-sm"
+              >
+                −
+              </button>
+              <button
+                onClick={handleZoomIn}
+                className="px-3 py-1 bg-white/10 text-white rounded border border-white/20 hover:bg-white/20 text-sm"
+              >
+                +
+              </button>
             </div>
           </div>
         </div>

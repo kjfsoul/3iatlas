@@ -6,6 +6,7 @@
 
 import { generate3IAtlasVectors } from './atlas-orbital-data';
 import { type VectorData } from './horizons-api';
+import { swissEphemerisCalculator } from "./swiss-ephemeris-calculator";
 
 // ============================================================================
 // SOLAR SYSTEM OBJECTS (NASA Horizons COMMAND codes)
@@ -49,106 +50,265 @@ export async function fetchSolarSystemData(
   objects: SolarSystemObjectKey[],
   startDate: string,
   endDate: string,
-  stepSize: string = '6h'
+  stepSize: string = "6h"
 ): Promise<Record<string, VectorData[]>> {
-  
+  console.log(
+    "[Solar System] 🚀 Using Swiss Ephemeris for astronomical calculations"
+  );
+
+  try {
+    // Use Swiss Ephemeris for all calculations
+    const results = await swissEphemerisCalculator.getAllSolarSystemData(
+      startDate,
+      endDate,
+      stepSize
+    );
+
+    // Filter results to only include requested objects
+    const filteredResults: Record<string, VectorData[]> = {};
+    for (const objKey of objects) {
+      if (results[objKey]) {
+        filteredResults[objKey] = results[objKey];
+      } else {
+        console.warn(`[Solar System] ⚠️ No data available for ${objKey}`);
+        // Use fallback for missing objects
+        filteredResults[objKey] = createMinimalFallbackData(
+          objKey,
+          startDate,
+          endDate,
+          stepSize
+        );
+      }
+    }
+
+    console.log("[Solar System] ✅ Swiss Ephemeris calculations complete");
+    return filteredResults;
+  } catch (error) {
+    console.error(
+      "[Solar System] ❌ Swiss Ephemeris failed, using fallback:",
+      error
+    );
+
+    // Fallback to original NASA API approach if Swiss Ephemeris fails
+    return await fetchSolarSystemDataFallback(
+      objects,
+      startDate,
+      endDate,
+      stepSize
+    );
+  }
+}
+
+/**
+ * Fallback function using NASA API (original implementation)
+ */
+async function fetchSolarSystemDataFallback(
+  objects: SolarSystemObjectKey[],
+  startDate: string,
+  endDate: string,
+  stepSize: string = "6h"
+): Promise<Record<string, VectorData[]>> {
   const results: Record<string, VectorData[]> = {};
-  
+
   // Fetch each object's data
   for (const objKey of objects) {
     const obj = SOLAR_SYSTEM_OBJECTS[objKey];
-    
+
     try {
       const params = new URLSearchParams({
         COMMAND: obj.command,
-        EPHEM_TYPE: 'VECTOR',
-        CENTER: '@sun',
+        EPHEM_TYPE: "VECTOR",
+        CENTER: "@sun",
         START_TIME: startDate,
         STOP_TIME: endDate,
         STEP_SIZE: stepSize,
-        format: 'json',
-        OUT_UNITS: 'AU-D',
-        REF_SYSTEM: 'ICRF',
-        VEC_TABLE: '2',
+        format: "json",
+        OUT_UNITS: "AU-D",
+        REF_SYSTEM: "ICRF",
+        VEC_TABLE: "2",
       });
 
-      const response = await fetch(`/api/horizons/ephemeris?${params.toString()}`);
-      
+      const response = await fetch(
+        `/api/horizons/ephemeris?${params.toString()}`
+      );
+
       if (!response.ok) {
-        console.warn(`[Solar System] Failed to fetch ${obj.name}: ${response.status}`);
-        
+        console.warn(
+          `[Solar System] Failed to fetch ${obj.name}: ${response.status}`
+        );
+
         // FALLBACK: Use generated orbital data for 3I/ATLAS
-        if (objKey === 'atlas') {
-          console.log('[Solar System] 🔄 Using fallback orbital calculations for 3I/ATLAS');
-          const stepHours = parseInt(stepSize.replace('h', '')) || 6;
-          const fallbackVectors = generate3IAtlasVectors(startDate, endDate, stepHours);
+        if (objKey === "atlas") {
+          console.log(
+            "[Solar System] 🔄 Using fallback orbital calculations for 3I/ATLAS"
+          );
+          const stepHours = parseInt(stepSize.replace("h", "")) || 6;
+          const fallbackVectors = generate3IAtlasVectors(
+            startDate,
+            endDate,
+            stepHours
+          );
           if (fallbackVectors.length > 0) {
             results[objKey] = fallbackVectors;
-            console.log(`[Solar System] ✅ Generated ${fallbackVectors.length} positions for 3I/ATLAS`);
+            console.log(
+              `[Solar System] ✅ Generated ${fallbackVectors.length} positions for 3I/ATLAS`
+            );
+          }
+        } else {
+          // For other objects, create minimal fallback data
+          console.log(
+            `[Solar System] 🔄 Creating minimal fallback data for ${obj.name}`
+          );
+          const fallbackData = createMinimalFallbackData(
+            objKey,
+            startDate,
+            endDate,
+            stepSize
+          );
+          if (fallbackData.length > 0) {
+            results[objKey] = fallbackData;
+            console.log(
+              `[Solar System] ✅ Generated ${fallbackData.length} positions for ${obj.name}`
+            );
           }
         }
         continue;
       }
 
       const data = await response.json();
-      
-      // Minimal logging to reduce console spam
-      // console.log(`[Solar System] Raw data for ${obj.name}:`, {
-      //   hasResult: !!data.result,
-      //   resultType: typeof data.result,
-      //   isArray: Array.isArray(data.result),
-      //   resultLength: data.result?.length,
-      // });
-      
+
       // Parse the result - can be array or string
       if (!data.result) {
         console.warn(`[Solar System] No result data for ${obj.name}`);
         continue;
       }
-      
+
       const vectors = parseHorizonsVectors(data.result);
       results[objKey] = vectors;
-      
-      console.log(`[Solar System] ✅ Loaded ${obj.name}: ${vectors.length} positions`);
-      
+
+      console.log(
+        `[Solar System] ✅ Loaded ${obj.name}: ${vectors.length} positions`
+      );
     } catch (error) {
       console.error(`[Solar System] Error fetching ${obj.name}:`, error);
-      
+
       // FALLBACK: Use generated orbital data for 3I/ATLAS on any error
-      if (objKey === 'atlas') {
+      if (objKey === "atlas") {
         try {
-          console.log('[Solar System] 🔄 Using fallback orbital calculations for 3I/ATLAS (error recovery)');
-          const stepHours = parseInt(stepSize.replace('h', '')) || 6;
-          const fallbackVectors = generate3IAtlasVectors(startDate, endDate, stepHours);
+          console.log(
+            "[Solar System] 🔄 Using fallback orbital calculations for 3I/ATLAS (error recovery)"
+          );
+          const stepHours = parseInt(stepSize.replace("h", "")) || 6;
+          const fallbackVectors = generate3IAtlasVectors(
+            startDate,
+            endDate,
+            stepHours
+          );
           if (fallbackVectors.length > 0) {
             results[objKey] = fallbackVectors;
-            console.log(`[Solar System] ✅ Generated ${fallbackVectors.length} positions for 3I/ATLAS`);
+            console.log(
+              `[Solar System] ✅ Generated ${fallbackVectors.length} positions for 3I/ATLAS`
+            );
           }
         } catch (fallbackError) {
-          console.error('[Solar System] Fallback also failed:', fallbackError);
+          console.error("[Solar System] Fallback also failed:", fallbackError);
         }
       }
     }
   }
-  
+
   // FINAL SAFETY NET: If 3I/ATLAS data is missing for ANY reason, generate it
-  if (!results['atlas'] || results['atlas'].length === 0) {
-    console.warn('[Solar System] ⚠️ 3I/ATLAS data missing! Using fallback calculations as last resort');
+  if (!results["atlas"] || results["atlas"].length === 0) {
+    console.warn(
+      "[Solar System] ⚠️ 3I/ATLAS data missing! Using fallback calculations as last resort"
+    );
     try {
-      const stepHours = parseInt(stepSize.replace('h', '')) || 6;
-      const fallbackVectors = generate3IAtlasVectors(startDate, endDate, stepHours);
+      const stepHours = parseInt(stepSize.replace("h", "")) || 6;
+      const fallbackVectors = generate3IAtlasVectors(
+        startDate,
+        endDate,
+        stepHours
+      );
       if (fallbackVectors.length > 0) {
-        results['atlas'] = fallbackVectors;
-        console.log(`[Solar System] ✅ FALLBACK: Generated ${fallbackVectors.length} positions for 3I/ATLAS`);
+        results["atlas"] = fallbackVectors;
+        console.log(
+          `[Solar System] ✅ FALLBACK: Generated ${fallbackVectors.length} positions for 3I/ATLAS`
+        );
       } else {
-        console.error('[Solar System] ❌ Fallback returned 0 positions!');
+        console.error("[Solar System] ❌ Fallback returned 0 positions!");
       }
     } catch (error) {
-      console.error('[Solar System] ❌ Final fallback failed:', error);
+      console.error("[Solar System] ❌ Final fallback failed:", error);
     }
   }
-  
+
   return results;
+}
+
+// ============================================================================
+// FALLBACK DATA GENERATION
+// ============================================================================
+
+/**
+ * Create minimal fallback data for objects when NASA API fails
+ */
+function createMinimalFallbackData(
+  objectKey: SolarSystemObjectKey,
+  startDate: string,
+  endDate: string,
+  stepSize: string
+): VectorData[] {
+  const obj = SOLAR_SYSTEM_OBJECTS[objectKey];
+  if (!obj) return [];
+
+  // Simple orbital positions based on approximate distances from sun
+  const distances: Record<string, number> = {
+    mercury: 0.39,
+    venus: 0.72,
+    earth: 1.0,
+    mars: 1.52,
+    jupiter: 5.2,
+    saturn: 9.5,
+    uranus: 19.2,
+    neptune: 30.1,
+    pluto: 39.5,
+    voyager1: 160,
+    voyager2: 130,
+    atlas: 1.5, // Will be overridden by proper fallback
+  };
+
+  const distance = distances[objectKey] || 1.0;
+  const stepHours = parseInt(stepSize.replace("h", "")) || 6;
+  const startTime = new Date(startDate);
+  const endTime = new Date(endDate);
+  const totalHours =
+    (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+  const numSteps = Math.ceil(totalHours / stepHours);
+
+  const vectors: VectorData[] = [];
+
+  for (let i = 0; i < numSteps; i++) {
+    const time = new Date(startTime.getTime() + i * stepHours * 60 * 60 * 1000);
+    const dayOfYear = Math.floor(
+      (time.getTime() - new Date(time.getFullYear(), 0, 0).getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+
+    // Simple circular orbit approximation
+    const angle = (dayOfYear / 365.25) * 2 * Math.PI;
+    const x = distance * Math.cos(angle);
+    const y = distance * Math.sin(angle);
+    const z = 0; // Simplified to ecliptic plane
+
+    vectors.push({
+      jd: time.getTime() / (1000 * 60 * 60 * 24) + 2440587.5, // Convert to Julian Date
+      date: time.toISOString(),
+      position: { x, y, z },
+      velocity: { vx: 0, vy: 0, vz: 0 }, // Simplified
+    });
+  }
+
+  return vectors;
 }
 
 // ============================================================================
