@@ -14,6 +14,9 @@ importers:
       '@types/three':
         specifier: ^0.180.0
         version: 0.180.0
+      astronomy-engine:
+        specifier: ^2.1.19
+        version: 2.1.19
       framer-motion:
         specifier: 11.2.10
         version: 11.2.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1092,6 +1095,9 @@ packages:
   arrify@2.0.1:
     resolution: {integrity: sha512-3duEwti880xqi4eAMN8AyR4a0ByT90zoYdLlevfrvU43vb0YZwZVfxOgxWrLXXXpyugL0hNZc9G6BiB5B3nUug==}
     engines: {node: '>=8'}
+
+  astronomy-engine@2.1.19:
+    resolution: {integrity: sha512-8yWKNf7UeNbH458h3sAJ6ZgAjE5jTXp/mNNRFoC20j2SHwZIjAQeEsBB2Q3uCFRaTCCJRv33K2XhkhZQMXoX6w==}
 
   async-mutex@0.5.0:
     resolution: {integrity: sha512-1A94B18jkJ3DYq284ohPxoXbfTA5HsQ7/Mf4DEhcyLx3Bz27Rh59iScbB6EPiP+B+joue6YCxcMXSbFC1tZKwA==}
@@ -4036,6 +4042,8 @@ snapshots:
 
   arrify@2.0.1:
     optional: true
+
+  astronomy-engine@2.1.19: {}
 
   async-mutex@0.5.0:
     dependencies:
