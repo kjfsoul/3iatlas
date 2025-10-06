@@ -127,6 +127,14 @@ export default function Atlas3DTrackerEnhanced({
   const isPlayingRef = useRef(isPlaying);
   const speedRef = useRef(speed);
   const currentIndexRef = useRef(0);
+  const objectEntriesRef = useRef<Array<[string, VectorData[]]>>([]);
+  const maxFrameCountRef = useRef(0);
+  const sharedVectorsRef = useRef({
+    current: new THREE.Vector3(),
+    next: new THREE.Vector3(),
+    final: new THREE.Vector3(),
+    offset: new THREE.Vector3(),
+  });
 
   useEffect(() => {
     isPlayingRef.current = isPlaying;
@@ -134,6 +142,15 @@ export default function Atlas3DTrackerEnhanced({
   useEffect(() => {
     speedRef.current = speed;
   }, [speed]);
+
+  useEffect(() => {
+    const entries = Object.entries(solarSystemData);
+    objectEntriesRef.current = entries;
+    maxFrameCountRef.current = entries.reduce(
+      (max, [, vectors]) => (vectors.length > max ? vectors.length : max),
+      0
+    );
+  }, [solarSystemData]);
 
   useEffect(() => {
     if (!sceneRef.current) return;
@@ -636,171 +653,137 @@ export default function Atlas3DTrackerEnhanced({
 
   // Animation loop
   useEffect(() => {
-    if (!sceneRef.current || Object.keys(solarSystemData).length === 0) return;
+    if (!sceneRef.current || objectEntriesRef.current.length === 0) {
+      return;
+    }
 
-    const { scene, camera, renderer, objects } = sceneRef.current;
     let animationId: number | null = null;
-    let lastTime = Date.now();
+    let lastTime = performance.now();
     let localIndex = 0;
 
-    function animate() {
+    const animate = () => {
       animationId = requestAnimationFrame(animate);
 
-      // Safety check for sceneRef
-      if (!sceneRef.current) {
-        console.warn("[Animation] sceneRef.current is null, skipping frame");
-        return;
-      }
+      const sceneState = sceneRef.current;
+      if (!sceneState) return;
 
-      const { scene, camera, renderer, objects } = sceneRef.current;
+      const { scene, camera, renderer, objects } = sceneState;
 
       if (isPlayingRef.current) {
-        const now = Date.now();
+        const now = performance.now();
         const dt = (now - lastTime) / 1000;
         lastTime = now;
 
-        localIndex += dt * speedRef.current * 3; // 3 frames/sec at 1x
-
-        const maxFrames = Math.max(
-          ...Object.values(solarSystemData).map((v) => v.length)
-        );
-        if (localIndex >= maxFrames) {
+        const maxFrames = maxFrameCountRef.current;
+        if (maxFrames > 0) {
+          localIndex += dt * speedRef.current * 3;
+          if (localIndex >= maxFrames) {
+            localIndex = localIndex % maxFrames;
+          }
+        } else {
           localIndex = 0;
         }
 
         const idx = Math.floor(localIndex);
         if (idx !== currentIndexRef.current) {
-          setCurrentIndex(idx);
           currentIndexRef.current = idx;
+          setCurrentIndex(idx);
         }
       }
 
-      // Update ALL object positions with smooth interpolation
+      const entries = objectEntriesRef.current;
+      if (!entries.length) {
+        renderer.render(scene, camera);
+        return;
+      }
+
       const { cometMotionMultiplier, interpolationEnabled } =
         motionParamsRef.current;
+      const { current, next, final, offset } = sharedVectorsRef.current;
 
-      for (const [key, vectors] of Object.entries(solarSystemData)) {
-        if (vectors.length === 0) continue;
-
-        // CRITICAL FIX: Skip sun - it must stay at origin
-        if (key === 'sun') continue;
+      for (let i = 0; i < entries.length; i++) {
+        const [key, vectors] = entries[i];
+        if (!vectors || vectors.length === 0 || key === 'sun') continue;
 
         const mesh = objects.get(key);
         if (!mesh) continue;
 
-        let finalPosition: THREE.Vector3;
+        const frameIndex = Math.floor(localIndex);
+        const boundedIndex = Math.min(frameIndex, vectors.length - 1);
+        const currentVec = vectors[boundedIndex];
+        if (!currentVec) continue;
 
-        if (interpolationEnabled && localIndex < vectors.length - 1) {
-          // Smooth interpolation between data points
-          const idx = Math.floor(localIndex);
-          const nextIdx = Math.min(idx + 1, vectors.length - 1);
-          const t = localIndex - idx; // Interpolation factor (0-1)
+        current.set(
+          currentVec.position.x,
+          currentVec.position.z,
+          -currentVec.position.y
+        );
 
-          const currentVec = vectors[idx];
-          const nextVec = vectors[nextIdx];
-
-          if (currentVec && nextVec) {
-            // Interpolate position
-            const currentPos = new THREE.Vector3(
-              currentVec.position.x,
-              currentVec.position.z,
-              -currentVec.position.y
-            );
-            const nextPos = new THREE.Vector3(
+        if (interpolationEnabled && boundedIndex < vectors.length - 1) {
+          const nextVec = vectors[boundedIndex + 1];
+          if (nextVec) {
+            next.set(
               nextVec.position.x,
               nextVec.position.z,
               -nextVec.position.y
             );
+            const t = localIndex - frameIndex;
+            final.copy(current).lerp(next, t);
 
-            finalPosition = currentPos.clone().lerp(nextPos, t);
-
-            // Apply motion multiplier for 3I/ATLAS
-            if (key === "atlas") {
-              const basePosition = finalPosition.clone();
-              const motionOffset = nextPos
-                .clone()
-                .sub(currentPos)
-                .multiplyScalar(cometMotionMultiplier - 1);
-              finalPosition = basePosition.add(motionOffset);
+            if (key === 'atlas') {
+              offset.copy(next).sub(current).multiplyScalar(
+                cometMotionMultiplier - 1
+              );
+              final.add(offset);
             }
           } else {
-            // Fallback to discrete positioning
-            const idx = Math.floor(localIndex);
-            const vec = vectors[idx];
-            if (vec) {
-              finalPosition = new THREE.Vector3(
-                vec.position.x,
-                vec.position.z,
-                -vec.position.y
-              );
-            } else {
-              continue;
-            }
+            final.copy(current);
           }
         } else {
-          // Discrete positioning (fallback)
-          const idx = Math.floor(localIndex);
-          if (idx >= vectors.length) continue;
-          const vec = vectors[idx];
-          if (vec) {
-            finalPosition = new THREE.Vector3(
-              vec.position.x,
-              vec.position.z,
-              -vec.position.y
-            );
-          } else {
-            continue;
-          }
+          final.copy(current);
         }
 
-        // Apply final position
-        mesh.position.copy(finalPosition);
+        mesh.position.copy(final);
 
-        // Update visual effects for 3I/ATLAS
-        if (key === "atlas") {
-          const glow = objects.get("atlas_glow");
+        if (key === 'atlas') {
+          const glow = objects.get('atlas_glow');
           if (glow) {
-            glow.position.copy(finalPosition);
+            glow.position.copy(final);
           }
 
-          const bloom = objects.get("atlas_bloom");
+          const bloom = objects.get('atlas_bloom');
           if (bloom) {
-            bloom.position.copy(finalPosition);
+            bloom.position.copy(final);
           }
 
-          // Update particle trail
-          const trail = objects.get("atlas_trail") as THREE.Points;
+          const trail = objects.get('atlas_trail') as THREE.Points | undefined;
           if (trail) {
             const positions = trail.geometry.attributes.position
               .array as Float32Array;
             const colors = trail.geometry.attributes.color
               .array as Float32Array;
 
-            // Shift trail positions (move each point to previous position)
             for (
-              let i = (motionParamsRef.current.trailLength - 1) * 3;
-              i >= 3;
-              i -= 3
+              let idx = (motionParamsRef.current.trailLength - 1) * 3;
+              idx >= 3;
+              idx -= 3
             ) {
-              positions[i] = positions[i - 3];
-              positions[i + 1] = positions[i - 2];
-              positions[i + 2] = positions[i - 1];
+              positions[idx] = positions[idx - 3];
+              positions[idx + 1] = positions[idx - 2];
+              positions[idx + 2] = positions[idx - 1];
 
-              // Fade colors more gradually for better visibility
-              colors[i] = colors[i - 3] * 0.95; // Slower fade
-              colors[i + 1] = colors[i - 2] * 0.95;
-              colors[i + 2] = colors[i - 1] * 0.95;
+              colors[idx] = colors[idx - 3] * 0.95;
+              colors[idx + 1] = colors[idx - 2] * 0.95;
+              colors[idx + 2] = colors[idx - 1] * 0.95;
             }
 
-            // Set new head position
-            positions[0] = finalPosition.x;
-            positions[1] = finalPosition.y;
-            positions[2] = finalPosition.z;
+            positions[0] = final.x;
+            positions[1] = final.y;
+            positions[2] = final.z;
 
-            // Set head color (bright)
-            colors[0] = 0.0; // R
-            colors[1] = 1.0; // G
-            colors[2] = 0.5; // B
+            colors[0] = 0.0;
+            colors[1] = 1.0;
+            colors[2] = 0.5;
 
             trail.geometry.attributes.position.needsUpdate = true;
             trail.geometry.attributes.color.needsUpdate = true;
@@ -808,38 +791,40 @@ export default function Atlas3DTrackerEnhanced({
         }
       }
 
-      // Ensure Sun stays at origin (fixes drift issue)
-      const sun = scene.getObjectByName("sun");
+      const sun = scene.getObjectByName('sun');
       if (sun) {
         sun.position.set(0, 0, 0);
       }
-      const sunGlow = scene.getObjectByName("sunGlow");
+      const sunGlow = scene.getObjectByName('sunGlow');
       if (sunGlow) {
         sunGlow.position.set(0, 0, 0);
       }
 
-      // Update label positions
       if (labelsContainerRef.current) {
         const labelElements = labelElementsRef.current;
         labelElements.forEach((label, key) => {
-          if (showLabels) {
-            const mesh = objects.get(key);
-            if (mesh) {
-              const vector = new THREE.Vector3();
-              mesh.getWorldPosition(vector);
-              vector.project(camera);
-
-              const x = (vector.x * 0.5 + 0.5) * renderer.domElement.clientWidth;
-              const y = (vector.y * -0.5 + 0.5) * renderer.domElement.clientHeight;
-
-              label.style.display = 'block';
-              label.style.transform = `translate(-50%, -120%) translate(${x}px, ${y}px)`;
-            } else {
-              label.style.display = 'none';
-            }
-          } else {
+          if (!showLabels) {
             label.style.display = 'none';
+            return;
           }
+
+          const mesh = objects.get(key);
+          if (!mesh) {
+            label.style.display = 'none';
+            return;
+          }
+
+          const labelVector = sharedVectorsRef.current.offset;
+          mesh.getWorldPosition(labelVector);
+          labelVector.project(camera);
+
+          const x =
+            (labelVector.x * 0.5 + 0.5) * renderer.domElement.clientWidth;
+          const y =
+            (labelVector.y * -0.5 + 0.5) * renderer.domElement.clientHeight;
+
+          label.style.display = 'block';
+          label.style.transform = `translate(-50%, -120%) translate(${x}px, ${y}px)`;
         });
       }
 

@@ -123,7 +123,10 @@ export class DailyOrbitalUpdater {
       );
 
       // Store data in cache
-      for (const [objectName, positions] of Object.entries(orbitalData)) {
+      for (const [objectName, positions] of Object.entries(orbitalData) as Array<[
+        string,
+        VectorData[],
+      ]>) {
         const record: OrbitalDataRecord = {
           id: `${objectName}_${today}`,
           objectName,
@@ -184,12 +187,14 @@ export class DailyOrbitalUpdater {
               '6h'
             );
 
-            if (dayData[objectName]) {
+            const positions = dayData[objectName] as VectorData[] | undefined;
+
+            if (positions) {
               record = {
                 id: cacheKey,
                 objectName,
                 date: dateStr,
-                positions: dayData[objectName],
+                positions,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
               };
