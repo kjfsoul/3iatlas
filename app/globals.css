@@ -2,6 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
-body { @apply bg-[#0b0c13] text-white; }
-a { @apply underline-offset-4; }
+:root { 
+  color-scheme: dark;
+}
+
+html {
+  /* Smooth scroll behavior as baseline */
+  scroll-behavior: smooth;
+}
+
+body { 
+  @apply bg-[#0b0c13] text-white; 
+}
+
+a { 
+  @apply underline-offset-4; 
+}
+
+/* Modal and overlay z-index management */
+.modal-backdrop {
+  z-index: 9998;
+}
+
+.modal-content {
+  z-index: 9999;
+}
+
+/* Smooth scroll offset for fixed headers (if any added later) */
+section[id] {
+  scroll-margin-top: 2rem;
+}
+
+/* Prevent layout shift when body scroll is locked */
+body.modal-open {
+  overflow: hidden;
+  padding-right: var(--scrollbar-width, 0);
+}
+
+/* Animation keyframes for pulse effect */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* Gradient animation for CTA background */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Focus visible styles for accessibility */
+*:focus-visible {
+  outline: 2px solid rgba(147, 51, 234, 0.6);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Smooth transitions for interactive elements */
+button, a {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Ensure modal renders above everything */
+#modal-root {
+  position: relative;
+  z-index: 9999;
+}

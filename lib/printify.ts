@@ -65,25 +65,34 @@ export async function findShopIdByBase(base: string): Promise<number | null> {
 }
 export async function getLatestPublishedProducts(shopId: number, limit = 3): Promise<Product[]> {
   if (!auth()) return [];
-  const res = await fetch(`${API}/shops/${shopId}/products.json`, auth());
+
+  // Reduce cache time to avoid 2MB limit issues
+  const res = await fetch(`${API}/shops/${shopId}/products.json`, {
+    ...auth(),
+    next: { revalidate: 30 }, // Reduced from 60 to 30 seconds
+  });
   if (!res.ok) return [];
-  
+
   const response = await res.json();
-  
+
   // Handle both array and object responses (Printify API returns object with 'data' property)
-  const all = Array.isArray(response) ? response : (response.data || []);
-  
+  const all = Array.isArray(response) ? response : response.data || [];
+
   if (!Array.isArray(all)) {
-    console.error('[Printify] Invalid product response format');
+    console.error("[Printify] Invalid product response format");
     return [];
   }
-  
+
   const published = all
-    .filter(p => p.published || p.visible)
-    .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime()
-                   - new Date(a.updated_at ?? a.created_at ?? 0).getTime());
-  
-  return published.slice(0, limit);
+    .filter((p) => p.published || p.visible)
+    .sort(
+      (a, b) =>
+        new Date(b.updated_at ?? b.created_at ?? 0).getTime() -
+        new Date(a.updated_at ?? a.created_at ?? 0).getTime()
+    );
+
+  // Limit to reduce data size and avoid cache issues
+  return published.slice(0, Math.min(limit, 6));
 }
 export function toPublicProductUrl(storeBase: string, product: Product): string {
   // If external.handle is a full URL, use it directly

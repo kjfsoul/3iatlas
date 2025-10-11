@@ -5,6 +5,16 @@
 Starting dev server on port 3030...
    ▲ Next.js 15.5.4
    - Local:        http://localhost:3030
-   - Network:      http://192.168.0.2:3030
+   - Network:      http://192.168.2.1:3030
+   - Environments: .env.local
 
  ✓ Starting...
+ ✓ Ready in 1624ms
+ ○ Compiling / ...
+ ✓ Compiled / in 965ms (1319 modules)
+Failed to set fetch cache https://api.printify.com/v1/shops/24437410/products.json [Error: Failed to set Next.js data cache for https://api.printify.com/v1/shops/24437410/products.json, items over 2MB can not be cached (2499195 bytes)]
+ GET / 200 in 5256ms
+Failed to set fetch cache https://api.printify.com/v1/shops/24437410/products.json [Error: Failed to set Next.js data cache for https://api.printify.com/v1/shops/24437410/products.json, items over 2MB can not be cached (2499195 bytes)]
+ GET / 200 in 3960ms
+ ✓ Compiled in 1162ms (1333 modules)
+[?25h

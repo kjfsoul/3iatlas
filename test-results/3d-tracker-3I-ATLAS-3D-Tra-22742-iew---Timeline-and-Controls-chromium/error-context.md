@@ -1,0 +1,451 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - heading "3I/ATLAS FLIGHTPATH" [level=1] [ref=e5]
+        - link "Explore brands" [ref=e6] [cursor=pointer]:
+          - /url: "#brands"
+      - paragraph [ref=e7]: Live drops from four Printify outposts.
+      - img [ref=e10]
+    - generic [ref=e25]:
+      - generic [ref=e27]:
+        - heading "3D Orbital Tracker" [level=2] [ref=e28]
+        - paragraph [ref=e29]: Watch 3I/ATLAS approach perihelion in October 2025
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]: "Data source: Astronomy Engine"
+          - generic [ref=e34]:
+            - generic [ref=e36]:
+              - generic [ref=e39]:
+                - generic [ref=e40]:
+                  - generic [ref=e41]:
+                    - generic [ref=e42]: Historical Timeline
+                    - generic [ref=e43]: 2025-07-11
+                  - generic [ref=e44]:
+                    - generic [ref=e45]:
+                      - generic [ref=e46]:
+                        - generic "Discovery" [ref=e47] [cursor=pointer]
+                        - generic [ref=e48]: 07/01
+                      - generic [ref=e49]:
+                        - generic "Confirmation" [ref=e50] [cursor=pointer]
+                        - generic [ref=e51]: 07/15
+                      - generic [ref=e52]:
+                        - generic "JWST Observation" [ref=e53] [cursor=pointer]
+                        - generic [ref=e54]: 08/06
+                      - generic [ref=e55]:
+                        - generic "Mars Approach" [ref=e56] [cursor=pointer]
+                        - generic [ref=e57]: 09/01
+                      - generic [ref=e58]:
+                        - generic "Current Position" [ref=e59] [cursor=pointer]
+                        - generic [ref=e60]: 10/08
+                    - slider [ref=e63] [cursor=pointer]: "130"
+                - generic [ref=e64]:
+                  - button "Pause" [ref=e65] [cursor=pointer]: ⏸ Pause
+                  - button "Reset" [ref=e66] [cursor=pointer]: ⏮ Reset
+                  - generic [ref=e67]:
+                    - generic [ref=e68]: "Speed:"
+                    - generic [ref=e69]:
+                      - button "1x speed" [ref=e70] [cursor=pointer]: 1x
+                      - button "5x speed" [ref=e71] [cursor=pointer]: 5x
+                      - button "10x speed" [ref=e72] [cursor=pointer]: 10x
+                      - button "25x speed" [ref=e73] [cursor=pointer]: 25x
+                      - button "50x speed" [ref=e74] [cursor=pointer]: 50x
+                      - button "100x speed" [ref=e75] [cursor=pointer]: 100x
+                  - generic [ref=e76]:
+                    - button "Hide trail" [ref=e77] [cursor=pointer]: Trail
+                    - button "Hide labels" [ref=e78] [cursor=pointer]: Labels
+                - generic [ref=e79]:
+                  - generic [ref=e80]:
+                    - generic [ref=e81]: Distance from Sun
+                    - generic [ref=e82]: 1357.120 AU
+                    - generic [ref=e83]: 203025.1 M km
+                  - generic [ref=e84]:
+                    - generic [ref=e85]: Distance from Earth
+                    - generic [ref=e86]: 1356.871 AU
+                    - generic [ref=e87]: 202987.8 M km
+                - generic [ref=e88]: "Frame 131 / 1189 • Historical Flight: July 1 - Oct 8, 2025"
+              - generic [ref=e89]:
+                - generic [ref=e90]: Historical Flight Controls
+                - generic [ref=e91]:
+                  - generic [ref=e92]: 🖱️ Click + drag to rotate view
+                  - generic [ref=e93]: 🎯 Scroll to zoom in/out
+                  - generic [ref=e94]: 📅 Click event markers for details
+                  - generic [ref=e95]: ⏩ Use speed controls for time travel
+                  - generic [ref=e96]: 🌟 Trail shows complete path
+            - generic [ref=e98]:
+              - generic [ref=e99]: 3I/ATLAS Views
+              - generic [ref=e100]:
+                - button "Switch to Historical Flight view" [ref=e101] [cursor=pointer]:
+                  - generic [ref=e102]: 🕐
+                  - generic [ref=e103]:
+                    - generic [ref=e104]: Historical Flight
+                    - generic [ref=e105]: Timeline from discovery to current
+                - button "Switch to Current Moment view" [ref=e107] [cursor=pointer]:
+                  - generic [ref=e108]: 🔍
+                  - generic [ref=e109]:
+                    - generic [ref=e110]: Current Moment
+                    - generic [ref=e111]: Super-lens view at Oct 8, 2025
+                - button "Switch to Speed Simulation view" [ref=e112] [cursor=pointer]:
+                  - generic [ref=e113]: ⚡
+                  - generic [ref=e114]:
+                    - generic [ref=e115]: Speed Simulation
+                    - generic [ref=e116]: Experience velocity from comet POV
+                - button "Switch to Perihelion Event view" [ref=e117] [cursor=pointer]:
+                  - generic [ref=e118]: ⭐
+                  - generic [ref=e119]:
+                    - generic [ref=e120]: Perihelion Event
+                    - generic [ref=e121]: Closest solar approach Oct 28-29
+                - button "Switch to Trajectory Plotter view" [ref=e122] [cursor=pointer]:
+                  - generic [ref=e123]: 📊
+                  - generic [ref=e124]:
+                    - generic [ref=e125]: Trajectory Plotter
+                    - generic [ref=e126]: Interactive path modification
+              - generic [ref=e127]:
+                - generic [ref=e128]: "Keyboard Navigation:"
+                - generic [ref=e129]:
+                  - generic [ref=e130]: • Tab to navigate views
+                  - generic [ref=e131]: • Enter/Space to select
+                  - generic [ref=e132]: • Arrow keys to navigate
+            - generic [ref=e135]:
+              - generic [ref=e136]: 🕐
+              - generic [ref=e137]:
+                - generic [ref=e138]: Historical Flight
+                - generic [ref=e139]: Timeline from discovery to current position
+            - generic [ref=e140]:
+              - generic [ref=e141]:
+                - generic [ref=e143]: Status
+                - generic [ref=e144]:
+                  - generic [ref=e145]:
+                    - button "Pause" [ref=e146] [cursor=pointer]:
+                      - img [ref=e147]
+                      - generic [ref=e149]: Pause
+                    - button "Reset" [ref=e150] [cursor=pointer]:
+                      - img [ref=e151]
+                      - generic [ref=e153]: Reset
+                  - generic [ref=e155]:
+                    - generic [ref=e156]: Current Date
+                    - generic [ref=e157]: 7/11/2025
+              - generic [ref=e158]:
+                - generic [ref=e159]: Performance
+                - generic [ref=e160]:
+                  - generic [ref=e161]:
+                    - generic [ref=e162]: FPS
+                    - generic [ref=e163]: "60"
+                  - generic [ref=e164]:
+                    - generic [ref=e165]: Speed
+                    - generic [ref=e166]: 5x
+            - generic [ref=e169]:
+              - generic [ref=e170]: 3I/ATLAS Interstellar Comet
+              - generic [ref=e171]: •
+              - generic [ref=e172]: "Data Source: NASA JPL Horizons"
+              - generic [ref=e173]: •
+              - generic [ref=e174]: Real-time Visualization
+            - button "⌨️ Shortcuts" [ref=e176] [cursor=pointer]
+        - generic [ref=e178]:
+          - generic [ref=e179]:
+            - generic [ref=e180]: "FPS:"
+            - generic [ref=e181]: "3"
+          - generic [ref=e182]:
+            - generic [ref=e183]: "MEM:"
+            - generic [ref=e184]: 69MB
+          - generic [ref=e185]:
+            - generic [ref=e186]: "FRAME:"
+            - generic [ref=e187]: 228.4ms
+          - generic [ref=e188]:
+            - generic [ref=e189]: "DROPS:"
+            - generic [ref=e190]: "296"
+      - generic [ref=e191]: 🌌 Orbital data provided by NASA Jet Propulsion Laboratory
+    - generic [ref=e192]:
+      - heading "Explore Our Universe" [level=2] [ref=e193]
+      - generic [ref=e194]:
+        - link "3I/Atlas Logo 3I/Atlas" [ref=e195] [cursor=pointer]:
+          - /url: https://3iatlas.printify.me/
+          - img "3I/Atlas Logo" [ref=e196]
+          - text: 3I/Atlas
+        - generic [ref=e198]:
+          - button "Previous products" [ref=e199] [cursor=pointer]:
+            - img [ref=e200]
+          - generic [ref=e202]:
+            - 'link "Open Beyond the Stars: The 3I/Atlas Astral Voyager Encounter Poster in new tab" [ref=e203] [cursor=pointer]':
+              - /url: https://3iatlas.printify.me/product/23366031
+              - 'img "Beyond the Stars: The 3I/Atlas Astral Voyager Encounter Poster" [ref=e205]'
+              - generic [ref=e206]:
+                - generic [ref=e207]:
+                  - 'heading "Beyond the Stars: The 3I/Atlas Astral Voyager Encounter Poster" [level=5] [ref=e208]'
+                  - generic [ref=e209]: $7.18
+                - paragraph [ref=e210]: "Beyond the Stars: The 3I/Atlas Astral Voyager Encounter Poster Unleash the awe of the cosmos with \"The Astral Voyager,\" a mesmerizing matte vertical poster that captures an extraordinary moment of interstellar connection. This vibrant artwork plunges you into a swirling vortex of deep blues and electric pinks, depicting a majestic astral voyager alien seemingly floating in a realm of mysterious plasma."
+            - 'link "Open Cosmic Wanderer''s Warp: 3I/ATLAS Inspired Pink Alien Fanny Pack in new tab" [ref=e211] [cursor=pointer]':
+              - /url: https://3iatlas.printify.me/product/23366833
+              - 'img "Cosmic Wanderer''s Warp: 3I/ATLAS Inspired Pink Alien Fanny Pack" [ref=e213]'
+              - generic [ref=e214]:
+                - generic [ref=e215]:
+                  - 'heading "Cosmic Wanderer''s Warp: 3I/ATLAS Inspired Pink Alien Fanny Pack" [level=5] [ref=e216]'
+                  - generic [ref=e217]: $22.00
+                - paragraph [ref=e218]: Journey beyond the mundane with our out-of-this-world fanny pack, a truly stellar accessory designed for the modern explorer. Featuring an eye-catching pattern of playful pink aliens set against a vast, cosmic black background adorned with twinkling stars and mysterious UFOs, this waist bag is more than just a place to stash your essentials&mdash;it's a statement.
+            - 'link "Open Unlock Your Cosmos: The Interstellar Odyssey Journal – Your Visionary Launchpad in new tab" [ref=e219] [cursor=pointer]':
+              - /url: https://3iatlas.printify.me/product/23367709
+              - 'img "Unlock Your Cosmos: The Interstellar Odyssey Journal – Your Visionary Launchpad" [ref=e221]'
+              - generic [ref=e222]:
+                - generic [ref=e223]:
+                  - 'heading "Unlock Your Cosmos: The Interstellar Odyssey Journal – Your Visionary Launchpad" [level=5] [ref=e224]'
+                  - generic [ref=e225]: $11.57
+                - paragraph [ref=e226]: Your next breakthrough isn't just waiting&mdash;it's ready to be documented. The Interstellar Odyssey Journal is far more than a simple hardcover journal; it's a dedicated launchpad for your deepest insights and grandest ambitions.
+          - button "Next products" [ref=e227] [cursor=pointer]:
+            - img [ref=e228]
+          - generic [ref=e230]:
+            - button "Go to page 1" [ref=e231] [cursor=pointer]
+            - button "Go to page 2" [ref=e232] [cursor=pointer]
+      - generic [ref=e233]:
+        - link "Mystic Arcana Logo Mystic Arcana" [ref=e234] [cursor=pointer]:
+          - /url: https://mysticarcana.com
+          - img "Mystic Arcana Logo" [ref=e235]
+          - text: Mystic Arcana
+        - generic [ref=e236]:
+          - generic [ref=e237]:
+            - link "mysticArcana on Facebook" [ref=e238] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61573772402958#
+              - text: Facebook
+            - link "mysticArcana on Instagram" [ref=e239] [cursor=pointer]:
+              - /url: https://www.instagram.com/mysticarcanaofficial/
+              - text: Instagram
+            - link "mysticArcana on X" [ref=e240] [cursor=pointer]:
+              - /url: https://x.com/arcana86042
+              - text: X
+            - link "mysticArcana on TikTok" [ref=e241] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@the_mystic_arcana
+              - text: TikTok
+            - link "mysticArcana on YouTube" [ref=e242] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UCAgx73UXA4oCZ85upjwzGhA
+              - text: YouTube
+          - link "Mystic Marketplace" [ref=e243] [cursor=pointer]:
+            - /url: https://mystic-arcana-pop-up.printify.me/
+        - generic [ref=e245]:
+          - button "Previous products" [ref=e246] [cursor=pointer]:
+            - img [ref=e247]
+          - generic [ref=e249]:
+            - link "Open Unisex Heavy Blend™ Crewneck Sweatshirt in new tab" [ref=e250] [cursor=pointer]:
+              - /url: https://mystic-arcana-pop-up.printify.me/product/23546780
+              - img "Unisex Heavy Blend™ Crewneck Sweatshirt" [ref=e252]
+              - generic [ref=e253]:
+                - generic [ref=e254]:
+                  - heading "Unisex Heavy Blend™ Crewneck Sweatshirt" [level=5] [ref=e255]
+                  - generic [ref=e256]: $22.07
+                - paragraph [ref=e257]: Ideal for any situation, a unisex heavy blend crewneck sweatshirt is pure comfort. These garments are made from polyester and cotton.
+            - link "Open Blue Aura Angel- Divine Feminine Candle (4oz, 9oz) Spiritual Decor, Sacred Space Aesthetic, Mystical Gifts, Angel Aura Aromatherapy in new tab" [ref=e258] [cursor=pointer]:
+              - /url: https://mystic-arcana-pop-up.printify.me/product/23546751
+              - img "Blue Aura Angel- Divine Feminine Candle (4oz, 9oz) Spiritual Decor, Sacred Space Aesthetic, Mystical Gifts, Angel Aura Aromatherapy" [ref=e260]
+              - generic [ref=e261]:
+                - generic [ref=e262]:
+                  - heading "Blue Aura Angel- Divine Feminine Candle (4oz, 9oz) Spiritual Decor, Sacred Space Aesthetic, Mystical Gifts, Angel Aura Aromatherapy" [level=5] [ref=e263]
+                  - generic [ref=e264]: $13.62
+                - paragraph [ref=e265]: ✨ Journey into a realm of serene luminescence with our new Blue Aura Candle&nbsp;&ndash; the ultimate blend of angelcore energy, divine feminine aesthetics, and calming spiritual decor. This hand-poured aromatherapy candle features a radiant blue angel with glowing rainbow wings, haloed in cosmic light, channeling peace, power, and protection.
+            - link "Open Galactic Adventure Men's Tank Top - AOP, Cosmic Apparel, Festival Wear, Summer Outing, Space Lover Gift in new tab" [ref=e266] [cursor=pointer]:
+              - /url: https://mystic-arcana-pop-up.printify.me/product/23546800
+              - img "Galactic Adventure Men's Tank Top - AOP, Cosmic Apparel, Festival Wear, Summer Outing, Space Lover Gift" [ref=e268]
+              - generic [ref=e269]:
+                - generic [ref=e270]:
+                  - heading "Galactic Adventure Men's Tank Top - AOP, Cosmic Apparel, Festival Wear, Summer Outing, Space Lover Gift" [level=5] [ref=e271]
+                  - generic [ref=e272]: $18.99
+                - paragraph [ref=e273]: Step into the cosmos with this Galactic Adventure men&rsquo;s tank top, featuring all‑over print (AOP) artwork that wraps around front, back, and sides. Crafted for both comfort and statement, this tank is perfect for summer performances, gym wear, festival heat, or layered under open shirts.
+          - button "Next products" [ref=e274] [cursor=pointer]:
+            - img [ref=e275]
+          - generic [ref=e277]:
+            - button "Go to page 1" [ref=e278] [cursor=pointer]
+            - button "Go to page 2" [ref=e279] [cursor=pointer]
+      - generic [ref=e280]:
+        - link "EDM Shuffle Logo EDM Shuffle" [ref=e281] [cursor=pointer]:
+          - /url: https://edmshuffle.com
+          - img "EDM Shuffle Logo" [ref=e282]
+          - text: EDM Shuffle
+        - generic [ref=e283]:
+          - generic [ref=e284]:
+            - link "edmShuffle on Facebook" [ref=e285] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61573689124563
+              - text: Facebook
+            - link "edmShuffle on Instagram" [ref=e286] [cursor=pointer]:
+              - /url: https://www.instagram.com/edmshuffleofficial/
+              - text: Instagram
+            - link "edmShuffle on X" [ref=e287] [cursor=pointer]:
+              - /url: https://x.com/edm_shuffle
+              - text: X
+            - link "edmShuffle on TikTok" [ref=e288] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@edmshuffleofficial?lang=en
+              - text: TikTok
+            - link "edmShuffle on YouTube" [ref=e289] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UCCwIeASGfF70IU7KYFWInqA
+              - text: YouTube
+          - link "Shuffle Shop" [ref=e290] [cursor=pointer]:
+            - /url: https://edm-shuffle-pop-up.printify.me/
+        - generic [ref=e292]:
+          - button "Previous products" [ref=e293] [cursor=pointer]:
+            - img [ref=e294]
+          - generic [ref=e296]:
+            - link "Open Unisex Garment-Dyed T-shirt in new tab" [ref=e297] [cursor=pointer]:
+              - /url: https://edm-shuffle-pop-up.printify.me/product/23546847
+              - img "Unisex Garment-Dyed T-shirt" [ref=e299]
+              - generic [ref=e300]:
+                - generic [ref=e301]:
+                  - heading "Unisex Garment-Dyed T-shirt" [level=5] [ref=e302]
+                  - generic [ref=e303]: $17.86
+                - paragraph [ref=e304]: Comfort Colors introduces the “Comfort Colors 1717” garment-dyed t-shirt; a fully customizable tee made 100% with ring-spun cotton. The soft-washed, garment-dyed fabric brings extra coziness to your wardrobe while the relaxed fit makes it an excellent daily choice.
+            - link "Open Elevate Your Style with Our 3I-ATLAS Feature Series- Alien Print Tote Bag (AOP) in new tab" [ref=e305] [cursor=pointer]:
+              - /url: https://edm-shuffle-pop-up.printify.me/product/23442430
+              - img "Elevate Your Style with Our 3I-ATLAS Feature Series- Alien Print Tote Bag (AOP)" [ref=e307]
+              - generic [ref=e308]:
+                - generic [ref=e309]:
+                  - heading "Elevate Your Style with Our 3I-ATLAS Feature Series- Alien Print Tote Bag (AOP)" [level=5] [ref=e310]
+                  - generic [ref=e311]: $14.23
+                - paragraph [ref=e312]: Discover the perfect blend of functionality and fashion with our stunning custom-printed tote bags. our alien-themed series is inspired by the cosmic phenomena, '3I-ATLAS,' so these products are available for a limited time only!
+            - link "Open Soundwaves and Starships- Alien DJ Sweatshirt — Intergalactic Music Voyager, Space Aesthetic, EDM Streetwear, Sci-Fi Vibes, Unisex Style, Festival-Ready Fit in new tab" [ref=e313] [cursor=pointer]:
+              - /url: https://edm-shuffle-pop-up.printify.me/product/23442325
+              - img "Soundwaves and Starships- Alien DJ Sweatshirt — Intergalactic Music Voyager, Space Aesthetic, EDM Streetwear, Sci-Fi Vibes, Unisex Style, Festival-Ready Fit" [ref=e315]
+              - generic [ref=e316]:
+                - generic [ref=e317]:
+                  - heading "Soundwaves and Starships- Alien DJ Sweatshirt — Intergalactic Music Voyager, Space Aesthetic, EDM Streetwear, Sci-Fi Vibes, Unisex Style, Festival-Ready Fit" [level=5] [ref=e318]
+                  - generic [ref=e319]: $22.07
+                - paragraph [ref=e320]: Get ready to turn heads and drop beats in the Alien DJ Unisex Crewneck Sweatshirt, your new go-to for sci-fi streetwear with serious festival flair! Featuring a neon-green extraterrestrial spinning intergalactic tunes in oversized shades and a purple fit, this bold pullover radiates energy with electric&nbsp;yellow soundwaves stretching across both sleeves.
+          - button "Next products" [ref=e321] [cursor=pointer]:
+            - img [ref=e322]
+          - generic [ref=e324]:
+            - button "Go to page 1" [ref=e325] [cursor=pointer]
+            - button "Go to page 2" [ref=e326] [cursor=pointer]
+      - generic [ref=e327]:
+        - link "BirthdayGen Logo BirthdayGen" [ref=e328] [cursor=pointer]:
+          - /url: https://birthdaygen.com
+          - img "BirthdayGen Logo" [ref=e329]
+          - text: BirthdayGen
+        - generic [ref=e330]:
+          - generic [ref=e331]:
+            - link "birthdayGen on Facebook" [ref=e332] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61573805004280
+              - text: Facebook
+            - link "birthdayGen on TikTok" [ref=e333] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@birthdaygen?lang=en
+              - text: TikTok
+            - link "birthdayGen on Instagram" [ref=e334] [cursor=pointer]:
+              - /url: https://www.instagram.com/birthday_gen/
+              - text: Instagram
+            - link "birthdayGen on X" [ref=e335] [cursor=pointer]:
+              - /url: https://x.com/BirthdayGen
+              - text: X
+            - link "birthdayGen on YouTube" [ref=e336] [cursor=pointer]:
+              - /url: https://www.youtube.com/@BirthdayGen
+              - text: YouTube
+          - link "Gift Shop" [ref=e337] [cursor=pointer]:
+            - /url: https://birthdaygen-popup.printify.me/
+        - generic [ref=e339]:
+          - button "Previous products" [ref=e340] [cursor=pointer]:
+            - img [ref=e341]
+          - generic [ref=e343]:
+            - 'link "Open Out-of-this-World Breakfast Hoodie: The Alien Chef''s Zero-G Struggle in new tab" [ref=e344] [cursor=pointer]':
+              - /url: https://birthdaygen-popup.printify.me/product/68dfef301dd95e33c3071451
+              - 'img "Out-of-this-World Breakfast Hoodie: The Alien Chef''s Zero-G Struggle" [ref=e346]'
+              - generic [ref=e347]:
+                - generic [ref=e348]:
+                  - 'heading "Out-of-this-World Breakfast Hoodie: The Alien Chef''s Zero-G Struggle" [level=5] [ref=e349]'
+                  - generic [ref=e350]: $29.98
+                - paragraph [ref=e351]: "&nbsp; Ever felt like your kitchen was a gravity-defying zone of culinary catastrophe? Our exclusive Alien Chef Zero-G Kitchen Hoodie perfectly captures that universal (or rather, *intergalactic*) struggle!"
+            - 'link "Open Starlit Dreams & Crab Cuddles: The Cancer Zodiac Youth Hooded Towel in new tab" [ref=e352] [cursor=pointer]':
+              - /url: https://birthdaygen-popup.printify.me/product/23546830
+              - 'img "Starlit Dreams & Crab Cuddles: The Cancer Zodiac Youth Hooded Towel" [ref=e354]'
+              - generic [ref=e355]:
+                - generic [ref=e356]:
+                  - 'heading "Starlit Dreams & Crab Cuddles: The Cancer Zodiac Youth Hooded Towel" [level=5] [ref=e357]'
+                  - generic [ref=e358]: $33.95
+                - paragraph [ref=e359]: Dive into a world of celestial wonder with our enchanting&nbsp;Youth Hooded Towel, featuring an utterly adorable&nbsp;baby crab! This isn't just any sea creature; it's a tender&nbsp;Cancer zodiac sign&nbsp;representative, lovingly cradling a radiant&nbsp;star.
+            - link "Open Unisex Jersey Short Sleeve Tee in new tab" [ref=e360] [cursor=pointer]:
+              - /url: https://birthdaygen-popup.printify.me/product/23546823
+              - img "Unisex Jersey Short Sleeve Tee" [ref=e362]
+              - generic [ref=e363]:
+                - generic [ref=e364]:
+                  - heading "Unisex Jersey Short Sleeve Tee" [level=5] [ref=e365]
+                  - generic [ref=e366]: $15.07
+                - paragraph [ref=e367]: This classic unisex jersey short sleeve tee fits like a well-loved favorite. Soft cotton and quality print make users fall in love with it over and over again.
+          - button "Next products" [ref=e368] [cursor=pointer]:
+            - img [ref=e369]
+          - generic [ref=e371]:
+            - button "Go to page 1" [ref=e372] [cursor=pointer]
+            - button "Go to page 2" [ref=e373] [cursor=pointer]
+    - generic [ref=e375]:
+      - heading "3I/Atlas Oracle" [level=3] [ref=e376]
+      - generic [ref=e377]:
+        - combobox [ref=e378]:
+          - option "Birth month" [disabled] [selected]
+          - option "Jan"
+          - option "Feb"
+          - option "Mar"
+          - option "Apr"
+          - option "May"
+          - option "Jun"
+          - option "Jul"
+          - option "Aug"
+          - option "Sep"
+          - option "Oct"
+          - option "Nov"
+          - option "Dec"
+        - combobox [ref=e379]:
+          - option "Current focus" [disabled] [selected]
+          - option "Career"
+          - option "Love"
+          - option "Health"
+          - option "Wealth"
+          - option "Creativity"
+          - option "Learning"
+          - option "Community"
+          - option "Travel"
+        - combobox [ref=e380]:
+          - option "Energy level" [disabled] [selected]
+          - option "Low"
+          - option "Calm"
+          - option "Balanced"
+          - option "Rising"
+          - option "High"
+          - option "Intense"
+      - generic [ref=e381]:
+        - button "Reveal Card" [disabled] [ref=e382]
+        - button "Skip survey & draw" [ref=e383] [cursor=pointer]
+    - generic [ref=e384]:
+      - link "3I/Atlas Logo 3I/Atlas Store" [ref=e385] [cursor=pointer]:
+        - /url: https://3iatlas.printify.me/
+        - img "3I/Atlas Logo" [ref=e386]
+        - heading "3I/Atlas Store" [level=3] [ref=e387]
+      - generic [ref=e389]:
+        - button "Previous products" [ref=e390] [cursor=pointer]:
+          - img [ref=e391]
+        - generic [ref=e393]:
+          - 'link "Open Beyond the Stars: The 3I/Atlas Astral Voyager Encounter Poster in new tab" [ref=e394] [cursor=pointer]':
+            - /url: https://3iatlas.printify.me/product/23366031
+            - 'img "Beyond the Stars: The 3I/Atlas Astral Voyager Encounter Poster" [ref=e396]'
+            - generic [ref=e397]:
+              - generic [ref=e398]:
+                - 'heading "Beyond the Stars: The 3I/Atlas Astral Voyager Encounter Poster" [level=5] [ref=e399]'
+                - generic [ref=e400]: $7.18
+              - paragraph [ref=e401]: "Beyond the Stars: The 3I/Atlas Astral Voyager Encounter Poster Unleash the awe of the cosmos with \"The Astral Voyager,\" a mesmerizing matte vertical poster that captures an extraordinary moment of interstellar connection. This vibrant artwork plunges you into a swirling vortex of deep blues and electric pinks, depicting a majestic astral voyager alien seemingly floating in a realm of mysterious plasma."
+          - 'link "Open Cosmic Wanderer''s Warp: 3I/ATLAS Inspired Pink Alien Fanny Pack in new tab" [ref=e402] [cursor=pointer]':
+            - /url: https://3iatlas.printify.me/product/23366833
+            - 'img "Cosmic Wanderer''s Warp: 3I/ATLAS Inspired Pink Alien Fanny Pack" [ref=e404]'
+            - generic [ref=e405]:
+              - generic [ref=e406]:
+                - 'heading "Cosmic Wanderer''s Warp: 3I/ATLAS Inspired Pink Alien Fanny Pack" [level=5] [ref=e407]'
+                - generic [ref=e408]: $22.00
+              - paragraph [ref=e409]: Journey beyond the mundane with our out-of-this-world fanny pack, a truly stellar accessory designed for the modern explorer. Featuring an eye-catching pattern of playful pink aliens set against a vast, cosmic black background adorned with twinkling stars and mysterious UFOs, this waist bag is more than just a place to stash your essentials&mdash;it's a statement.
+          - 'link "Open Unlock Your Cosmos: The Interstellar Odyssey Journal – Your Visionary Launchpad in new tab" [ref=e410] [cursor=pointer]':
+            - /url: https://3iatlas.printify.me/product/23367709
+            - 'img "Unlock Your Cosmos: The Interstellar Odyssey Journal – Your Visionary Launchpad" [ref=e412]'
+            - generic [ref=e413]:
+              - generic [ref=e414]:
+                - 'heading "Unlock Your Cosmos: The Interstellar Odyssey Journal – Your Visionary Launchpad" [level=5] [ref=e415]'
+                - generic [ref=e416]: $11.57
+              - paragraph [ref=e417]: Your next breakthrough isn't just waiting&mdash;it's ready to be documented. The Interstellar Odyssey Journal is far more than a simple hardcover journal; it's a dedicated launchpad for your deepest insights and grandest ambitions.
+        - button "Next products" [ref=e418] [cursor=pointer]:
+          - img [ref=e419]
+        - generic [ref=e421]:
+          - button "Go to page 1" [ref=e422] [cursor=pointer]
+          - button "Go to page 2" [ref=e423] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=e429] [cursor=pointer]:
+    - img [ref=e430]
+  - alert [ref=e433]
+```

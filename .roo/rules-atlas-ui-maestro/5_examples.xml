@@ -1,0 +1,555 @@
+<examples>
+  <example name="unobtrusive_overlay_creation">
+    <description>Creating an unobtrusive UI overlay that doesn't block the 3D scene</description>
+    <context>When implementing UI elements that need to coexist with Three.js scenes without obstructing the view</context>
+    
+    <workflow_steps>
+      <step number="1">
+        <action>Analyze existing overlay patterns in the codebase</action>
+        <tool_usage>
+          <tool>search_files</tool>
+          <query>overlay UI component Three.js unobtrusive</query>
+        </tool_usage>
+      </step>
+      
+      <step number="2">
+        <action>Examine current overlay implementations</action>
+        <tool_usage>
+          <tool>read_file</tool>
+          <files>components/Atlas3DTrackerEnhanced.tsx, components/Atlas3DTracker.tsx</files>
+        </tool_usage>
+      </step>
+      
+      <step number="3">
+        <action>Implement overlay with proper z-indexing and positioning</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+// Unobtrusive timestamp overlay
+const TimestampOverlay: React.FC = () => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  return (
+    <div 
+      className="absolute top-4 left-4 text-xs opacity-70 pointer-events-none z-10"
+      aria-hidden="true"
+    >
+      {currentTime.toLocaleString()}
+    </div>
+  );
+};
+            ]]>
+          </code>
+        </implementation>
+      </step>
+      
+      <step number="4">
+        <action>Verify overlay doesn't interfere with 3D interactions</action>
+        <tool_usage>
+          <tool>execute_command</tool>
+          <command>npm run build</command>
+        </tool_usage>
+      </step>
+    </workflow_steps>
+    
+    <key_principles>
+      <principle>Use pointer-events-none to prevent blocking 3D interactions</principle>
+      <principle>Keep z-index low (10-20) to stay below critical UI elements</principle>
+      <principle>Use opacity and subtle positioning to minimize visual impact</principle>
+      <principle>Mark as aria-hidden when purely decorative</principle>
+    </key_principles>
+  </example>
+
+  <example name="collapsible_legend_implementation">
+    <description>Implementing a collapsible legend that stays closed on mobile</description>
+    <context>When creating UI controls that need to be responsive and mobile-friendly</context>
+    
+    <workflow_steps>
+      <step number="1">
+        <action>Research existing legend and toggle patterns</action>
+        <tool_usage>
+          <tool>search_files</tool>
+          <query>legend toggle collapsible mobile responsive</query>
+        </tool_usage>
+      </step>
+      
+      <step number="2">
+        <action>Implement collapsible legend with mobile detection</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+const CollapsibleLegend: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  // Keep collapsed on mobile
+  useEffect(() => {
+    if (isMobile) setIsExpanded(false);
+  }, [isMobile]);
+  
+  return (
+    <div className="absolute top-4 right-4 z-20">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="bg-black/50 text-white px-2 py-1 rounded text-sm hover:bg-black/70 transition-colors"
+        aria-expanded={isExpanded}
+        aria-controls="legend-content"
+      >
+        {isExpanded ? 'Hide' : 'Show'} Legend
+      </button>
+      
+      {isExpanded && (
+        <div 
+          id="legend-content"
+          className="mt-2 bg-black/50 text-white p-3 rounded text-sm max-w-xs"
+        >
+          {/* Legend content here */}
+        </div>
+      )}
+    </div>
+  );
+};
+            ]]>
+          </code>
+        </implementation>
+      </step>
+      
+      <step number="3">
+        <action>Test responsive behavior and accessibility</action>
+        <tool_usage>
+          <tool>execute_command</tool>
+          <command>npm run build</command>
+        </tool_usage>
+      </step>
+    </workflow_steps>
+    
+    <accessibility_features>
+      <feature>Proper ARIA attributes (aria-expanded, aria-controls)</feature>
+      <feature>Keyboard navigation support</feature>
+      <feature>Screen reader announcements</feature>
+      <feature>Touch-friendly target sizes on mobile</feature>
+    </accessibility_features>
+  </example>
+
+  <example name="frustum_visibility_testing">
+    <description>Implementing frustum testing to guarantee Sun visibility in closeup view</description>
+    <context>When ensuring 3D objects remain visible during camera movements</context>
+    
+    <workflow_steps>
+      <step number="1">
+        <action>Examine existing camera and Three.js integration</action>
+        <tool_usage>
+          <tool>search_files</tool>
+          <query>camera frustum Three.js visibility testing</query>
+        </tool_usage>
+      </step>
+      
+      <step number="2">
+        <action>Implement frustum testing with camera adjustment</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+const ensureSunInFrame = (camera: THREE.PerspectiveCamera, scene: THREE.Scene) => {
+  const sun = scene.getObjectByName('sun');
+  if (!sun) return;
+  
+  const frustum = new THREE.Frustum();
+  const cameraMatrix = new THREE.Matrix4().multiplyMatrices(
+    camera.projectionMatrix, 
+    camera.matrixWorldInverse
+  );
+  frustum.setFromProjectionMatrix(cameraMatrix);
+  
+  let iterations = 0;
+  const maxIterations = 20;
+  
+  while (!frustum.containsPoint(sun.position) && iterations < maxIterations) {
+    // Move camera along comet-to-sun vector
+    const sunDirection = sun.position.clone().normalize();
+    camera.position.add(sunDirection.multiplyScalar(0.1));
+    camera.updateMatrixWorld();
+    
+    // Update frustum for next iteration
+    cameraMatrix.multiplyMatrices(
+      camera.projectionMatrix, 
+      camera.matrixWorldInverse
+    );
+    frustum.setFromProjectionMatrix(cameraMatrix);
+    iterations++;
+  }
+};
+            ]]>
+          </code>
+        </implementation>
+      </step>
+      
+      <step number="3">
+        <action>Integrate with camera view changes</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+useEffect(() => {
+  if (cameraView === 'closeup' && scene && camera) {
+    ensureSunInFrame(camera, scene);
+  }
+}, [cameraView, scene, camera]);
+            ]]>
+          </code>
+        </implementation>
+      </step>
+    </workflow_steps>
+    
+    <performance_considerations>
+      <consideration>Limit iterations to prevent infinite loops</consideration>
+      <consideration>Only run when camera view changes to closeup</consideration>
+      <consideration>Use efficient matrix operations</consideration>
+      <consideration>Cache frustum calculations when possible</consideration>
+    </performance_considerations>
+  </example>
+
+  <example name="zoom_functionality_fix">
+    <description>Implementing universal zoom functionality for buttons and mouse wheel</description>
+    <context>When ensuring zoom works consistently across different interaction methods</context>
+    
+    <workflow_steps>
+      <step number="1">
+        <action>Analyze existing zoom implementations and OrbitControls</action>
+        <tool_usage>
+          <tool>search_files</tool>
+          <query>zoom OrbitControls mouse wheel dolly</query>
+        </tool_usage>
+      </step>
+      
+      <step number="2">
+        <action>Implement universal zoom handler</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+const handleZoom = useCallback((direction: 'in' | 'out') => {
+  if (!camera) return;
+  
+  const zoomFactor = direction === 'in' ? 0.9 : 1.1;
+  
+  // Try OrbitControls dolly first
+  if (orbitControls && typeof orbitControls.dolly === 'function') {
+    orbitControls.dolly(zoomFactor);
+    orbitControls.update();
+  } else {
+    // Fallback: multiply camera position
+    const newPosition = camera.position.clone().multiplyScalar(zoomFactor);
+    camera.position.copy(newPosition);
+    camera.updateMatrixWorld();
+  }
+}, [camera, orbitControls]);
+
+// Mouse wheel handler
+const handleWheel = useCallback((event: WheelEvent) => {
+  event.preventDefault();
+  const direction = event.deltaY > 0 ? 'out' : 'in';
+  handleZoom(direction);
+}, [handleZoom]);
+
+// Button handlers
+const handleZoomIn = useCallback(() => handleZoom('in'), [handleZoom]);
+const handleZoomOut = useCallback(() => handleZoom('out'), [handleZoom]);
+            ]]>
+          </code>
+        </implementation>
+      </step>
+      
+      <step number="3">
+        <action>Add event listeners and accessibility</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+useEffect(() => {
+  const canvas = document.querySelector('canvas');
+  if (canvas) {
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+    return () => canvas.removeEventListener('wheel', handleWheel);
+  }
+}, [handleWheel]);
+            ]]>
+          </code>
+        </implementation>
+      </step>
+    </workflow_steps>
+    
+    <accessibility_features>
+      <feature>Keyboard alternatives for zoom (plus/minus keys)</feature>
+      <feature>ARIA labels for zoom buttons</feature>
+      <feature>Screen reader announcements for zoom changes</feature>
+      <feature>Focus management for zoom controls</feature>
+    </accessibility_features>
+  </example>
+
+  <example name="label_overlap_prevention">
+    <description>Preventing label overlap with timestamp area using collision detection</description>
+    <context>When ensuring UI elements don't visually interfere with each other</context>
+    
+    <workflow_steps>
+      <step number="1">
+        <action>Examine current label rendering and positioning</action>
+        <tool_usage>
+          <tool>search_files</tool>
+          <query>label positioning overlap detection timestamp</query>
+        </tool_usage>
+      </step>
+      
+      <step number="2">
+        <action>Implement overlap detection and hiding logic</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+const useLabelOverlapDetection = () => {
+  const timestampRef = useRef<HTMLDivElement>(null);
+  const [hiddenLabels, setHiddenLabels] = useState<Set<string>>(new Set());
+  
+  const checkOverlap = useCallback((labelElement: HTMLElement, labelId: string) => {
+    if (!timestampRef.current) return false;
+    
+    const timestampRect = timestampRef.current.getBoundingClientRect();
+    const labelRect = labelElement.getBoundingClientRect();
+    
+    // Check if label overlaps with timestamp area
+    const overlaps = !(
+      labelRect.right < timestampRect.left ||
+      labelRect.left > timestampRect.right ||
+      labelRect.bottom < timestampRect.top ||
+      labelRect.top > timestampRect.bottom
+    );
+    
+    setHiddenLabels(prev => {
+      const newSet = new Set(prev);
+      if (overlaps) {
+        newSet.add(labelId);
+      } else {
+        newSet.delete(labelId);
+      }
+      return newSet;
+    });
+    
+    return overlaps;
+  }, []);
+  
+  return { timestampRef, hiddenLabels, checkOverlap };
+};
+            ]]>
+          </code>
+        </implementation>
+      </step>
+      
+      <step number="3">
+        <action>Integrate with label rendering</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+const LabelComponent: React.FC<{ id: string; text: string; position: THREE.Vector3 }> = ({ 
+  id, text, position 
+}) => {
+  const { hiddenLabels, checkOverlap } = useLabelOverlapDetection();
+  const labelRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (labelRef.current) {
+      checkOverlap(labelRef.current, id);
+    }
+  }, [checkOverlap, id]);
+  
+  if (hiddenLabels.has(id)) return null;
+  
+  return (
+    <div 
+      ref={labelRef}
+      className="absolute text-xs bg-black/50 text-white px-1 rounded"
+      style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+    >
+      {text}
+    </div>
+  );
+};
+            ]]>
+          </code>
+        </implementation>
+      </step>
+    </workflow_steps>
+    
+    <performance_optimizations>
+      <optimization>Use useCallback to prevent unnecessary recalculations</optimization>
+      <optimization>Debounce overlap checks during rapid movements</optimization>
+      <optimization>Cache bounding box calculations</optimization>
+      <optimization>Use efficient Set operations for hidden label tracking</optimization>
+    </performance_optimizations>
+  </example>
+
+  <example name="performance_optimization_workflow">
+    <description>Complete workflow for optimizing a Three.js component for 60fps performance</description>
+    <context>When addressing performance issues in 3D scenes with complex UI overlays</context>
+    
+    <workflow_steps>
+      <step number="1">
+        <action>Profile current performance and identify bottlenecks</action>
+        <tool_usage>
+          <tool>search_files</tool>
+          <query>performance optimization useCallback useMemo Three.js</query>
+        </tool_usage>
+        <analysis>
+          Look for:
+          - Unnecessary re-renders in React components
+          - Missing useCallback/useMemo optimizations
+          - Inefficient Three.js operations
+          - Memory leaks in event listeners
+        </analysis>
+      </step>
+      
+      <step number="2">
+        <action>Implement performance monitoring</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+const usePerformanceMonitor = () => {
+  const frameCount = useRef(0);
+  const lastTime = useRef(performance.now());
+  const fps = useRef(60);
+  
+  const updateFPS = useCallback(() => {
+    frameCount.current++;
+    const currentTime = performance.now();
+    
+    if (currentTime >= lastTime.current + 1000) {
+      fps.current = Math.round((frameCount.current * 1000) / (currentTime - lastTime.current));
+      frameCount.current = 0;
+      lastTime.current = currentTime;
+      
+      // Log performance warnings
+      if (fps.current < 55) {
+        console.warn(`Performance warning: ${fps.current} FPS`);
+      }
+    }
+  }, []);
+  
+  return { fps: fps.current, updateFPS };
+};
+            ]]>
+          </code>
+        </implementation>
+      </step>
+      
+      <step number="3">
+        <action>Apply React performance optimizations</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+const OptimizedComponent = React.memo(({ data, onAction }) => {
+  const { updateFPS } = usePerformanceMonitor();
+  
+  // Memoize expensive calculations
+  const processedData = useMemo(() => {
+    return data.map(item => expensiveTransform(item));
+  }, [data]);
+  
+  // Memoize event handlers
+  const handleAction = useCallback((action) => {
+    onAction(action);
+  }, [onAction]);
+  
+  // Optimize animation loop
+  const animate = useCallback(() => {
+    updateFPS();
+    // Animation logic here
+    requestAnimationFrame(animate);
+  }, [updateFPS]);
+  
+  useEffect(() => {
+    const animationId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationId);
+  }, [animate]);
+  
+  return (
+    <div>
+      {processedData.map(item => (
+        <Item key={item.id} item={item} onAction={handleAction} />
+      ))}
+    </div>
+  );
+});
+            ]]>
+          </code>
+        </implementation>
+      </step>
+      
+      <step number="4">
+        <action>Optimize Three.js operations</action>
+        <implementation>
+          <code language="typescript">
+            <![CDATA[
+// Optimize Three.js rendering
+const optimizeThreeJSScene = (scene: THREE.Scene, renderer: THREE.WebGLRenderer) => {
+  // Enable frustum culling
+  scene.traverse((object) => {
+    if (object instanceof THREE.Mesh) {
+      object.frustumCulled = true;
+    }
+  });
+  
+  // Optimize renderer settings
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  
+  // Dispose of unused geometries and materials
+  const dispose = (object: THREE.Object3D) => {
+    if (object instanceof THREE.Mesh) {
+      object.geometry.dispose();
+      if (Array.isArray(object.material)) {
+        object.material.forEach(material => material.dispose());
+      } else {
+        object.material.dispose();
+      }
+    }
+  };
+  
+  return { dispose };
+};
+            ]]>
+          </code>
+        </implementation>
+      </step>
+      
+      <step number="5">
+        <action>Verify performance improvements</action>
+        <tool_usage>
+          <tool>execute_command</tool>
+          <command>npm run build</command>
+        </tool_usage>
+        <validation>
+          Check for:
+          - Stable 60fps during normal operation
+          - No memory leaks during extended use
+          - Smooth animations and transitions
+          - Responsive UI interactions
+        </validation>
+      </step>
+    </workflow_steps>
+    
+    <success_metrics>
+      <metric>Maintain 60fps during normal scene interaction</metric>
+      <metric>Memory usage remains stable over time</metric>
+      <metric>No jank or stuttering during animations</metric>
+      <metric>UI remains responsive during 3D operations</metric>
+      <metric>TypeScript compilation passes without errors</metric>
+    </success_metrics>
+  </example>
+</examples>

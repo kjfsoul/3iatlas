@@ -94,9 +94,15 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
             const description = p ? getProductDescription(p) : "";
             
             return (
-              <Link key={uniqueKey} href={url} target="_blank" rel="noopener" aria-label={`Open ${name} in new tab`}
-                className="group block rounded-xl border border-white/10 bg-white/5 p-3 hover:border-white/20 transition-all">
-                <div className="relative h-56 w-full overflow-hidden rounded-lg bg-white flex items-center justify-center">
+              <Link
+                key={uniqueKey}
+                href={url}
+                target="_blank"
+                rel="noopener"
+                aria-label={`Open ${name} in new tab`}
+                className="group block rounded-xl border border-white/10 bg-white/5 p-3 hover:border-white/20 transition-all"
+              >
+                <div className="relative h-56 w-full overflow-hidden rounded-lg bg-amber-100 flex items-center justify-center">
                   <SafeImage
                     src={img}
                     alt={name}
@@ -105,11 +111,19 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
                 </div>
                 <div className="mt-3 space-y-1">
                   <div className="flex items-start justify-between gap-2">
-                    <h5 className="text-sm font-semibold text-white/90 line-clamp-2 flex-1">{name}</h5>
-                    {price && <span className="text-sm font-bold text-green-400 whitespace-nowrap">{price}</span>}
+                    <h5 className="text-sm font-semibold text-white/90 line-clamp-2 flex-1">
+                      {name}
+                    </h5>
+                    {price && (
+                      <span className="text-sm font-bold text-green-400 whitespace-nowrap">
+                        {price}
+                      </span>
+                    )}
                   </div>
                   {description && (
-                    <p className="text-xs text-white/60 line-clamp-2">{description}</p>
+                    <p className="text-xs text-white/60 line-clamp-2">
+                      {description}
+                    </p>
                   )}
                 </div>
               </Link>

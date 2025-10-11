@@ -1,0 +1,593 @@
+<common_patterns>
+  <overview>
+    Reusable code patterns and templates specifically designed for 3IAtlas UI development
+    that can be applied across different React/Next.js projects with Three.js integration.
+  </overview>
+
+  <pattern_category name="ui_overlay_patterns">
+    <pattern name="unobtrusive_overlay">
+      <description>UI overlay that doesn't block 3D scene interaction</description>
+      <use_case>Control panels, HUD elements, information displays</use_case>
+      <code language="tsx">
+        <![CDATA[
+interface UnobtrusiveOverlayProps {
+  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  children: React.ReactNode;
+  isVisible: boolean;
+}
+
+const UnobtrusiveOverlay: React.FC<UnobtrusiveOverlayProps> = ({
+  position,
+  children,
+  isVisible
+}) => {
+  const positionClasses = {
+    'top-left': 'top-4 left-4',
+    'top-right': 'top-4 right-4',
+    'bottom-left': 'bottom-4 left-4',
+    'bottom-right': 'bottom-4 right-4'
+  };
+
+  return (
+    <div 
+      className={`
+        absolute ${positionClasses[position]} z-10 
+        bg-black/30 backdrop-blur-sm rounded-lg p-4
+        pointer-events-auto
+        transition-opacity duration-300
+        ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+      `}
+    >
+      {children}
+    </div>
+  );
+};
+        ]]>
+      </code>
+      <key_features>
+        <feature>Transparent background with backdrop blur</feature>
+        <feature>Proper z-index layering</feature>
+        <feature>Smooth fade transitions</feature>
+        <feature>Pointer events management</feature>
+      </key_features>
+    </pattern>
+
+    <pattern name="collapsible_legend">
+      <description>Legend that collapses by default to save screen space</description>
+      <use_case>3D scene legends, information panels, settings menus</use_case>
+      <code language="tsx">
+        <![CDATA[
+interface CollapsibleLegendProps {
+  title: string;
+  items: Array<{ label: string; color: string; value?: string }>;
+  defaultCollapsed?: boolean;
+}
+
+const CollapsibleLegend: React.FC<CollapsibleLegendProps> = ({
+  title,
+  items,
+  defaultCollapsed = true
+}) => {
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+
+  return (
+    <div className="absolute top-4 right-4 z-10 bg-black/50 backdrop-blur-sm rounded-lg p-4 max-w-xs">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-white font-semibold text-sm">{title}</h3>
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="text-white hover:text-gray-300 transition-colors p-1"
+          aria-label={isCollapsed ? 'Expand legend' : 'Collapse legend'}
+        >
+          {isCollapsed ? '▶' : '▼'}
+        </button>
+      </div>
+      
+      {!isCollapsed && (
+        <div className="space-y-2">
+          {items.map((item, index) => (
+            <div key={index} className="flex items-center space-x-2">
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="text-white text-xs">{item.label}</span>
+              {item.value && (
+                <span className="text-gray-300 text-xs ml-auto">{item.value}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+        ]]>
+      </code>
+      <key_features>
+        <feature>Mobile-first collapsed state</feature>
+        <feature>Smooth expand/collapse animations</feature>
+        <feature>Accessible button with ARIA labels</feature>
+        <feature>Color-coded legend items</feature>
+      </key_features>
+    </pattern>
+  </pattern_category>
+
+  <pattern_category name="three_js_integration_patterns">
+    <pattern name="performance_optimized_component">
+      <description>React component optimized for Three.js performance</description>
+      <use_case>Any component that interacts with Three.js scene</use_case>
+      <code language="tsx">
+        <![CDATA[
+import { useEffect, useRef, useCallback, useMemo } from 'react';
+import * as THREE from 'three';
+
+interface OptimizedThreeComponentProps {
+  scene: THREE.Scene;
+  camera: THREE.Camera;
+  onInteraction?: (event: MouseEvent) => void;
+}
+
+const OptimizedThreeComponent: React.FC<OptimizedThreeComponentProps> = ({
+  scene,
+  camera,
+  onInteraction
+}) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const frameRef = useRef<number>();
+
+  // Memoize expensive computations
+  const geometry = useMemo(() => new THREE.SphereGeometry(1, 32, 32), []);
+  const material = useMemo(() => 
+    new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.7 })
+  , []);
+
+  // Optimized interaction handler
+  const handleInteraction = useCallback((event: MouseEvent) => {
+    if (!meshRef.current) return;
+    
+    // Perform raycasting or other interactions
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(
+      (event.clientX / window.innerWidth) * 2 - 1,
+      -(event.clientY / window.innerHeight) * 2 + 1
+    );
+    
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(meshRef.current);
+    
+    if (intersects.length > 0 && onInteraction) {
+      onInteraction(event);
+    }
+  }, [camera, onInteraction]);
+
+  // Setup Three.js object with proper cleanup
+  useEffect(() => {
+    if (!scene) return;
+
+    const mesh = new THREE.Mesh(geometry, material);
+    meshRef.current = mesh;
+    scene.add(mesh);
+
+    // Add event listeners
+    window.addEventListener('click', handleInteraction);
+
+    // Animation loop (if needed)
+    const animate = () => {
+      if (meshRef.current) {
+        meshRef.current.rotation.y += 0.01;
+      }
+      frameRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      // Cleanup
+      window.removeEventListener('click', handleInteraction);
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+      }
+      scene.remove(mesh);
+      // Note: Don't dispose shared geometry/material here
+    };
+  }, [scene, geometry, material, handleInteraction]);
+
+  return null; // This component manages Three.js objects only
+};
+        ]]>
+      </code>
+      <key_features>
+        <feature>Proper cleanup in useEffect</feature>
+        <feature>Memoized geometry and materials</feature>
+        <feature>Optimized event handling with useCallback</feature>
+        <feature>RequestAnimationFrame management</feature>
+      </key_features>
+    </pattern>
+
+    <pattern name="frustum_visibility_test">
+      <description>Test if 3D object is visible in camera frustum</description>
+      <use_case>Ensuring objects remain visible, UI positioning based on 3D objects</use_case>
+      <code language="tsx">
+        <![CDATA[
+import { useMemo } from 'react';
+import * as THREE from 'three';
+
+interface FrustumTestResult {
+  isVisible: boolean;
+  screenPosition?: { x: number; y: number };
+  distance?: number;
+}
+
+const useFrustumTest = (
+  objectPosition: THREE.Vector3,
+  camera: THREE.Camera
+): FrustumTestResult => {
+  return useMemo(() => {
+    if (!camera || !objectPosition) return { isVisible: false };
+
+    // Create frustum from camera
+    const frustum = new THREE.Frustum();
+    const matrix = new THREE.Matrix4().multiplyMatrices(
+      camera.projectionMatrix,
+      camera.matrixWorldInverse
+    );
+    frustum.setFromProjectionMatrix(matrix);
+
+    // Test if object is in frustum
+    const testPoint = objectPosition.clone();
+    const isVisible = frustum.containsPoint(testPoint);
+
+    if (!isVisible) return { isVisible };
+
+    // Calculate screen position
+    const screenPosition = testPoint.clone();
+    screenPosition.project(camera);
+
+    // Convert to screen coordinates
+    const x = (screenPosition.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-screenPosition.y * 0.5 + 0.5) * window.innerHeight;
+
+    // Calculate distance from camera
+    const distance = camera.position.distanceTo(testPoint);
+
+    return {
+      isVisible: true,
+      screenPosition: { x, y },
+      distance
+    };
+  }, [objectPosition, camera]);
+};
+
+// Usage example
+const VisibilityAwareUI: React.FC<{ objectPosition: THREE.Vector3; camera: THREE.Camera }> = ({
+  objectPosition,
+  camera
+}) => {
+  const { isVisible, screenPosition } = useFrustumTest(objectPosition, camera);
+
+  if (!isVisible || !screenPosition) return null;
+
+  return (
+    <div
+      className="absolute z-20 bg-red-500 text-white px-2 py-1 rounded text-xs"
+      style={{
+        left: `${screenPosition.x}px`,
+        top: `${screenPosition.y}px`,
+        transform: 'translate(-50%, -50%)'
+      }}
+    >
+      Visible
+    </div>
+  );
+};
+        ]]>
+      </code>
+      <key_features>
+        <feature>Efficient frustum testing</feature>
+        <feature>Screen position calculation</feature>
+        <feature>Distance measurement</feature>
+        <feature>Optimized with useMemo</feature>
+      </key_features>
+    </pattern>
+  </pattern_category>
+
+  <pattern_category name="accessibility_patterns">
+    <pattern name="accessible_controls">
+      <description>Fully accessible control set for 3D interactions</description>
+      <use_case>Camera controls, zoom buttons, interaction panels</use_case>
+      <code language="tsx">
+        <![CDATA[
+interface AccessibleControlsProps {
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onReset: () => void;
+  disabled?: boolean;
+}
+
+const AccessibleControls: React.FC<AccessibleControlsProps> = ({
+  onZoomIn,
+  onZoomOut,
+  onReset,
+  disabled = false
+}) => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (disabled) return;
+    
+    switch (event.key) {
+      case '+':
+      case '=':
+        onZoomIn();
+        break;
+      case '-':
+      case '_':
+        onZoomOut();
+        break;
+      case 'r':
+      case 'R':
+        onReset();
+        break;
+    }
+  }, [onZoomIn, onZoomOut, onReset, disabled]);
+
+  return (
+    <div 
+      className="absolute bottom-4 left-4 z-10 bg-black/50 backdrop-blur-sm rounded-lg p-2"
+      onKeyDown={handleKeyDown}
+      role="toolbar"
+      aria-label="3D scene controls"
+    >
+      <div className="flex space-x-2">
+        <button
+          onClick={onZoomIn}
+          disabled={disabled}
+          className="w-10 h-10 bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed rounded flex items-center justify-center text-white font-bold transition-colors"
+          aria-label="Zoom in"
+          title="Zoom in (Press +)"
+        >
+          +
+        </button>
+        
+        <button
+          onClick={onZoomOut}
+          disabled={disabled}
+          className="w-10 h-10 bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed rounded flex items-center justify-center text-white font-bold transition-colors"
+          aria-label="Zoom out"
+          title="Zoom out (Press -)"
+        >
+          −
+        </button>
+        
+        <button
+          onClick={onReset}
+          disabled={disabled}
+          className="w-10 h-10 bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed rounded flex items-center justify-center text-white text-xs transition-colors"
+          aria-label="Reset view"
+          title="Reset view (Press R)"
+        >
+          R
+        </button>
+      </div>
+      
+      <div className="sr-only">
+        Use keyboard shortcuts: + to zoom in, - to zoom out, R to reset view
+      </div>
+    </div>
+  );
+};
+        ]]>
+      </code>
+      <key_features>
+        <feature>Full keyboard navigation</feature>
+        <feature>ARIA labels and roles</feature>
+        <feature>Screen reader support</feature>
+        <feature>Focus management</feature>
+        <feature>Disabled state handling</feature>
+      </key_features>
+    </pattern>
+  </pattern_category>
+
+  <pattern_category name="performance_patterns">
+    <pattern name="optimized_animation_loop">
+      <description>60fps-optimized animation loop with proper cleanup</description>
+      <use_case>Smooth animations, continuous updates, performance monitoring</use_case>
+      <code language="tsx">
+        <![CDATA[
+interface AnimationLoopOptions {
+  onUpdate?: (deltaTime: number) => void;
+  targetFPS?: number;
+  enablePerformanceMonitoring?: boolean;
+}
+
+const useOptimizedAnimationLoop = (options: AnimationLoopOptions = {}) => {
+  const {
+    onUpdate,
+    targetFPS = 60,
+    enablePerformanceMonitoring = false
+  } = options;
+
+  const frameRef = useRef<number>();
+  const lastTimeRef = useRef<number>(0);
+  const fpsRef = useRef<number>(0);
+  const frameCountRef = useRef<number>(0);
+  const fpsUpdateTimeRef = useRef<number>(0);
+
+  const animate = useCallback((currentTime: number) => {
+    // Calculate delta time
+    const deltaTime = lastTimeRef.current ? 
+      (currentTime - lastTimeRef.current) / 1000 : 0;
+    lastTimeRef.current = currentTime;
+
+    // FPS monitoring
+    if (enablePerformanceMonitoring) {
+      frameCountRef.current++;
+      
+      if (currentTime - fpsUpdateTimeRef.current >= 1000) {
+        fpsRef.current = frameCountRef.current;
+        frameCountRef.current = 0;
+        fpsUpdateTimeRef.current = currentTime;
+        
+        console.log(`FPS: ${fpsRef.current}`);
+      }
+    }
+
+    // Frame rate limiting
+    const targetFrameTime = 1000 / targetFPS;
+    const elapsed = currentTime - lastTimeRef.current;
+
+    if (elapsed >= targetFrameTime) {
+      onUpdate?.(deltaTime);
+    }
+
+    frameRef.current = requestAnimationFrame(animate);
+  }, [onUpdate, targetFPS, enablePerformanceMonitoring]);
+
+  const start = useCallback(() => {
+    if (!frameRef.current) {
+      lastTimeRef.current = performance.now();
+      fpsUpdateTimeRef.current = performance.now();
+      frameCountRef.current = 0;
+      frameRef.current = requestAnimationFrame(animate);
+    }
+  }, [animate]);
+
+  const stop = useCallback(() => {
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = undefined;
+    }
+  }, []);
+
+  const getCurrentFPS = useCallback(() => fpsRef.current, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return stop;
+  }, [stop]);
+
+  return { start, stop, getCurrentFPS };
+};
+
+// Usage example
+const AnimatedComponent: React.FC = () => {
+  const [rotation, setRotation] = useState(0);
+
+  const { start, stop } = useOptimizedAnimationLoop({
+    onUpdate: (deltaTime) => {
+      setRotation(prev => prev + deltaTime * 0.5);
+    },
+    targetFPS: 60,
+    enablePerformanceMonitoring: process.env.NODE_ENV === 'development'
+  });
+
+  useEffect(() => {
+    start();
+    return stop;
+  }, [start, stop]);
+
+  return (
+    <div style={{ transform: `rotate(${rotation}rad)` }}>
+      Animated content
+    </div>
+  );
+};
+        ]]>
+      </code>
+      <key_features>
+        <feature>Frame rate limiting</feature>
+        <feature>Performance monitoring</feature>
+        <feature>Proper cleanup</feature>
+        <feature>Delta time calculations</feature>
+      </key_features>
+    </pattern>
+  </pattern_category>
+
+  <pattern_category name="responsive_patterns">
+    <pattern name="mobile_adaptive_layout">
+      <description>Layout that adapts between mobile and desktop</description>
+      <use_case>Control panels, information displays, navigation</use_case>
+      <code language="tsx">
+        <![CDATA[
+interface MobileAdaptiveLayoutProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const MobileAdaptiveLayout: React.FC<MobileAdaptiveLayoutProps> = ({
+  children,
+  className = ''
+}) => {
+  return (
+    <div className={`
+      // Mobile-first approach
+      p-2 sm:p-4 md:p-6 lg:p-8
+      
+      // Responsive spacing
+      space-y-2 sm:space-y-3 md:space-y-4
+      
+      // Responsive text sizes
+      text-xs sm:text-sm md:text-base
+      
+      // Responsive grid
+      grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4
+      
+      // Touch-friendly targets on mobile
+      min-h-[44px] sm:min-h-[36px]
+      
+      ${className}
+    `}>
+      {children}
+    </div>
+  );
+};
+
+// Touch-friendly button component
+const TouchFriendlyButton: React.FC<{
+  onClick: () => void;
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary';
+}> = ({ onClick, children, variant = 'primary' }) => {
+  const baseClasses = `
+    // Minimum touch target size
+    min-w-[44px] min-h-[44px] sm:min-w-[36px] sm:min-h-[36px]
+    
+    // Responsive padding
+    px-3 py-2 sm:px-2 sm:py-1
+    
+    // Responsive font size
+    text-sm sm:text-xs
+    
+    // Touch-friendly spacing
+    flex items-center justify-center
+    
+    // Smooth transitions
+    transition-all duration-200
+    
+    // Focus styles for accessibility
+    focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+  `;
+
+  const variantClasses = {
+    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
+    secondary: 'bg-gray-600 hover:bg-gray-700 text-white'
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`${baseClasses} ${variantClasses[variant]} rounded-lg`}
+    >
+      {children}
+    </button>
+  );
+};
+        ]]>
+      </code>
+      <key_features>
+        <feature>Mobile-first responsive design</feature>
+        <feature>Touch-friendly target sizes</feature>
+        <feature>Progressive enhancement</feature>
+        <feature>Adaptive spacing and typography</feature>
+      </key_features>
+    </pattern>
+  </pattern_category>
+</common_patterns>

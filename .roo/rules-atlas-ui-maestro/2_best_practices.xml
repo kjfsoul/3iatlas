@@ -1,0 +1,208 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Performance First - 60fps Mandate</name>
+      <description>All UI interactions must maintain 60fps performance. Never block the main thread or Three.js rendering loop.</description>
+      <rationale>Smooth animations are critical for user experience, especially in 3D applications where jank breaks immersion.</rationale>
+      <example>
+        <scenario>Implementing animated UI overlays</scenario>
+        <good>Use requestAnimationFrame, CSS transforms, and React.memo for optimized rendering</good>
+        <bad>Avoid layout thrashing, synchronous DOM operations, and unoptimized re-renders</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Unobtrusive UI Design</name>
+      <description>UI elements must never obstruct or interfere with 3D scenes. Use proper layering and transparency.</description>
+      <rationale>3D visualization is the primary focus; UI should enhance, not block the experience.</rationale>
+      <example>
+        <scenario>Adding controls to a 3D scene</scenario>
+        <good>Use z-index layering, pointer-events: none for transparent areas, and minimal visual footprint</good>
+        <bad>Avoid solid backgrounds that cover the 3D scene or blocking camera controls</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Accessibility Non-Negotiable</name>
+      <description>WCAG 2.1 AA/AAA compliance is mandatory for all UI components.</description>
+      <rationale>Inclusive design ensures all users can access the application regardless of abilities.</rationale>
+      <example>
+        <scenario>Creating interactive buttons</scenario>
+        <good>Include proper ARIA roles, keyboard navigation, focus management, and screen reader support</good>
+        <bad>Never rely solely on color or visual cues for important information</bad>
+      </example>
+    </principle>
+
+    <principle priority="medium">
+      <name>Mobile-First Responsive Design</name>
+      <description>Design for mobile devices first, then enhance for larger screens.</description>
+      <rationale>Mobile users often have limited screen space and touch-based interactions.</rationale>
+      <example>
+        <scenario>Designing a control panel</scenario>
+        <good>Start with touch-friendly targets (44px minimum), collapsible sections, and simplified mobile layout</good>
+        <bad>Avoid small touch targets, hover-only interactions, or desktop-centric layouts</bad>
+      </example>
+    </principle>
+  </general_principles>
+
+  <code_conventions>
+    <convention category="react_hooks">
+      <rule>Use performance hooks strategically</rule>
+      <examples>
+        <good>useCallback for event handlers, useMemo for expensive computations, useRef for Three.js objects</good>
+        <bad>Overusing useMemo for simple calculations or creating unnecessary dependencies</bad>
+      </examples>
+      <template>
+        const handleZoom = useCallback((direction: 'in' | 'out') => {
+          // Optimized zoom handler
+        }, [cameraRef]);
+        
+        const expensiveValue = useMemo(() => {
+          return computeExpensiveValue(data);
+        }, [data]);
+      </template>
+    </convention>
+
+    <convention category="typescript">
+      <rule>Strict typing with interfaces</rule>
+      <examples>
+        <good>Define interfaces for all props, state, and Three.js objects</good>
+        <bad>Using 'any' type or loose typing for component props</bad>
+      </examples>
+      <template>
+        interface UIComponentProps {
+          onAction: (action: string) => void;
+          isVisible: boolean;
+          position: Vector3;
+          children?: React.ReactNode;
+        }
+        
+        interface ThreeJSRef {
+          current: THREE.Mesh | null;
+        }
+      </template>
+    </convention>
+
+    <convention category="styling">
+      <rule>Tailwind CSS utility-first approach</rule>
+      <examples>
+        <good>Use utility classes for responsive design, animations, and accessibility</good>
+        <bad>Inline styles or custom CSS unless absolutely necessary</bad>
+      </examples>
+      <template>
+        <div className="absolute top-4 left-4 z-10 bg-black/50 backdrop-blur-sm rounded-lg p-4 md:p-6 lg:p-8">
+          <button className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+            {/* Button content */}
+          </button>
+        </div>
+      </template>
+    </convention>
+
+    <convention category="three_js_integration">
+      <rule>Clean Three.js object management</rule>
+      <examples>
+        <good>Proper cleanup in useEffect, refs for persistent objects, event listener management</good>
+        <bad>Memory leaks from uncleaned objects or missing event listener removal</bad>
+      </examples>
+      <template>
+        useEffect(() => {
+          const mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
+          
+          return () => {
+            scene.remove(mesh);
+            geometry.dispose();
+            material.dispose();
+          };
+        }, [scene]);
+      </template>
+    </convention>
+  </code_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Blocking Three.js render loop with heavy UI computations</description>
+      <why_problematic>Causes frame drops and breaks 60fps requirement, leading to poor user experience</why_problematic>
+      <correct_approach>Use Web Workers for heavy computations, optimize React rendering, and profile performance regularly</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Improper event listener cleanup causing memory leaks</description>
+      <why_problematic>Memory leaks accumulate over time, causing performance degradation and potential crashes</why_problematic>
+      <correct_approach>Always return cleanup functions in useEffect and remove event listeners in componentWillUnmount</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Ignoring accessibility in 3D applications</description>
+      <why_problematic>Excludes users with disabilities and may violate legal requirements</why_problematic>
+      <correct_approach>Provide keyboard navigation, screen reader support, and alternative input methods</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>UI elements blocking 3D scene interaction</description>
+      <why_problematic>Prevents users from interacting with the 3D scene, breaking core functionality</why_problematic>
+      <correct_approach>Use proper z-indexing, pointer-events management, and transparent overlays</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_starting">
+      <item>Understand performance requirements (60fps target)</item>
+      <item>Identify 3IAtlas-specific patterns and conventions</item>
+      <item>Review accessibility requirements for the component</item>
+      <item>Check existing Three.js integration patterns</item>
+      <item>Analyze mobile/responsive design needs</item>
+    </category>
+    
+    <category name="during_implementation">
+      <item>Use React performance hooks appropriately</item>
+      <item>Implement proper TypeScript typing</item>
+      <item>Follow Tailwind CSS utility-first approach</item>
+      <item>Ensure proper event listener management</item>
+      <item>Maintain WCAG 2.1 AA/AAA compliance</item>
+      <item>Test 60fps performance during development</item>
+    </category>
+    
+    <category name="before_completion">
+      <item>Verify TypeScript compilation without errors</item>
+      <item>Test 60fps performance with browser dev tools</item>
+      <item>Validate accessibility with screen readers and keyboard</item>
+      <item>Test responsive design across device sizes</item>
+      <item>Confirm Three.js scene remains unobstructed</item>
+      <item>Check memory usage and cleanup</item>
+      <item>Verify event listeners are properly removed</item>
+    </category>
+  </quality_checklist>
+
+  <performance_guidelines>
+    <guideline name="render_optimization">
+      <description>Optimize React rendering for 60fps performance</description>
+      <practices>
+        <practice>Use React.memo for expensive components</practice>
+        <practice>Implement proper dependency arrays in hooks</practice>
+        <practice>Avoid unnecessary re-renders with useCallback/useMemo</practice>
+        <practice>Use virtual scrolling for large lists</practice>
+      </practices>
+    </guideline>
+
+    <guideline name="three_js_performance">
+      <description>Maintain Three.js performance while adding UI</description>
+      <practices>
+        <practice>Minimize DOM queries in render loop</practice>
+        <practice>Use object pooling for frequently created/destroyed objects</practice>
+        <practice>Optimize geometry and material usage</practice>
+        <practice>Profile with Three.js inspector tools</practice>
+      </practices>
+    </guideline>
+
+    <guideline name="memory_management">
+      <description>Prevent memory leaks in long-running applications</description>
+      <practices>
+        <practice>Always cleanup Three.js objects in useEffect</practice>
+        <practice>Remove event listeners in cleanup functions</practice>
+        <practice>Dispose of geometries, materials, and textures</practice>
+        <practice>Monitor memory usage with browser dev tools</practice>
+      </practices>
+    </guideline>
+  </performance_guidelines>
+</best_practices>

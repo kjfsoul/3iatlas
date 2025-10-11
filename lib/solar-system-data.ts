@@ -4,9 +4,28 @@
  * Creates a comprehensive, accurate visualization of the solar system
  */
 
-import { generate3IAtlasVectors } from './atlas-orbital-data';
-import { getCached3IAtlasVectors } from './horizons-cache';
-import { type VectorData, parseVectorData } from './horizons-api';
+import ATLAS_ORBITAL_ELEMENTS from "../config/orbital-elements/3i-atlas.json"; // Import the JSON data
+import { generateVectorsAstronomy } from "./astronomy-engine-source";
+import { generate3IAtlasVectors } from "./atlas-orbital-data";
+import { isAstronomyMode } from "./data-source";
+import { type VectorData, parseVectorData } from "./horizons-api";
+import { getCached3IAtlasVectors } from "./horizons-cache";
+
+// ============================================================================
+// ORBITAL ELEMENTS FOR 3I/ATLAS
+// ============================================================================
+// Elements from docs/HORIZONS_ENHANCEMENT_PLAN.md and config file
+interface AtlasOrbitalElements {
+  EC: number; // Eccentricity
+  QR: number; // Perihelion distance in AU
+  TP_JulianDay: number; // Time of perihelion passage (Julian Day)
+  OM: number; // Longitude of ascending node in degrees
+  W: number; // Argument of perihelion in degrees
+  IN: number; // Inclination in degrees
+}
+
+const ATLAS_ORBITAL_ELEMENTS_TYPED: AtlasOrbitalElements =
+  ATLAS_ORBITAL_ELEMENTS;
 
 // ============================================================================
 // SOLAR SYSTEM OBJECTS (NASA Horizons COMMAND codes)
@@ -14,26 +33,26 @@ import { type VectorData, parseVectorData } from './horizons-api';
 
 export const SOLAR_SYSTEM_OBJECTS = {
   // Inner Planets
-  mercury: { command: '199', name: 'Mercury', color: 0x8c7853, size: 0.025 },
-  venus: { command: '299', name: 'Venus', color: 0xffc649, size: 0.038 },
-  earth: { command: '399', name: 'Earth', color: 0x2266ff, size: 0.04 },
-  mars: { command: '499', name: 'Mars', color: 0xff6644, size: 0.034 },
-  
+  mercury: { command: "199", name: "Mercury", color: 0x8c7853, size: 0.025 },
+  venus: { command: "299", name: "Venus", color: 0xffc649, size: 0.038 },
+  earth: { command: "399", name: "Earth", color: 0x2266ff, size: 0.04 },
+  mars: { command: "499", name: "Mars", color: 0xff6644, size: 0.034 },
+
   // Outer Planets
-  jupiter: { command: '599', name: 'Jupiter', color: 0xd4a574, size: 0.12 },
-  saturn: { command: '699', name: 'Saturn', color: 0xfad5a5, size: 0.10 },
-  uranus: { command: '799', name: 'Uranus', color: 0x4fd0e7, size: 0.07 },
-  neptune: { command: '899', name: 'Neptune', color: 0x4166f5, size: 0.07 },
-  
+  jupiter: { command: "599", name: "Jupiter", color: 0xd4a574, size: 0.12 },
+  saturn: { command: "699", name: "Saturn", color: 0xfad5a5, size: 0.1 },
+  uranus: { command: "799", name: "Uranus", color: 0x4fd0e7, size: 0.07 },
+  neptune: { command: "899", name: "Neptune", color: 0x4166f5, size: 0.07 },
+
   // Dwarf Planets
-  pluto: { command: '999', name: 'Pluto', color: 0xccaa88, size: 0.02 },
-  
+  pluto: { command: "999", name: "Pluto", color: 0xccaa88, size: 0.02 },
+
   // Spacecraft (famous missions)
-  voyager1: { command: '-31', name: 'Voyager 1', color: 0xffff00, size: 0.03 },
-  voyager2: { command: '-32', name: 'Voyager 2', color: 0xffff00, size: 0.03 },
-  
+  voyager1: { command: "-31", name: "Voyager 1", color: 0xffff00, size: 0.03 },
+  voyager2: { command: "-32", name: "Voyager 2", color: 0xffff00, size: 0.03 },
+
   // 3I/ATLAS
-  atlas: { command: '1004083', name: '3I/ATLAS', color: 0x00ff88, size: 0.06 },
+  atlas: { command: "100", name: "3I/ATLAS", color: 0x00ff88, size: 0.06 },
 };
 
 export type SolarSystemObjectKey = keyof typeof SOLAR_SYSTEM_OBJECTS;
@@ -55,7 +74,8 @@ export async function fetchSolarSystemData(
   const results: Record<string, VectorData[]> = {};
   const stepHours = normalizeStepHours(stepSize);
 
-  await Promise.all(
+  // Use Promise.allSettled instead of Promise.all to handle partial failures
+  const promises = await Promise.allSettled(
     objects.map((objKey) =>
       loadObjectData({
         objKey,
@@ -67,6 +87,12 @@ export async function fetchSolarSystemData(
       })
     )
   );
+
+  // Check for any failed requests
+  const failedRequests = promises.filter((result: PromiseSettledResult<void>) => result.status === 'rejected');
+  if (failedRequests.length > 0) {
+    console.warn(`[Solar System] ${failedRequests.length} objects failed to load, but continuing with available data`);
+  }
 
   if (!results["atlas"] || results["atlas"].length === 0) {
     console.warn(
@@ -114,9 +140,13 @@ async function loadObjectData({
   const obj = SOLAR_SYSTEM_OBJECTS[objKey];
   if (!obj) return;
 
-  if (objKey === 'atlas') {
+  if (objKey === "atlas") {
     try {
-      const vectors = await getCached3IAtlasVectors(startDate, endDate, stepSize);
+      const vectors = await getCached3IAtlasVectors(
+        startDate,
+        endDate,
+        stepSize
+      );
       if (vectors.length > 0) {
         results[objKey] = vectors;
         console.log(
@@ -124,12 +154,16 @@ async function loadObjectData({
         );
         return;
       }
-      console.warn('[Solar System] Horizons returned 0 positions for 3I/ATLAS');
+      console.warn("[Solar System] Horizons returned 0 positions for 3I/ATLAS");
     } catch (error) {
-      console.warn('[Solar System] Horizons fetch for 3I/ATLAS failed:', error);
+      console.warn("[Solar System] Horizons fetch for 3I/ATLAS failed:", error);
     }
 
-    const fallbackVectors = generate3IAtlasVectors(startDate, endDate, stepHours);
+    const fallbackVectors = generate3IAtlasVectors(
+      startDate,
+      endDate,
+      stepHours
+    );
     if (fallbackVectors.length > 0) {
       results[objKey] = fallbackVectors;
       console.log(
@@ -141,37 +175,40 @@ async function loadObjectData({
 
   const params = new URLSearchParams({
     COMMAND: obj.command,
-    EPHEM_TYPE: 'VECTOR',
-    CENTER: '@sun',
+    EPHEM_TYPE: "VECTOR",
+    CENTER: "@sun",
     START_TIME: startDate,
     STOP_TIME: endDate,
     STEP_SIZE: stepSize,
-    format: 'json',
-    OUT_UNITS: 'AU-D',
-    REF_SYSTEM: 'ICRF',
-    VEC_TABLE: '2',
+    format: "json",
+    OUT_UNITS: "AU-D",
+    REF_SYSTEM: "ICRF",
+    VEC_TABLE: "2",
   });
 
   try {
-    const response = await fetch(`/api/horizons/ephemeris?${params.toString()}`);
+    const response = await fetch(
+      `/api/horizons/ephemeris?${params.toString()}`
+    );
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
 
     const data = await response.json();
     if (!data.result) {
-      throw new Error('Missing result payload');
+      throw new Error("Missing result payload");
     }
 
     const resultLines = Array.isArray(data.result)
       ? data.result
-      : typeof data.result === 'string'
-      ? data.result.split('\n')
+      : typeof data.result === "string"
+      ? data.result.split("\n")
       : [];
 
     const vectors = parseVectorData(resultLines);
     if (vectors.length === 0) {
-      throw new Error('No vector data parsed');
+      console.warn(`[Solar System] No vector data parsed for ${obj.name}, using fallback`);
+      throw new Error("No vector data parsed");
     }
 
     results[objKey] = vectors;
@@ -189,19 +226,23 @@ async function loadObjectData({
     if (fallbackData.length > 0) {
       results[objKey] = fallbackData;
       console.log(
-        `[Solar System] ✅ Generated ${fallbackData.length} positions for ${obj.name}`
+        `[Solar System] ✅ Generated ${fallbackData.length} fallback positions for ${obj.name}`
       );
+    } else {
+      console.error(`[Solar System] ❌ Failed to generate fallback data for ${obj.name}`);
+      // Create empty array to prevent undefined errors
+      results[objKey] = [];
     }
   }
 }
 
 function normalizeStepHours(stepSize: string): number {
-  if (stepSize.endsWith('h')) {
+  if (stepSize.endsWith("h")) {
     const value = parseInt(stepSize.slice(0, -1), 10);
     return Number.isFinite(value) && value > 0 ? value : 6;
   }
 
-  if (stepSize.endsWith('d')) {
+  if (stepSize.endsWith("d")) {
     const value = parseInt(stepSize.slice(0, -1), 10);
     return Number.isFinite(value) && value > 0 ? value * 24 : 24;
   }
@@ -269,7 +310,11 @@ function createMinimalFallbackData(
       jd: time.getTime() / (1000 * 60 * 60 * 24) + 2440587.5, // Convert to Julian Date
       date: time.toISOString(),
       position: { x, y, z },
-      velocity: { vx: 0, vy: 0, vz: 0 }, // Simplified
+      velocity: {
+        vx: Math.sin(angle) * 0.017, // Realistic orbital velocity in AU/day
+        vy: -Math.cos(angle) * 0.017,
+        vz: 0,
+      }, // Proper orbital velocity instead of zero
     });
   }
 
@@ -279,3 +324,4 @@ function createMinimalFallbackData(
 // ============================================================================
 // PARSE HORIZONS VECTOR DATA
 // ============================================================================
+// Removed stray debug log that referenced out-of-scope variables.

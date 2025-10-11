@@ -1,0 +1,325 @@
+import {
+  Body,
+  HelioState, // Function to compute heliocentric state vectors
+  AstroTime,  // Class for specifying time
+  StateVector, // Class for position and velocity vectors (x,y,z,vx,vy,vz,t)
+  MassProduct, // For SUN_GM
+  DEG2RAD, RAD2DEG,
+  Rotation_ECL_EQJ, // To rotate from J2000 Ecliptic to J2000 Equatorial
+  RotateState, // To apply rotation to StateVector
+  Vector, // For temporary vector creations
+} from 'astronomy-engine';
+
+// Import VectorData from horizons-api to ensure type compatibility
+import { VectorData } from './horizons-api'; 
+
+const J2000_JD_OFFSET = 2451545.0; // Julian Date for J2000.0 (January 1, 2000, 12:00:00 TT)
+const SUN_GM = MassProduct(Body.Sun); // Solar Gravitational Parameter
+
+interface OrbitalElementsInput {
+  EC: number; // Eccentricity
+  QR: number; // Perihelion distance in AU
+  TP: number; // Time of perihelion passage (Julian Day)
+  OM: number; // Longitude of ascending node in degrees
+  W: number; // Argument of perihelion in degrees
+  IN: number; // Inclination in degrees
+}
+
+/**
+ * Solves Kepler's equation for hyperbolic orbits: M_h = e * sinh(E_h) - E_h.
+ * @param M_h Hyperbolic Mean Anomaly in radians
+ * @param e Eccentricity
+ * @returns Hyperbolic Eccentric Anomaly (E_h) in radians
+ */
+function solveKeplerHyperbolic(M_h: number, e: number): number {
+  let E_h = M_h; // Initial guess for E_h
+  if (M_h > Math.PI) E_h = M_h - 2 * Math.PI; // Adjust for reasonable starting point
+  if (M_h < - Math.PI) E_h = M_h + 2 * Math.PI;
+  // A more robust initial guess for large e
+  if (e > 1.2 && Math.abs(M_h) > 0.5) {
+      E_h = Math.log(M_h / e + Math.sqrt(Math.pow(M_h/e, 2) + 1));
+  } else {
+      E_h = M_h / (e - 1); // For small M_h or e close to 1
+  }
+
+  let deltaE_h = Infinity; // Initialize deltaE_h to a non-undefined value
+  let iterations = 0;
+  const maxIterations = 20;
+  const tolerance = 1e-12;
+
+  do {
+    const f = e * Math.sinh(E_h) - E_h - M_h;
+    const f_prime = e * Math.cosh(E_h) - 1;
+    if (Math.abs(f_prime) < 1e-15) { // Avoid division by zero close to periapsis
+      E_h += 0.01; // nudge E_h slightly to move away from critical point
+      deltaE_h = Infinity; // Ensure loop continues as long as not converged
+      continue;
+    }
+    deltaE_h = f / f_prime;
+    E_h -= deltaE_h;
+    iterations++;
+  } while (Math.abs(deltaE_h) > tolerance && iterations < maxIterations);
+
+  return E_h;
+}
+
+/**
+ * Calculates the heliocentric StateVector for a hyperbolic comet given its orbital elements.
+ * This function manually propagates the orbit because astronomy-engine's
+ * public Elements class constructor does not directly support hyperbolic elements readily for `StateVector`.
+ * @param elements Orbital elements of the comet.
+ * @param time The current AstroTime for which to calculate the state.
+ * @returns StateVector (position and velocity in J2000 equatorial coordinates).
+ */
+function calculateHyperbolicStateVector(elements: OrbitalElementsInput, time: AstroTime): StateVector {
+  const e = elements.EC; // eccentricity
+  const q = elements.QR; // perihelion distance (AU)
+  const T = new AstroTime(elements.TP); // Time of perihelion passage
+  const M_tp = elements.OM * DEG2RAD; // Longitude of ascending node (Ω)
+  const w_ap = elements.W * DEG2RAD; // Argument of perihelion (ω)
+  const i_inc = elements.IN * DEG2RAD; // Inclination (i)
+
+  // Time from perihelion passage in days
+  const dt = (time.ut - T.ut) * (365.25 / 365.24219); // Convert J2000 days from AstroTime.ut to a form closer to actual days difference
+                                                     // This is a rough estimation of fractional days from T.tt to time.tt
+
+  // Semi-major axis for hyperbolic orbit (a = q / (e-1)) - a is negative
+  const a = q / (e - 1);
+
+  // Validate orbital elements to prevent NaN
+  if (!isFinite(a) || !isFinite(e) || e <= 1) {
+    console.warn('[AE] Invalid orbital elements:', { e, q, a });
+    return new StateVector(0, 0, 0, 0, 0, 0, time);
+  }
+
+  // Hyperbolic mean motion n_h = sqrt(GM / -a^3)
+  const n_h = Math.sqrt(SUN_GM / (-a * -a * -a));
+
+  // Validate mean motion
+  if (!isFinite(n_h)) {
+    console.warn('[AE] Invalid mean motion:', { SUN_GM, a, n_h });
+    return new StateVector(0, 0, 0, 0, 0, 0, time);
+  }
+
+  // Hyperbolic Mean Anomaly (M_h = n_h * dt)
+  const M_h = n_h * dt;
+
+  // Solve Kepler's Equation for Hyperbolic Eccentric Anomaly (E_h)
+  const E_h = solveKeplerHyperbolic(M_h, e);
+
+  // Validate eccentric anomaly
+  if (!isFinite(E_h)) {
+    console.warn('[AE] Invalid eccentric anomaly:', { M_h, e, E_h });
+    return new StateVector(0, 0, 0, 0, 0, 0, time);
+  }
+
+  // True Anomaly (nu)
+  const nu = 2 * Math.atan2(Math.sqrt(e + 1) * Math.sinh(E_h / 2), Math.sqrt(e - 1) * Math.cosh(E_h / 2));
+
+  // Distance from Sun (r_mag)
+  const r_mag = a * (1 - e * Math.cosh(E_h));
+
+  // Position in perifocal frame (P,Q axes)
+  const Xp = r_mag * Math.cos(nu);
+  const Yp = r_mag * Math.sin(nu);
+
+  // Velocity in perifocal frame (P,Q axes)
+  const p = a * (1 - e * e); // Semi-latus rectum using negative a
+  const h_angular = Math.sqrt(SUN_GM * p); // Specific angular momentum
+
+  const vx_p_perifocal = -(h_angular / r_mag) * Math.sin(nu);
+  const vy_p_perifocal = (h_angular / r_mag) * (e + Math.cos(nu));
+
+
+  // Rotate from Perifocal Frame to J2000 Ecliptic Frame
+  // This uses a sequence of Euler rotations: Z(w), X(i), Z(OM)
+  // Position
+  let x_ecl = Xp * (Math.cos(w_ap) * Math.cos(M_tp) - Math.sin(w_ap) * Math.sin(M_tp) * Math.cos(i_inc))
+            - Yp * (Math.sin(w_ap) * Math.cos(M_tp) + Math.cos(w_ap) * Math.sin(M_tp) * Math.cos(i_inc));
+  let y_ecl = Xp * (Math.cos(w_ap) * Math.sin(M_tp) + Math.sin(w_ap) * Math.cos(M_tp) * Math.cos(i_inc))
+            + Yp * (Math.cos(w_ap) * Math.cos(M_tp) * Math.cos(i_inc) - Math.sin(w_ap) * Math.sin(M_tp));
+  let z_ecl = Xp * (Math.sin(w_ap) * Math.sin(i_inc))
+            + Yp * (Math.cos(w_ap) * Math.sin(i_inc));
+
+  // Velocity
+  // For velocity transformations, we need to correctly apply the same rotations
+  // This is non-trivial and usually done via RotationMatrix class or similar.
+  // For brevity and to keep within astronomy-engine's assumed utilities where possible (even if manually),
+  // let's define a basic rotation utility or explicitly use the Rotation_ECL_EQJ if it applies well
+  // or construct a custom rotation matrix from Euler angles.
+
+  // Using standard transformation equations:
+  const C1 = Math.cos(w_ap);
+  const S1 = Math.sin(w_ap);
+  const C2 = Math.cos(i_inc);
+  const S2 = Math.sin(i_inc);
+  const C3 = Math.cos(M_tp);
+  const S3 = Math.sin(M_tp);
+
+  const P_x_ecl = (C1*C3 - S1*S3*C2) * Xp + (-S1*C3 - C1*S3*C2) * Yp;
+  const P_y_ecl = (C1*S3 + S1*C3*C2) * Xp + (-S1*S3 + C1*C3*C2) * Yp;
+  const P_z_ecl = (S1*S2) * Xp + (C1*S2) * Yp;
+
+  const V_x_ecl = (C1*C3 - S1*S3*C2) * vx_p_perifocal + (-S1*C3 - C1*S3*C2) * vy_p_perifocal;
+  const V_y_ecl = (C1*S3 + S1*C3*C2) * vx_p_perifocal + (-S1*S3 + C1*C3*C2) * vy_p_perifocal;
+  const V_z_ecl = (S1*S2) * vx_p_perifocal + (C1*S2) * vy_p_perifocal;
+
+  // Now, rotate from J2000 Ecliptic to J2000 Equatorial using Rotation_ECL_EQJ
+  const eclipticState = new StateVector(P_x_ecl, P_y_ecl, P_z_ecl, V_x_ecl, V_y_ecl, V_z_ecl, time);
+  const equatorialState = RotateState(Rotation_ECL_EQJ(), eclipticState);
+
+  return equatorialState;
+}
+
+export function generateVectorsAstronomy(
+  start: Date,
+  end: Date,
+  stepHours: number,
+  objectKey: string,
+  elements?: OrbitalElementsInput
+): VectorData[] {
+  const vectors: VectorData[] = [];
+  let current = new Date(start);
+
+  // Support specific cadence profiles: 2h, 1h, 0.5h (30m)
+  // Ensure stable performance at high cadences
+  const supportedCadences = [0.5, 1, 2];
+  const effectiveStepHours = supportedCadences.includes(stepHours)
+    ? stepHours
+    : supportedCadences.reduce((prev, curr) =>
+        Math.abs(curr - stepHours) < Math.abs(prev - stepHours) ? curr : prev
+      );
+
+  // Ensure inclusive end date by adding one step if needed
+  const endTime = new Date(end.getTime() + (effectiveStepHours * 60 * 60 * 1000));
+
+  console.log(`[AE] Generating ${objectKey} vectors: ${start.toISOString().split('T')[0]} to ${end.toISOString().split('T')[0]}, step: ${effectiveStepHours}h`);
+
+  while (current.getTime() < endTime.getTime()) {
+    const astroTime = new AstroTime(current);
+    let resultStateVector: StateVector;
+
+    if (objectKey === '3I/ATLAS' && elements) {
+      resultStateVector = calculateHyperbolicStateVector(elements, astroTime);
+    } else {
+      let body: Body;
+      switch (objectKey) {
+        case 'mercury': body = Body.Mercury; break;
+        case 'venus': body = Body.Venus; break;
+        case 'earth': body = Body.Earth; break;
+        case 'mars': body = Body.Mars; break;
+        case 'jupiter': body = Body.Jupiter; break;
+        case 'saturn': body = Body.Saturn; break;
+        case 'uranus': body = Body.Uranus; break;
+        case 'neptune': body = Body.Neptune; break;
+        case 'pluto': body = Body.Pluto; break;
+        default:
+          console.warn(`Unknown body: ${objectKey}`);
+          current.setHours(current.getHours() + effectiveStepHours);
+          continue;
+      }
+      resultStateVector = HelioState(body, astroTime);
+    }
+
+    // Ensure no NaN values in position/velocity
+    if (isValidStateVector(resultStateVector)) {
+      vectors.push({
+        jd: astroTime.ut + J2000_JD_OFFSET,
+        date: current.toISOString(),
+        position: {
+          x: resultStateVector.x,
+          y: resultStateVector.y,
+          z: resultStateVector.z,
+        },
+        velocity: {
+          vx: resultStateVector.vx,
+          vy: resultStateVector.vy,
+          vz: resultStateVector.vz,
+        },
+      });
+    }
+
+    current.setHours(current.getHours() + effectiveStepHours);
+  }
+
+  console.log(`[AE] Generated ${vectors.length} vectors for ${objectKey}`);
+  return vectors;
+}
+
+/**
+ * Validates that a StateVector contains no NaN values
+ */
+function isValidStateVector(state: StateVector): boolean {
+  return isFinite(state.x) && isFinite(state.y) && isFinite(state.z) &&
+         isFinite(state.vx) && isFinite(state.vy) && isFinite(state.vz);
+}
+
+/**
+ * Finds the nearest frame index by date for seamless seeking
+ * @param vectors Array of VectorData to search
+ * @param isoString Target ISO date string
+ * @returns Clamped index between 0 and vectors.length - 1
+ */
+export function findNearestFrameByDate(vectors: VectorData[], isoString: string): number {
+  if (!vectors || vectors.length === 0) return 0;
+
+  const targetTime = new Date(isoString).getTime();
+
+  // Handle edge cases
+  if (targetTime <= new Date(vectors[0].date).getTime()) return 0;
+  if (targetTime >= new Date(vectors[vectors.length - 1].date).getTime()) return vectors.length - 1;
+
+  // Binary search for better performance with large datasets
+  let left = 0;
+  let right = vectors.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    const midTime = new Date(vectors[mid].date).getTime();
+
+    if (midTime === targetTime) {
+      return mid;
+    } else if (midTime < targetTime) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  // Find nearest neighbor after binary search
+  const leftTime = new Date(vectors[left] ? vectors[left].date : vectors[0].date).getTime();
+  const rightTime = new Date(vectors[right] ? vectors[right].date : vectors[vectors.length - 1].date).getTime();
+
+  // Choose the closer time
+  return Math.abs(targetTime - leftTime) < Math.abs(targetTime - rightTime) ? left : right;
+}
+
+/**
+ * Downsamples vectors for efficient trail rendering at high cadences
+ * @param vectors Original vector array
+ * @param everyNth Return every Nth frame (e.g., 10 = every 10th frame)
+ * @returns Downsampled array suitable for trail rendering
+ */
+export function downsampleForTrails(vectors: VectorData[], everyNth: number = 10): VectorData[] {
+  if (!vectors || vectors.length === 0 || everyNth <= 0) return vectors;
+
+  const result: VectorData[] = [];
+
+  for (let i = 0; i < vectors.length; i += everyNth) {
+    // Validate each vector before including
+    if (isValidVectorData(vectors[i])) {
+      result.push(vectors[i]);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Validates that VectorData contains no NaN values
+ */
+function isValidVectorData(vector: VectorData): boolean {
+  return isFinite(vector.position.x) && isFinite(vector.position.y) && isFinite(vector.position.z) &&
+         isFinite(vector.velocity.vx) && isFinite(vector.velocity.vy) && isFinite(vector.velocity.vz) &&
+         isFinite(vector.jd);
+}

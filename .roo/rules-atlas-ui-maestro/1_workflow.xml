@@ -1,0 +1,125 @@
+<workflow_instructions>
+  <mode_overview>
+    Atlas-UI-Maestro is a specialized Frontend/UI engineering mode focused on building 
+    world-class, production-grade interfaces in React/Next.js and Three.js. This mode 
+    specializes in 3IAtlas patterns while being reusable across projects, with expertise 
+    in accessibility, performance optimization, and unobtrusive UI design that never 
+    blocks 3D scenes.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand the user's request</action>
+      <details>
+        Parse the user's input to identify:
+        - Primary UI/UX objective (component creation, refactoring, optimization)
+        - Specific requirements (accessibility, performance, responsive design)
+        - Technical constraints (Three.js integration, 60fps requirements)
+        - Target devices and screen sizes
+        - Any 3IAtlas-specific patterns or requirements
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>Gather necessary context</action>
+      <tools>
+        <tool>search_files - Find relevant existing components and patterns</tool>
+        <tool>list_files - Understand project structure and component organization</tool>
+        <tool>read_file - Examine specific implementations and styling approaches</tool>
+        <tool>read_file - Review TypeScript interfaces and type definitions</tool>
+      </tools>
+    </step>
+
+    <step number="3">
+      <action>Analyze performance requirements</action>
+      <details>
+        Identify:
+        - 60fps performance requirements for animations
+        - Three.js scene integration needs
+        - Event listener management requirements
+        - Memory cleanup considerations
+        - Mobile performance constraints
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="analysis">
+      <description>Analyze current state and plan UI approach</description>
+      <steps>
+        <step>Identify affected components and dependencies</step>
+        <step>Assess impact on Three.js scene performance</step>
+        <step>Plan responsive design strategy</step>
+        <step>Evaluate accessibility requirements (WCAG 2.1 AA/AAA)</step>
+        <step>Determine event listener management needs</step>
+      </steps>
+    </phase>
+
+    <phase name="design">
+      <description>Create component architecture and interaction patterns</description>
+      <steps>
+        <step>Design component API and prop interfaces</step>
+        <step>Plan state management approach</step>
+        <step>Design responsive layout with Tailwind CSS</step>
+        <step>Plan accessibility features and ARIA roles</step>
+        <step>Design animation and motion systems</step>
+      </steps>
+    </phase>
+
+    <phase name="implementation">
+      <description>Execute the planned UI changes</description>
+      <steps>
+        <step>Implement React components with proper TypeScript typing</step>
+        <step>Add performance optimizations (useCallback, useMemo, useRef)</step>
+        <step>Implement responsive design with Tailwind utilities</step>
+        <step>Add accessibility features and semantic HTML</step>
+        <step>Integrate with Three.js scene without blocking</step>
+        <step>Implement proper event listener cleanup</step>
+      </steps>
+    </phase>
+
+    <phase name="validation">
+      <description>Verify implementation meets all requirements</description>
+      <steps>
+        <step>Test 60fps performance in animations</step>
+        <step>Validate WCAG 2.1 AA/AAA compliance</step>
+        <step>Test responsive design across device sizes</step>
+        <step>Verify Three.js scene remains unobstructed</step>
+        <step>Check TypeScript compilation and type safety</step>
+        <step>Test event listener cleanup and memory management</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>UI components are accessible (WCAG 2.1 AA/AAA compliant)</criterion>
+    <criterion>60fps performance maintained in animations and interactions</criterion>
+    <criterion>Three.js scenes remain unobstructed and performant</criterion>
+    <criterion>Responsive design works across all target devices</criterion>
+    <criterion>TypeScript compilation passes without errors</criterion>
+    <criterion>Event listeners are properly managed and cleaned up</criterion>
+    <criterion>Code follows 3IAtlas patterns and project conventions</criterion>
+  </completion_criteria>
+
+  <special_considerations>
+    <consideration name="three_js_integration">
+      <description>Always ensure UI overlays don't block Three.js scenes</description>
+      <implementation>Use proper z-indexing, pointer-events management, and performance monitoring</implementation>
+    </consideration>
+    
+    <consideration name="performance_first">
+      <description>Maintain 60fps visual fidelity at all times</description>
+      <implementation>Use React performance hooks, requestAnimationFrame optimization, and profile regularly</implementation>
+    </consideration>
+    
+    <consideration name="accessibility_mandatory">
+      <description>WCAG compliance is non-negotiable</description>
+      <implementation>Include semantic HTML, ARIA roles, keyboard navigation, and screen reader support</implementation>
+    </consideration>
+    
+    <consideration name="mobile_optimization">
+      <description>Mobile-first responsive design approach</description>
+      <implementation>Design for touch interactions, optimize for smaller screens, and consider mobile performance</implementation>
+    </consideration>
+  </special_considerations>
+</workflow_instructions>

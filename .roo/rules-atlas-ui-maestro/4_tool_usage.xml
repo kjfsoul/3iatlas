@@ -1,0 +1,272 @@
+<tool_usage_guide>
+  <tool_priorities>
+    <priority level="1">
+      <tool>search_files</tool>
+      <when>Always use first to find relevant UI components and patterns</when>
+      <why>Semantic search finds UI patterns and Three.js integrations better than simple keyword matching</why>
+    </priority>
+    
+    <priority level="2">
+      <tool>read_file</tool>
+      <when>After identifying relevant files with search_files</when>
+      <why>Get full context of existing UI components, styling approaches, and Three.js integrations</why>
+    </priority>
+    
+    <priority level="3">
+      <tool>list_files</tool>
+      <when>When exploring project structure and component organization</when>
+      <why>Understand the overall UI architecture and file organization patterns</why>
+    </priority>
+    
+    <priority level="4">
+      <tool>apply_diff</tool>
+      <when>When implementing UI changes and optimizations</when>
+      <why>Make precise, targeted changes to components while preserving existing functionality</why>
+    </priority>
+    
+    <priority level="5">
+      <tool>execute_command</tool>
+      <when>For build verification, dependency management, and development server operations</when>
+      <why>Ensure TypeScript compilation passes and development environment is properly configured</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="search_files">
+      <best_practices>
+        <practice>Use semantic search terms like "overlay", "controls", "legend", "frustum" to find relevant UI patterns</practice>
+        <practice>Search for Three.js related terms: "camera", "scene", "mesh", "renderer" to understand 3D integrations</practice>
+        <practice>Look for accessibility patterns: "aria", "keyboard", "focus", "screen-reader"</practice>
+        <practice>Search for performance patterns: "useCallback", "useMemo", "requestAnimationFrame", "cleanup"</practice>
+      </best_practices>
+      <example>
+        <scenario>Finding existing overlay components</scenario>
+        <search_query>overlay UI component Three.js</search_query>
+        <expected_results>Components that overlay 3D scenes, HUD elements, control panels</expected_results>
+      </example>
+      <example>
+        <scenario>Finding performance optimizations</scenario>
+        <search_query>useCallback useMemo performance optimization</search_query>
+        <expected_results>Performance-optimized React components with proper hook usage</expected_results>
+      </example>
+    </tool>
+
+    <tool name="read_file">
+      <best_practices>
+        <practice>Always read multiple related files together to understand the full context</practice>
+        <practice>Examine both the component implementation and its related styles/types</practice>
+        <practice>Look for Three.js integration patterns and cleanup strategies</practice>
+        <practice>Check for accessibility implementations and ARIA usage</practice>
+        <practice>Analyze performance optimizations and hook dependencies</practice>
+      </best_practices>
+      <example>
+        <scenario>Analyzing a Three.js UI component</scenario>
+        <files_to_read>
+          <file>components/Atlas3DTrackerEnhanced.tsx</file>
+          <file>components/Atlas3DTracker.tsx</file>
+          <file>app/globals.css</file>
+        </files_to_read>
+        <focus_areas>Three.js integration, event handling, cleanup, performance optimizations</focus_areas>
+      </example>
+    </tool>
+
+    <tool name="apply_diff">
+      <best_practices>
+        <practice>Always read the target file first to ensure exact content matching</practice>
+        <practice>Make multiple related changes in a single diff operation when possible</practice>
+        <practice>Include precise line numbers for accurate targeting</practice>
+        <practice>Preserve existing functionality while adding new features</practice>
+        <practice>Maintain consistent code style and TypeScript patterns</practice>
+      </best_practices>
+      <example>
+        <scenario>Adding accessibility improvements to a component</scenario>
+        <code>
+          <![CDATA[
+<apply_diff>
+<path>components/UIComponent.tsx</path>
+<diff>
+<<<<<<< SEARCH
+:start_line:15
+-------
+<button onClick={handleClick} className="button">
+  {label}
+</button>
+=======
+<button 
+  onClick={handleClick} 
+  className="button"
+  aria-label={ariaLabel}
+  onKeyDown={handleKeyDown}
+  ref={buttonRef}
+>
+  {label}
+</button>
+>>>>>>> REPLACE
+</diff>
+</apply_diff>
+          ]]>
+        </code>
+      </example>
+      <example>
+        <scenario>Adding performance optimizations</scenario>
+        <code>
+          <![CDATA[
+<apply_diff>
+<path>components/ExpensiveComponent.tsx</path>
+<diff>
+<<<<<<< SEARCH
+:start_line:8
+-------
+const ExpensiveComponent = ({ data, onAction }) => {
+  const processedData = processData(data);
+  
+  return (
+    <div>
+      {processedData.map(item => (
+        <Item key={item.id} item={item} onAction={onAction} />
+      ))}
+    </div>
+  );
+};
+=======
+const ExpensiveComponent = React.memo(({ data, onAction }) => {
+  const processedData = useMemo(() => processData(data), [data]);
+  
+  const handleAction = useCallback((action) => {
+    onAction(action);
+  }, [onAction]);
+  
+  return (
+    <div>
+      {processedData.map(item => (
+        <Item key={item.id} item={item} onAction={handleAction} />
+      ))}
+    </div>
+  );
+});
+>>>>>>> REPLACE
+</diff>
+</apply_diff>
+          ]]>
+        </code>
+      </example>
+    </tool>
+
+    <tool name="execute_command">
+      <best_practices>
+        <practice>Always run TypeScript compilation before and after major changes</practice>
+        <practice>Use build commands to verify no breaking changes were introduced</practice>
+        <practice>Test development server functionality when implementing new features</practice>
+        <practice>Check for linting errors and code quality issues</practice>
+      </best_practices>
+      <example>
+        <scenario>Verifying TypeScript compilation</scenario>
+        <command>npm run build</command>
+        <expected_success>Build completes without TypeScript errors</expected_success>
+        <troubleshooting>If build fails, check for type errors and missing imports</troubleshooting>
+      </example>
+      <example>
+        <scenario>Starting development server for testing</scenario>
+        <command>npm run dev</command>
+        <expected_success>Development server starts successfully on configured port</expected_success>
+        <troubleshooting>Check for port conflicts or missing environment variables</troubleshooting>
+      </example>
+    </tool>
+
+    <tool name="list_files">
+      <best_practices>
+        <practice>Use recursive listing to understand the complete component structure</practice>
+        <practice>Examine the components directory to understand UI organization</practice>
+        <practice>Check for existing patterns in file naming and structure</practice>
+        <practice>Look for test files and documentation alongside components</practice>
+      </best_practices>
+      <example>
+        <scenario>Understanding component organization</scenario>
+        <command>list_files components/ --recursive</command>
+        <expected_insights>Component structure, naming patterns, test organization</expected_insights>
+      </example>
+    </tool>
+  </tool_specific_guidance>
+
+  <workflow_integration>
+    <phase name="analysis">
+      <tool_sequence>
+        <step>search_files - Find existing UI patterns and Three.js integrations</step>
+        <step>list_files - Understand project structure and component organization</step>
+        <step>read_file - Examine specific implementations and patterns</step>
+      </tool_sequence>
+    </phase>
+    
+    <phase name="implementation">
+      <tool_sequence>
+        <step>read_file - Review target files before making changes</step>
+        <step>apply_diff - Implement UI improvements and optimizations</step>
+        <step>execute_command - Verify TypeScript compilation</step>
+      </tool_sequence>
+    </phase>
+    
+    <phase name="validation">
+      <tool_sequence>
+        <step>execute_command - Run build to ensure no breaking changes</step>
+        <step>read_file - Review implemented changes for correctness</step>
+        <step>search_files - Verify patterns are applied consistently</step>
+      </tool_sequence>
+    </phase>
+  </workflow_integration>
+
+  <quality_assurance>
+    <checklist name="before_applying_changes">
+      <item>Read all target files to understand current implementation</item>
+      <item>Search for similar patterns in the codebase</item>
+      <item>Verify TypeScript types and interfaces are understood</item>
+      <item>Check for existing accessibility implementations</item>
+      <item>Identify performance bottlenecks or optimization opportunities</item>
+    </checklist>
+    
+    <checklist name="after_applying_changes">
+      <item>Run TypeScript compilation to verify no errors</item>
+      <item>Test build process to ensure no breaking changes</item>
+      <item>Verify accessibility features are properly implemented</item>
+      <item>Check performance optimizations are correctly applied</item>
+      <item>Ensure proper cleanup and memory management</item>
+    </checklist>
+  </quality_assurance>
+
+  <common_scenarios>
+    <scenario name="adding_new_ui_overlay">
+      <tool_workflow>
+        <step>search_files for "overlay" patterns to understand existing approach</step>
+        <step>read_file existing overlay components to understand patterns</step>
+        <step>apply_diff to create new overlay following established patterns</step>
+        <step>execute_command npm run build to verify TypeScript compilation</step>
+      </tool_workflow>
+    </scenario>
+    
+    <scenario name="optimizing_component_performance">
+      <tool_workflow>
+        <step>search_files for "useCallback useMemo" performance patterns</step>
+        <step>read_file target component to identify optimization opportunities</step>
+        <step>apply_diff to add performance optimizations</step>
+        <step>execute_command npm run build to verify changes don't break anything</step>
+      </tool_workflow>
+    </scenario>
+    
+    <scenario name="improving_accessibility">
+      <tool_workflow>
+        <step>search_files for "aria keyboard focus" accessibility patterns</step>
+        <step>read_file component to understand current accessibility implementation</step>
+        <step>apply_diff to add missing accessibility features</step>
+        <step>execute_command npm run build to ensure TypeScript compliance</step>
+      </tool_workflow>
+    </scenario>
+    
+    <scenario name="integrating_with_three_js">
+      <tool_workflow>
+        <step>search_files for "Three.js scene camera mesh" integration patterns</step>
+        <step>read_file existing Three.js components to understand integration approach</step>
+        <step>apply_diff to implement proper Three.js integration with cleanup</step>
+        <step>execute_command npm run build to verify Three.js types and imports</step>
+      </tool_workflow>
+    </scenario>
+  </common_scenarios>
+</tool_usage_guide>

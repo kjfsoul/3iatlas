@@ -289,56 +289,84 @@ export async function get3IAtlasVectors(
   endDate: string,
   stepSize: string = '6h'
 ): Promise<VectorData[]> {
-  // Step 1: Look up 3I/ATLAS to get SPK-ID
-  // Official designations for the third interstellar object
-  const possibleNames = [
-    '3I/ATLAS',         // Official interstellar designation
-    'C/2025 N1',        // Provisional comet designation
-    '3I',               // Short interstellar designation
-    '2025 N1',          // Short provisional designation
-  ];
+  // Step 1 (hardened): Use confirmed SPK-ID first to avoid flaky name lookups
+  // SPK-ID reference: docs/HORIZONS_ENHANCEMENT_PLAN.md
+  const preferredSpkId = "1004083";
+  let spkid = preferredSpkId;
 
-  let lookupResult: HorizonsLookupResult | null = null;
-  let usedDesignation = '';
+  // If SPK-ID path fails for any reason, fall back to designation lookup
+  let needLookup = false;
+  try {
+    const sanityParams: HorizonsQueryParams = {
+      COMMAND: preferredSpkId,
+      EPHEM_TYPE: "VECTOR",
+      CENTER: "@sun",
+      START_TIME: startDate,
+      STOP_TIME: endDate,
+      STEP_SIZE: stepSize,
+      format: "json",
+      OUT_UNITS: "AU-D",
+      REF_SYSTEM: "ICRF",
+      VEC_TABLE: "2",
+      OBJ_DATA: "YES",
+    };
+    // Quick probe (no parse here; the real fetch happens below). If this throws we will do lookup.
+    await getEphemerisVectors(sanityParams);
+    console.log("[Horizons] Using direct SPK-ID 1004083 for 3I/ATLAS");
+  } catch {
+    needLookup = true;
+  }
 
-  for (const name of possibleNames) {
-    try {
-      const result = await lookupObject(name, 'com');
-      if (result.count > 0) {
-        lookupResult = result;
-        usedDesignation = name;
-        console.log(`[Horizons] Found 3I/ATLAS using designation: "${name}"`);
-        console.log(`[Horizons] Object name: ${result.result?.[0]?.name}`);
-        break;
+  if (needLookup) {
+    // Official designations for the third interstellar object (ordered by reliability)
+    const possibleNames = [
+      "C/2025 N1", // Provisional comet designation (most reliable in practice)
+      "3I/ATLAS", // Interstellar designation
+      "3I", // Short interstellar designation
+      "2025 N1", // Short provisional designation
+    ];
+
+    let lookupResult: HorizonsLookupResult | null = null;
+    for (const name of possibleNames) {
+      try {
+        const result = await lookupObject(name, "com");
+        if (result.count > 0) {
+          lookupResult = result;
+          console.log(`[Horizons] Found 3I/ATLAS using designation: "${name}"`);
+          console.log(`[Horizons] Object name: ${result.result?.[0]?.name}`);
+          break;
+        }
+      } catch (error) {
+        console.warn(`[Horizons] Failed to lookup "${name}":`, error);
       }
-    } catch (error) {
-      console.warn(`[Horizons] Failed to lookup "${name}":`, error);
     }
-  }
 
-  if (!lookupResult || !lookupResult.result || lookupResult.result.length === 0) {
-    throw new HorizonsAPIError(
-      '3I/ATLAS (C/2025 N1) not found in Horizons database. Tried: 3I/ATLAS, C/2025 N1, 3I, 2025 N1'
-    );
+    if (
+      !lookupResult ||
+      !lookupResult.result ||
+      lookupResult.result.length === 0
+    ) {
+      throw new HorizonsAPIError(
+        "3I/ATLAS (C/2025 N1) not found in Horizons database. Tried: C/2025 N1, 3I/ATLAS, 3I, 2025 N1"
+      );
+    }
+    spkid = lookupResult.result[0].spkid;
+    console.log(`[Horizons] Using SPK-ID from lookup: ${spkid}`);
   }
-
-  const spkid = lookupResult.result[0].spkid;
-  const cometName = lookupResult.result[0].name;
-  console.log(`[Horizons] Using SPK-ID: ${spkid} for ${cometName}`);
 
   // Step 2: Fetch ephemeris vectors
   const ephemerisParams: HorizonsQueryParams = {
     COMMAND: spkid,
-    EPHEM_TYPE: 'VECTOR',
-    CENTER: '@sun',           // Heliocentric (Sun-centered)
+    EPHEM_TYPE: "VECTOR",
+    CENTER: "@sun", // Heliocentric (Sun-centered)
     START_TIME: startDate,
     STOP_TIME: endDate,
     STEP_SIZE: stepSize,
-    format: 'json',
-    OUT_UNITS: 'AU-D',       // Astronomical Units, Days
-    REF_SYSTEM: 'ICRF',      // International Celestial Reference Frame
-    VEC_TABLE: '2',          // Position + Velocity
-    OBJ_DATA: 'YES',         // Include object metadata
+    format: "json",
+    OUT_UNITS: "AU-D", // Astronomical Units, Days
+    REF_SYSTEM: "ICRF", // International Celestial Reference Frame
+    VEC_TABLE: "2", // Position + Velocity
+    OBJ_DATA: "YES", // Include object metadata
   };
 
   const ephemerisResponse = await getEphemerisVectors(ephemerisParams);

@@ -1,0 +1,175 @@
+Perfect! I have all the details needed. Let me create a comprehensive plan for the 5-view 3I/ATLAS trajectory system.
+
+
+[1 tool called]
+
+# 3I/ATLAS 5-View Trajectory System - Master Plan
+
+## Overview
+Transform the current 3D tracker into a comprehensive 5-view system for 3I/ATLAS visualization, with historical flight path, current moment super-lens, speed simulation, perihelion event, and interactive trajectory plotting.
+
+## 5 Views Specification
+
+### View 1: Historical Flight Path (July 1 - Oct 8, 2025)
+- **Purpose**: Show complete journey since discovery
+- **Data**: Generated locally using astronomy-engine + orbital elements
+- **Features**: 
+  - Animated timeline scrubber
+  - Speed controls (1x-100x)
+  - Date markers for key events
+  - Trail persistence showing full path
+
+### View 2: Current Moment Super-Lens (Oct 8, 2025)
+- **Purpose**: Freeze-frame of current position with full solar system context
+- **Features**:
+  - 3I/ATLAS frozen at current position
+  - All major solar system bodies (8 planets + Pluto)
+  - Asteroid belt visualization
+  - Major moons (Jupiter's 4 Galilean, Saturn's Titan, etc.)
+  - Star field background
+  - Other active comets (if data available)
+  - Free camera rotation around 3I/ATLAS
+  - Zoom controls for detailed inspection
+
+### View 3: Speed Simulation
+- **Purpose**: Experience 3I/ATLAS's velocity from comet's perspective
+- **Features**:
+  - Camera locked to 3I/ATLAS position
+  - Motion blur effects on tail
+  - Streaking star field
+  - Velocity vector display
+  - Speed multiplier controls
+  - User can rotate camera around the comet
+  - Particle effects showing solar wind interaction
+
+### View 4: Perihelion Event (Oct 28-29, 2025)
+- **Purpose**: Dramatic visualization of closest approach to Sun
+- **Features**:
+  - Time-lapse around perihelion (Oct 28-29)
+  - Enhanced solar corona effects
+  - Comet tail intensification
+  - Heat/radiation visualization
+  - Gravitational lensing effects
+  - Speed increase visualization
+  - Multiple camera angles (Sun perspective, comet perspective, side view)
+
+### View 5: Interactive Trajectory Plotter
+- **Purpose**: User can alter 3I/ATLAS's path and see consequences
+- **Features**:
+  - Full solar system at current moment
+  - Draggable 3I/ATLAS position on timeline
+  - Real-time physics calculations
+  - Impact prediction system
+  - Dashboard showing:
+    - Velocity vectors
+    - Acceleration
+    - Gravitational influences
+    - Time to impact
+    - Energy calculations
+  - Multiple scenario presets (Earth impact, Jupiter slingshot, etc.)
+
+## Technical Architecture
+
+### Data Management
+- **Historical Data**: Generate once using astronomy-engine, cache in localStorage
+- **Current Position**: Update daily via astronomy-engine (no live API calls)
+- **Solar System Objects**: Pre-calculate positions for Oct 8, 2025
+- **Physics Engine**: Custom n-body simulator for trajectory plotting
+
+### File Structure
+```
+components/
+├── Atlas3DTrackerEnhanced.tsx (main component)
+├── views/
+│   ├── HistoricalFlightView.tsx
+│   ├── CurrentMomentView.tsx
+│   ├── SpeedSimulationView.tsx
+│   ├── PerihelionEventView.tsx
+│   └── TrajectoryPlotterView.tsx
+lib/
+├── astronomy-engine-source.ts (enhanced)
+├── historical-data-generator.ts (new)
+├── solar-system-positions.ts (new)
+├── physics-engine.ts (new)
+└── trajectory-calculator.ts (new)
+config/
+├── orbital-elements/3i-atlas.json
+└── solar-system-objects.json (new)
+```
+
+## Task Delegation
+
+### Roo Code (UI/UX Specialist)
+**Primary Focus**: Views 1, 2, 4 (Historical, Current Moment, Perihelion)
+**Tasks**:
+1. Create view switching UI with 5 tabs
+2. Implement Historical Flight View with timeline scrubber
+3. Build Current Moment Super-Lens with full solar system
+4. Design Perihelion Event View with dramatic effects
+5. Enhance camera controls and zoom functionality
+6. Add visual effects (motion blur, particles, corona)
+
+### Kilo Code (Data/Physics Specialist)  
+**Primary Focus**: Views 3, 5 (Speed Simulation, Trajectory Plotter)
+**Tasks**:
+1. Generate historical data (July 1 - Oct 8, 2025)
+2. Calculate current solar system positions for Oct 8, 2025
+3. Build physics engine for trajectory calculations
+4. Implement speed simulation with velocity vectors
+5. Create trajectory plotter with drag-and-drop
+6. Build real-time physics dashboard
+7. Add asteroid belt and moon data
+
+### Self (Architecture/Integration)
+**Primary Focus**: System integration and coordination
+**Tasks**:
+1. Design overall component architecture
+2. Create shared state management
+3. Implement view switching logic
+4. Coordinate data flow between views
+5. Add daily position update mechanism
+6. Ensure no conflicts between parallel work
+7. Integration testing and bug fixes
+
+## Implementation Phases
+
+### Phase 1: Foundation (Self)
+- Set up view switching architecture
+- Create shared state management
+- Implement daily position update system
+- Establish data flow patterns
+
+### Phase 2: Historical & Current (Roo + Kilo in parallel)
+- Roo: Historical Flight View UI
+- Kilo: Historical data generation
+- Roo: Current Moment Super-Lens UI  
+- Kilo: Solar system position calculations
+
+### Phase 3: Simulation & Physics (Roo + Kilo in parallel)
+- Roo: Speed Simulation View UI
+- Kilo: Physics engine implementation
+- Roo: Perihelion Event View with effects
+- Kilo: Trajectory calculation algorithms
+
+### Phase 4: Interactive Plotter (Kilo + Roo collaboration)
+- Kilo: Trajectory plotter physics
+- Roo: Drag-and-drop interface
+- Kilo: Real-time dashboard
+- Roo: UI polish and effects
+
+### Phase 5: Integration & Polish (All)
+- Cross-view testing
+- Performance optimization
+- Visual effects refinement
+- Final bug fixes
+
+## Success Criteria
+- All 5 views functional and visually impressive
+- Historical data loads instantly (no API delays)
+- Physics calculations accurate and real-time
+- Smooth transitions between views
+- No conflicts with existing Printify functionality
+- Mobile-responsive design
+- 60fps performance on standard hardware
+
+This plan provides a comprehensive roadmap for building an exceptional 3I/ATLAS visualization system while maintaining clear separation of concerns and parallel development capabilities.

@@ -2,9 +2,10 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import Atlas3DTrackerWrapper from "@/components/Atlas3DTrackerWrapper";
+import AtlasDirectiveCTA from "@/components/AtlasDirectiveCTA";
+import AtlasDirectiveSection from "@/components/AtlasDirectiveSection";
 import FeaturedRow from "@/components/FeaturedRow";
 import FlightpathSimulator from "@/components/FlightpathSimulator";
-import Oracle from "@/components/Oracle";
 import SocialLinks from "@/components/SocialLinks";
 
 const BASES = {
@@ -54,6 +55,9 @@ export default async function Page() {
           </div>
         </div>
       </section>
+
+      {/* ATLAS DIRECTIVE CTA */}
+      <AtlasDirectiveCTA />
 
       {/* UNIVERSE / BRANDS */}
       <section id="brands" className="mt-10">
@@ -121,10 +125,8 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* ORACLE — survey gates reveal */}
-      <section className="mt-10">
-        <Oracle />
-      </section>
+      {/* ATLAS DIRECTIVE GAME SECTION */}
+      <AtlasDirectiveSection />
 
       {/* BOTTOM STORE BAND with EYE image */}
       <section className="mt-12 rounded-2xl border border-white/10 bg-white/5 p-6">

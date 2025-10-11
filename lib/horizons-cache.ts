@@ -12,6 +12,12 @@
 import { generate3IAtlasVectors } from './atlas-orbital-data';
 import { type VectorData, get3IAtlasVectors } from './horizons-api';
 
+// Track whether fallback was used for the last 3I/ATLAS fetch
+let last3IAtlasUsedFallback = false;
+export function getLast3IAtlasUsedFallback(): boolean {
+  return last3IAtlasUsedFallback;
+}
+
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
@@ -261,6 +267,7 @@ export async function getCached3IAtlasVectors(
 
   try {
     const vectors = await get3IAtlasVectors(startDate, endDate, stepSize);
+    last3IAtlasUsedFallback = false;
 
     // Save to cache
     const cacheData: CachedVectorData = {
@@ -275,22 +282,32 @@ export async function getCached3IAtlasVectors(
     return vectors;
   } catch (error) {
     console.warn('[Cache] Horizons API failed, attempting fallback orbital calculation');
-    
+    last3IAtlasUsedFallback = true;
+
     // If fetch fails and we have expired cache, return it anyway
     if (cached && cached.data.length > 0) {
-      console.warn('[Cache] Using expired cache as fallback');
+      console.warn("[Cache] Using expired cache as fallback");
       return cached.data;
     }
 
     // If no cache available, use calculated orbital data
     // Based on discovery observations and published orbital elements
-    console.log('[Cache] Generating 3I/ATLAS vectors using Keplerian orbital mechanics');
-    console.log('[Cache] Using orbital elements from July 2025 discovery papers');
-    
-    const stepHours = parseInt(stepSize.replace('h', '')) || 6;
-    const fallbackVectors = generate3IAtlasVectors(startDate, endDate, stepHours);
-    
+    console.log(
+      "[Cache] Generating 3I/ATLAS vectors using Keplerian orbital mechanics"
+    );
+    console.log(
+      "[Cache] Using orbital elements from July 2025 discovery papers"
+    );
+
+    const stepHours = parseInt(stepSize.replace("h", "")) || 6;
+    const fallbackVectors = generate3IAtlasVectors(
+      startDate,
+      endDate,
+      stepHours
+    );
+
     if (fallbackVectors.length > 0) {
+      last3IAtlasUsedFallback = true;
       // Cache the generated data
       const cacheData: CachedVectorData = {
         data: fallbackVectors,
@@ -300,7 +317,7 @@ export async function getCached3IAtlasVectors(
       };
 
       saveToLocalStorage(cacheKey, cacheData);
-      
+
       return fallbackVectors;
     }
 
