@@ -102,7 +102,7 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
                 aria-label={`Open ${name} in new tab`}
                 className="group block rounded-xl border border-white/10 bg-white/5 p-3 hover:border-white/20 transition-all"
               >
-                <div className="relative h-56 w-full overflow-hidden rounded-lg bg-amber-100 flex items-center justify-center">
+                <div className="relative h-56 w-full overflow-hidden rounded-lg bg-amber-300 flex items-center justify-center">
                   <SafeImage
                     src={img}
                     alt={name}

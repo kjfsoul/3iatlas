@@ -1,7 +1,10 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// NO 'use client' directive. This is a Server Component.
+// The async keyword is now valid again, although not strictly needed here.
+// I will remove it for clarity as it's not awaiting anything.
 
-import Atlas3DTrackerWrapper from "@/components/Atlas3DTrackerWrapper";
+import ClientOnly3DTracker from "@/components/ClientOnly3DTracker"; // <-- Import our new boundary component
+
+// All other original static imports are fine
 import AtlasDirectiveCTA from "@/components/AtlasDirectiveCTA";
 import AtlasDirectiveSection from "@/components/AtlasDirectiveSection";
 import FeaturedRow from "@/components/FeaturedRow";
@@ -15,23 +18,31 @@ const BASES = {
   bday: process.env.NEXT_PUBLIC_BDAY_BASE || "",
 };
 
-export default async function Page() {
+// Removed 'async' as it's not being used. This is a clean, synchronous Server Component.
+export default function Page() {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 text-white">
+    <main className="mx-auto max-w-6xl px-4 pt-8 pb-8 text-white">
       {/* HERO */}
       <section className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-black/20 p-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">3I/ATLAS FLIGHTPATH</h1>
-          <a className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20" href="#brands">Explore brands</a>
+          <a
+            className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20"
+            href="#brands"
+          >
+            Explore brands
+          </a>
         </div>
-        <p className="mt-2 text-white/80">Live drops from four Printify outposts.</p>
+        <p className="mt-2 text-white/80">
+          Live drops from four Printify outposts.
+        </p>
         <div className="mt-6">
           <FlightpathSimulator seed="3iatlas" />
         </div>
       </section>
 
       {/* 3D ORBITAL TRACKER */}
-      <section className="mt-10">
+      <section className="mt-10 mb-24">
         <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-black/20 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -42,13 +53,8 @@ export default async function Page() {
             </div>
           </div>
           <div className="h-[700px] rounded-xl relative">
-            <Atlas3DTrackerWrapper
-              startDate="2025-10-01"
-              endDate="2025-10-31"
-              stepSize="6h"
-              autoPlay={true}
-              playbackSpeed={2}
-            />
+            {/* Render the 3D tracker with improved error handling */}
+            <ClientOnly3DTracker />
           </div>
           <div className="mt-4 text-center text-white/40 text-sm">
             🌌 Orbital data provided by NASA Jet Propulsion Laboratory
@@ -65,59 +71,99 @@ export default async function Page() {
 
         {/* 3I Atlas — no socials */}
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-4">
-          <a href={BASES.atlas} target="_blank" rel="noopener" className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/3iAtlas_Logo.png" alt="3I/Atlas Logo" className="h-8 w-8 rounded-md object-contain" />
+          <a
+            href={BASES.atlas}
+            target="_blank"
+            rel="noopener"
+            className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit"
+          >
+            <img
+              src="/images/3iAtlas_Logo.png"
+              alt="3I/Atlas Logo"
+              className="h-8 w-8 rounded-md object-contain"
+            />
             3I/Atlas
           </a>
           <FeaturedRow storeBase={BASES.atlas} />
         </div>
 
-        {/* Mystic Arcana */}
+        {/* ... other brand sections ... */}
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-4">
-          <a href="https://mysticarcana.com" target="_blank" rel="noopener" className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/Mystic_Arcana_Logo.png" alt="Mystic Arcana Logo" className="h-8 w-8 rounded-md object-contain" />
+          <a
+            href="https://mysticarcana.com"
+            target="_blank"
+            rel="noopener"
+            className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit"
+          >
+            <img
+              src="/images/Mystic_Arcana_Logo.png"
+              alt="Mystic Arcana Logo"
+              className="h-8 w-8 rounded-md object-contain"
+            />
             Mystic Arcana
           </a>
           <div className="flex items-center gap-2 mt-1">
             <SocialLinks brand="mysticArcana" />
-            <a href={BASES.arcana} target="_blank" rel="noopener" 
-              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap">
+            <a
+              href={BASES.arcana}
+              target="_blank"
+              rel="noopener"
+              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap"
+            >
               Mystic Marketplace
             </a>
           </div>
           <FeaturedRow storeBase={BASES.arcana} />
         </div>
-
-        {/* EDM Shuffle */}
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-4">
-          <a href="https://edmshuffle.com" target="_blank" rel="noopener" className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/EDM_Shuffle_Logo.png" alt="EDM Shuffle Logo" className="h-8 w-8 rounded-md object-contain" />
+          <a
+            href="https://edmshuffle.com"
+            target="_blank"
+            rel="noopener"
+            className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit"
+          >
+            <img
+              src="/images/EDM_Shuffle_Logo.png"
+              alt="EDM Shuffle Logo"
+              className="h-8 w-8 rounded-md object-contain"
+            />
             EDM Shuffle
           </a>
           <div className="flex items-center gap-2 mt-1">
             <SocialLinks brand="edmShuffle" />
-            <a href={BASES.edm} target="_blank" rel="noopener" 
-              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap">
+            <a
+              href={BASES.edm}
+              target="_blank"
+              rel="noopener"
+              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap"
+            >
               Shuffle Shop
             </a>
           </div>
           <FeaturedRow storeBase={BASES.edm} />
         </div>
-
-        {/* BirthdayGen */}
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-4">
-          <a href="https://birthdaygen.com" target="_blank" rel="noopener" className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/birthday-gen-logo.png" alt="BirthdayGen Logo" className="h-8 w-8 rounded-md object-contain" />
+          <a
+            href="https://birthdaygen.com"
+            target="_blank"
+            rel="noopener"
+            className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit"
+          >
+            <img
+              src="/images/birthday-gen-logo.png"
+              alt="BirthdayGen Logo"
+              className="h-8 w-8 rounded-md object-contain"
+            />
             BirthdayGen
           </a>
           <div className="flex items-center gap-2 mt-1">
             <SocialLinks brand="birthdayGen" />
-            <a href={BASES.bday} target="_blank" rel="noopener" 
-              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap">
+            <a
+              href={BASES.bday}
+              target="_blank"
+              rel="noopener"
+              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap"
+            >
               Gift Shop
             </a>
           </div>
@@ -130,9 +176,17 @@ export default async function Page() {
 
       {/* BOTTOM STORE BAND with EYE image */}
       <section className="mt-12 rounded-2xl border border-white/10 bg-white/5 p-6">
-        <a href={BASES.atlas} target="_blank" rel="noopener" className="mb-3 flex items-center gap-3 hover:opacity-80 transition-opacity w-fit">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/3iAtlas_Logo.png" alt="3I/Atlas Logo" className="h-8 w-8 rounded-md object-contain" />
+        <a
+          href={BASES.atlas}
+          target="_blank"
+          rel="noopener"
+          className="mb-3 flex items-center gap-3 hover:opacity-80 transition-opacity w-fit"
+        >
+          <img
+            src="/images/3iAtlas_Logo.png"
+            alt="3I/Atlas Logo"
+            className="h-8 w-8 rounded-md object-contain"
+          />
           <h3 className="text-lg font-semibold">3I/Atlas Store</h3>
         </a>
         <FeaturedRow storeBase={BASES.atlas} />

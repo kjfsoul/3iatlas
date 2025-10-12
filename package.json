@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "overrides": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
   "scripts": {
     "dev": "./start-dev.sh",
     "build": "next build",
@@ -14,10 +18,11 @@
   },
   "dependencies": {
     "@genkit-ai/mcp": "^1.21.0",
-    "@types/three": "^0.180.0",
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
     "astronomy-engine": "^2.1.19",
     "framer-motion": "11.2.10",
-    "next": "15.5.4",
+    "next": "^14.2.33",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "three": "^0.180.0"
@@ -25,9 +30,12 @@
   "_comment_atlas_directive": "Uncomment below when @kjfsoul/atlas-directive package is published to GitHub Packages",
   "devDependencies": {
     "@playwright/test": "^1.56.0",
-    "@types/react": "19.1.16",
-    "@types/react-dom": "^19.2.1",
+    "@types/node": "18.17.17",
+    "@types/react": "18.2.23",
+    "@types/react-dom": "18.2.8",
+    "@types/three": "^0.180.0",
     "autoprefixer": "10.4.20",
+    "eslint-config-next": "^14.2.33",
     "postcss": "8.4.49",
     "tailwindcss": "3.4.13",
     "typescript": "5.6.3"

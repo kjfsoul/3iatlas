@@ -1,7 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import PerformanceMonitor from "./PerformanceMonitor";
+import dynamic from "next/dynamic";
 
 // Dynamically import enhanced 3D tracker (client-side only)
 const Atlas3DTrackerEnhanced = dynamic(() => import('./Atlas3DTrackerEnhanced'), {
@@ -25,10 +24,11 @@ export default function Atlas3DTrackerWrapper(props: Atlas3DTrackerWrapperProps)
   return (
     <div className="relative w-full h-full">
       <Atlas3DTrackerEnhanced {...props} />
-      <PerformanceMonitor
+      {/* Temporarily disabled PerformanceMonitor to isolate React error */}
+      {/* <PerformanceMonitor
         enabled={true}
         className="absolute top-4 right-4 z-10"
-      />
+      /> */}
     </div>
   );
 }

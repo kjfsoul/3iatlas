@@ -1,24 +1,28 @@
+// --- START OF FILE: lib/printify.ts (Rewritten & Fixed) ---
+
 const API = "https://api.printify.com/v1";
-type Shop = { 
-  id: number; 
-  title: string; 
+
+// --- Type Definitions (Unchanged) ---
+type Shop = {
+  id: number;
+  title: string;
   sales_channel?: string;
 };
 
 type Product = {
-  id: string; 
+  id: string;
   title: string;
   description?: string;
   tags?: string[];
-  images?: { 
-    src: string; 
-    variant_ids?: number[]; 
-    position?: string; 
+  images?: {
+    src: string;
+    variant_ids?: number[];
+    position?: string;
     is_default?: boolean;
   }[];
-  visible?: boolean; 
+  visible?: boolean;
   published?: boolean;
-  created_at?: string; 
+  created_at?: string;
   updated_at?: string;
   variants?: {
     id: number;
@@ -29,53 +33,74 @@ type Product = {
     handle?: string;
   };
 };
+
+// --- CORRECTED HELPER FUNCTIONS ---
+
+/**
+ * FIX #1: The auth() function now ONLY handles authorization.
+ * Caching logic has been removed from here to prevent conflicts.
+ */
 function auth() {
   const key = process.env.PRINTIFY_API_TOKEN;
   if (!key) return undefined;
-  return { headers: { Authorization: `Bearer ${key}` }, next: { revalidate: 60 } };
+  return { headers: { Authorization: `Bearer ${key}` } };
 }
+
+// Map of store URLs to Printify shop titles (Unchanged)
+const SHOP_TITLE_MAP: Record<string, string> = {
+  "https://3iatlas.printify.me": "3iAtlas",
+  "https://mystic-arcana-pop-up.printify.me": "Mystic Arcana Pop-up",
+  "https://edm-shuffle-pop-up.printify.me": "EDM Shuffle pop-up",
+  "https://birthdaygen-popup.printify.me": "BirthdayGen Popup",
+};
+
+// --- CORRECTED DATA FETCHING FUNCTIONS ---
+
+/**
+ * FIX #2: getShops() now explicitly defines its own caching strategy.
+ * This data is small and changes rarely, so caching for 1 hour is efficient.
+ */
 export async function getShops(): Promise<Shop[]> {
   if (!auth()) return [];
-  const res = await fetch(`${API}/shops.json`, auth());
+  const res = await fetch(`${API}/shops.json`, {
+    ...auth(),
+    next: { revalidate: 3600 }, // Revalidate once per hour
+  });
   if (!res.ok) return [];
   const data = await res.json();
   return Array.isArray(data) ? data : [];
 }
-// Map of store URLs to Printify shop titles
-const SHOP_TITLE_MAP: Record<string, string> = {
-  'https://3iatlas.printify.me': '3iAtlas',
-  'https://mystic-arcana-pop-up.printify.me': 'Mystic Arcana Pop-up',
-  'https://edm-shuffle-pop-up.printify.me': 'EDM Shuffle pop-up',
-  'https://birthdaygen-popup.printify.me': 'BirthdayGen Popup',
-};
 
 export async function findShopIdByBase(base: string): Promise<number | null> {
+  // This function is unchanged as it correctly uses getShops()
   if (!base) return null;
-  
   const shops = await getShops();
-  const expectedTitle = SHOP_TITLE_MAP[base.toLowerCase().replace(/\/$/, '')];
-  
+  const expectedTitle = SHOP_TITLE_MAP[base.toLowerCase().replace(/\/$/, "")];
   if (!expectedTitle) {
-    console.warn('[Printify] No shop mapping for:', base);
+    console.warn("[Printify] No shop mapping for:", base);
     return null;
   }
-  
-  const match = shops.find(s => s.title === expectedTitle);
+  const match = shops.find((s) => s.title === expectedTitle);
   return match ? match.id : null;
 }
-export async function getLatestPublishedProducts(shopId: number, limit = 3): Promise<Product[]> {
+
+/**
+ * FIX #3: getLatestPublishedProducts() now explicitly disables caching.
+ * This solves both the "conflicting options" warning and the "over 2MB" error.
+ */
+export async function getLatestPublishedProducts(
+  shopId: number,
+  limit = 3
+): Promise<Product[]> {
   if (!auth()) return [];
 
-  // Reduce cache time to avoid 2MB limit issues
   const res = await fetch(`${API}/shops/${shopId}/products.json`, {
     ...auth(),
-    next: { revalidate: 30 }, // Reduced from 60 to 30 seconds
+    cache: "no-store", // Explicitly disable caching for this large request
   });
   if (!res.ok) return [];
 
   const response = await res.json();
-
-  // Handle both array and object responses (Printify API returns object with 'data' property)
   const all = Array.isArray(response) ? response : response.data || [];
 
   if (!Array.isArray(all)) {
@@ -91,22 +116,24 @@ export async function getLatestPublishedProducts(shopId: number, limit = 3): Pro
         new Date(a.updated_at ?? a.created_at ?? 0).getTime()
     );
 
-  // Limit to reduce data size and avoid cache issues
   return published.slice(0, Math.min(limit, 6));
 }
-export function toPublicProductUrl(storeBase: string, product: Product): string {
-  // If external.handle is a full URL, use it directly
+
+// --- UTILITY FUNCTIONS (Unchanged) ---
+
+export function toPublicProductUrl(
+  storeBase: string,
+  product: Product
+): string {
   if (product.external?.handle) {
-    // Check if it's already a full URL
-    if (product.external.handle.startsWith('http')) {
+    if (product.external.handle.startsWith("http")) {
       return product.external.handle;
     }
-    // Otherwise append to base
     const base = storeBase.replace(/\/$/, "");
-    return `${base}${product.external.handle.startsWith('/') ? '' : '/'}${product.external.handle}`;
+    return `${base}${product.external.handle.startsWith("/") ? "" : "/"}${
+      product.external.handle
+    }`;
   }
-  
-  // Fallback: construct URL from base + product ID
   const base = storeBase.replace(/\/$/, "");
   if (product.external?.id) {
     return `${base}/product/${product.external.id}`;
@@ -115,39 +142,33 @@ export function toPublicProductUrl(storeBase: string, product: Product): string 
 }
 
 export function productImage(p: Product): string {
-  // Find default image or first image
-  const defaultImg = p.images?.find(img => img.is_default);
+  const defaultImg = p.images?.find((img) => img.is_default);
   const firstImg = p.images?.[0];
-  const imageUrl = defaultImg?.src || firstImg?.src || "/images/placeholder-product.png";
-  
-  // Log when we're using placeholder (for debugging)
+  const imageUrl =
+    defaultImg?.src || firstImg?.src || "/images/placeholder-product.png";
   if (imageUrl === "/images/placeholder-product.png") {
-    console.warn('[Printify] No image found for product:', p.title, 'ID:', p.id);
-    if (p.images) {
-      console.log('[Printify] Product has', p.images.length, 'images but none found');
-    }
+    console.warn(
+      "[Printify] No image found for product:",
+      p.title,
+      "ID:",
+      p.id
+    );
   }
-  
   return imageUrl;
 }
 
 export function productPrice(p: Product): string {
   if (!p.variants || p.variants.length === 0) return "";
-  const minPrice = Math.min(...p.variants.map(v => v.price));
+  const minPrice = Math.min(...p.variants.map((v) => v.price));
   return `$${(minPrice / 100).toFixed(2)}`;
 }
 
 export function productDescription(p: Product): string {
   if (!p.description) return "";
-  // Remove HTML tags if any
-  const text = p.description.replace(/<[^>]*>/g, '');
-  // Get first 2 sentences or 25 words
+  const text = p.description.replace(/<[^>]*>/g, "");
   const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-  const firstTwo = sentences.slice(0, 2).join(' ').trim();
-  
+  const firstTwo = sentences.slice(0, 2).join(" ").trim();
   if (firstTwo) return firstTwo;
-  
-  // Fallback to 25 words if no sentences found
-  const words = text.split(/\s+/).slice(0, 25).join(' ');
-  return words + (text.split(/\s+/).length > 25 ? '...' : '');
+  const words = text.split(/\s+/).slice(0, 25).join(" ");
+  return words + (text.split(/\s+/).length > 25 ? "..." : "");
 }
