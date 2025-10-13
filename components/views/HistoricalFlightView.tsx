@@ -1,58 +1,84 @@
 "use client";
 
-/**
- * Historical Flight View - Final "Golden" Version
- * This version is a "dumb" presentation component that receives all data via props.
- * It includes a visually enhanced comet, sun, planetary orbits, and a starfield.
- */
-
 import { OrbitControls, Ring, Stars } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
+import trajectoryData from "../../public/trajectory.json";
 
-// --- Reusable 3D Sub-components ---
+// --- Reusable 3D Sub-components (Defined ONLY ONCE) ---
 
-const EnhancedSun = () => (
-  <group>
-    <mesh>
-      <sphereGeometry args={[0.3, 64, 64]} />
-      <meshStandardMaterial
-        color="#ffff00"
-        emissive="#ffff00"
-        emissiveIntensity={3}
-      />
-    </mesh>
-    <mesh scale={[1.5, 1.5, 1.5]}>
-      <sphereGeometry args={[0.3, 64, 64]} />
-      <meshStandardMaterial
-        color="#ffff00"
-        emissive="#ffff00"
-        emissiveIntensity={1}
-        transparent
-        opacity={0.3}
-      />
-    </mesh>
-  </group>
-);
-
-const EnhancedComet = ({
-  position,
+const FollowCamera = ({
+  targetRef,
 }: {
-  position: [number, number, number];
+  targetRef: React.RefObject<THREE.Group>;
 }) => {
-  const cometRef = useRef<THREE.Group>(null!);
-
+  const { camera } = useThree();
   useFrame(() => {
-    // Make the tail always point away from the sun
-    if (cometRef.current) {
-      cometRef.current.lookAt(new THREE.Vector3(0, 0, 0));
+    if (targetRef.current) {
+      const targetPosition = targetRef.current.position;
+      const offset = new THREE.Vector3(5, 3, 5);
+      const cameraPosition = targetPosition.clone().add(offset);
+      camera.position.lerp(cameraPosition, 0.05);
+      camera.lookAt(targetPosition);
     }
   });
+  return null;
+};
 
+const Sun = () => (
+  <mesh>
+    <sphereGeometry args={[0.3, 64, 64]} />
+    <meshStandardMaterial
+      color="#ffff00"
+      emissive="#ffff00"
+      emissiveIntensity={3}
+    />
+  </mesh>
+);
+
+const Planet = ({
+  trajectory,
+  currentIndex,
+  color,
+  size,
+}: {
+  trajectory: any[];
+  currentIndex: number;
+  color: string;
+  size: number;
+}) => {
+  const position = useMemo(() => {
+    const frame = trajectory[Math.floor(currentIndex)];
+    return frame
+      ? [frame.position.x, frame.position.z, -frame.position.y]
+      : [0, 0, 0];
+  }, [trajectory, currentIndex]);
   return (
-    <group position={position}>
-      {/* Coma (Glowing head) */}
+    <mesh position={position as [number, number, number]}>
+      <sphereGeometry args={[size, 32, 32]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+  );
+};
+
+const Comet = ({
+  trajectory,
+  currentIndex,
+  targetRef,
+}: {
+  trajectory: any[];
+  currentIndex: number;
+  targetRef: React.RefObject<THREE.Group>;
+}) => {
+  const position = useMemo(() => {
+    const frame = trajectory[Math.floor(currentIndex)];
+    return frame
+      ? [frame.position.x, frame.position.z, -frame.position.y]
+      : [10, 5, 0];
+  }, [trajectory, currentIndex]);
+  return (
+    <group ref={targetRef} position={position as [number, number, number]}>
       <mesh>
         <sphereGeometry args={[0.05, 32, 32]} />
         <meshStandardMaterial
@@ -62,82 +88,32 @@ const EnhancedComet = ({
           toneMapped={false}
         />
       </mesh>
-      {/* Tail */}
-      <group ref={cometRef}>
-        <mesh position={[0, 0, 0.75]}>
-          <coneGeometry args={[0.02, 1.5, 16]} />
-          <meshBasicMaterial
-            color="#00ff88"
-            transparent
-            opacity={0.5}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-      </group>
+      <mesh position={[0, 0, 0.75]}>
+        <coneGeometry args={[0.02, 1.5, 16]} />
+        <meshBasicMaterial
+          color="#00ff88"
+          transparent
+          opacity={0.5}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
     </group>
   );
 };
 
-const OrbitalPath = ({ historicalData }: { historicalData: any[] }) => {
-  const points = useMemo(
-    () =>
-      historicalData.map(
-        (d) => new THREE.Vector3(d.position.x, d.position.z, -d.position.y)
-      ),
-    [historicalData]
-  );
-  if (points.length < 2) return null;
-  return (
-    <line>
-      <bufferGeometry
-        attach="geometry"
-        onUpdate={(self) => self.setFromPoints(points)}
-      />
-      <lineBasicMaterial
-        attach="material"
-        color="#ffffff"
-        transparent
-        opacity={0.3}
-      />
-    </line>
-  );
-};
-
 // --- Main 3D Scene ---
-
-const Scene = ({
-  currentIndex,
-  historicalData,
-}: {
-  currentIndex: number;
-  historicalData: any[];
-}) => {
-  const cometPosition: [number, number, number] = useMemo(() => {
-    if (historicalData.length === 0) return [10, 0, 0];
-    const frameIndex = Math.floor(currentIndex);
-    const boundedIndex = Math.min(frameIndex, historicalData.length - 1);
-    const currentVec = historicalData[boundedIndex];
-    if (currentVec?.position) {
-      return [
-        currentVec.position.x,
-        currentVec.position.z,
-        -currentVec.position.y,
-      ];
-    }
-    return [10, 0, 0];
-  }, [currentIndex, historicalData]);
-
+const Scene = ({ currentIndex }: { currentIndex: number }) => {
+  const cometRef = useRef<THREE.Group>(null!);
   return (
     <>
       <color attach="background" args={["#000005"]} />
-      <ambientLight intensity={0.1} />
+      <ambientLight intensity={0.2} />
       <pointLight
         position={[0, 0, 0]}
         intensity={25}
         color="#ffffff"
         decay={2}
       />
-
       <Stars
         radius={150}
         depth={50}
@@ -147,48 +123,31 @@ const Scene = ({
         fade
         speed={1}
       />
-
-      <EnhancedSun />
-      <EnhancedComet position={cometPosition} />
-      <OrbitalPath historicalData={historicalData} />
-
-      {/* Planetary Orbits for context */}
-      <Ring args={[1.0, 1.0, 128, 1, 0, Math.PI * 2]} rotation-x={Math.PI / 2}>
-        <meshBasicMaterial
-          color="skyblue"
-          side={THREE.DoubleSide}
-          transparent
-          opacity={0.3}
-          wireframe
-        />
-      </Ring>
-      <Ring
-        args={[1.52, 1.52, 128, 1, 0, Math.PI * 2]}
-        rotation-x={Math.PI / 2}
-      >
-        <meshBasicMaterial
-          color="#ff6666"
-          side={THREE.DoubleSide}
-          transparent
-          opacity={0.3}
-          wireframe
-        />
-      </Ring>
-
-      <OrbitControls
-        enableDamping
-        dampingFactor={0.05}
-        autoRotate
-        autoRotateSpeed={0.1}
+      <Sun />
+      <Planet
+        trajectory={trajectoryData.earth}
+        currentIndex={currentIndex}
+        color="skyblue"
+        size={0.06}
       />
+      <Planet
+        trajectory={trajectoryData.mars}
+        currentIndex={currentIndex}
+        color="#ff6666"
+        size={0.04}
+      />
+      <Comet
+        trajectory={trajectoryData.atlas}
+        currentIndex={currentIndex}
+        targetRef={cometRef}
+      />
+      <FollowCamera targetRef={cometRef} />
     </>
   );
 };
 
-// --- The Final HistoricalFlightView Component ---
+// --- The Main HistoricalFlightView Component ---
 interface HistoricalFlightViewProps {
-  historicalData: any[];
-  className?: string;
   isPlaying: boolean;
   speed: number;
   currentIndex: number;
@@ -200,8 +159,6 @@ interface HistoricalFlightViewProps {
 
 const HistoricalFlightView: React.FC<HistoricalFlightViewProps> = (props) => {
   const {
-    historicalData,
-    className = "",
     isPlaying,
     speed,
     currentIndex,
@@ -210,33 +167,40 @@ const HistoricalFlightView: React.FC<HistoricalFlightViewProps> = (props) => {
     onIndexChange,
     onSpeedChange,
   } = props;
+  const data = trajectoryData.atlas;
 
-  const currentDate = historicalData[Math.floor(currentIndex)]?.date || "...";
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-black">
+        <p className="text-white">
+          Trajectory data not found. Please run 'npm run generate-data'.
+        </p>
+      </div>
+    );
+  }
+
+  const currentDate = data[Math.floor(currentIndex)]?.date || "...";
 
   return (
-    <div className={`w-full h-full flex flex-col bg-black ${className}`}>
+    <div className={`w-full h-full flex flex-col bg-black`}>
       <div className="w-full flex-grow rounded-lg overflow-hidden">
         <Canvas camera={{ position: [7, 4, 7], fov: 75 }} frameloop="always">
-          <Scene currentIndex={currentIndex} historicalData={historicalData} />
+          <Scene currentIndex={currentIndex} />
         </Canvas>
       </div>
-
       <div className="flex-shrink-0 p-2 bg-black/60 backdrop-blur-sm border-t border-white/10">
         <div className="px-4 pt-2 space-y-2">
           <div className="flex items-center justify-between text-white/70 text-xs">
-            <span>{historicalData[0]?.date.split("T")[0]}</span>
+            <span>{data[0]?.date.split("T")[0]}</span>
             <span className="font-bold text-white">
               {currentDate.split("T")[0]}
             </span>
-            <span>
-              {historicalData.length > 0 &&
-                historicalData[historicalData.length - 1]?.date.split("T")[0]}
-            </span>
+            <span>{data[data.length - 1]?.date.split("T")[0]}</span>
           </div>
           <input
             type="range"
             min="0"
-            max={historicalData.length > 0 ? historicalData.length - 1 : 0}
+            max={data.length > 0 ? data.length - 1 : 0}
             value={currentIndex}
             onChange={(e) => onIndexChange(Number(e.target.value))}
             className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"

@@ -8,6 +8,7 @@
     "react-dom": "18.2.0"
   },
   "scripts": {
+    "generate-data": "node ./scripts/generate-trajectory.mjs",
     "dev": "./start-dev.sh",
     "build": "next build",
     "start": "next dev -p 3030",

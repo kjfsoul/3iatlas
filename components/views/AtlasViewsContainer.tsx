@@ -1,7 +1,6 @@
-// components/views/AtlasViewsContainer.tsx (Corrected)
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo } from "react"; // FIXED THE TYPO
 import dynamic from "next/dynamic";
 import { type ViewType } from "@/lib/view-manager";
 import ViewSelector from "./ViewSelector";
@@ -11,7 +10,11 @@ const HistoricalFlightView = dynamic(() => import("./HistoricalFlightView"), {
   loading: () => <ViewLoadingFallback />,
   ssr: false,
 });
-// Other views...
+const CurrentMomentView = dynamic(() => import("./CurrentMomentView"), {
+  loading: () => <ViewLoadingFallback />,
+  ssr: false,
+});
+// ... other view imports
 
 interface AtlasViewsContainerProps {
   atlasData: any[];
@@ -25,70 +28,83 @@ interface AtlasViewsContainerProps {
   onTrajectoryChange: (trajectory: any) => void;
   onPlayPause: () => void;
   onReset: () => void;
-  onIndexChange: (index: number) => void; // Expect this prop
+  onIndexChange: (index: number) => void;
   dailyPosition: any;
   observerMetrics: any;
   currentDate: string;
   className?: string;
 }
 
-// ... (ViewState and other parts can remain the same for now)
+const AtlasViewsContainer: React.FC<AtlasViewsContainerProps> = (props) => {
+  const {
+    currentView,
+    onViewChange,
+    isPlaying,
+    onPlayPause,
+    onReset,
+    currentDate,
+    speed,
+  } = props;
 
-const AtlasViewsContainer: React.FC<AtlasViewsContainerProps> = ({
-  atlasData,
-  // ... other props
-  currentIndex,
-  isPlaying,
-  speed,
-  currentView,
-  onViewChange,
-  onSpeedChange,
-  onPlayPause,
-  onReset,
-  onIndexChange, // Receive the handler
-  currentDate,
-}) => {
   const renderActiveView = () => {
     switch (currentView) {
       case "historical":
+        return <HistoricalFlightView {...props} />;
+      case "currentMoment":
         return (
-          <HistoricalFlightView
-            historicalData={atlasData} // Pass the full dataset here!
-            currentIndex={currentIndex}
-            isPlaying={isPlaying}
-            speed={speed}
-            onPlayPause={onPlayPause}
-            onReset={onReset}
-            onIndexChange={onIndexChange} // Pass the handler down
-            onSpeedChange={onSpeedChange}
-          />
+          <div className="text-white p-4">
+            Current Moment View (Placeholder)
+          </div>
         );
-      // ... other cases for other views
       default:
-        return <div className="text-white">Select a view</div>;
+        return (
+          <div className="flex items-center justify-center text-white">
+            Select a view
+          </div>
+        );
     }
   };
 
   return (
     <div
-      className={`w-full h-full bg-black grid grid-cols-[256px_1fr] gap-4 p-4`}
+      className={`w-full h-full bg-black grid grid-cols-[256px_1fr_256px] gap-4 p-4 ${props.className}`}
     >
-      {/* Left Sidebar - View Selector */}
-      <div>
+      <div className="max-h-full overflow-y-auto">
         <ViewSelector activeView={currentView} onViewChange={onViewChange} />
       </div>
-
-      {/* Main 3D View Container */}
       <div className="relative w-full h-full rounded-xl overflow-hidden">
         {renderActiveView()}
       </div>
-
-      {/* Removed the right sidebar for simplicity in this view */}
+      <div className="max-h-full overflow-y-auto space-y-4">
+        <ControlPanel
+          title="Status"
+          isPlaying={isPlaying}
+          onPlayPause={onPlayPause}
+          onReset={onReset}
+        >
+          {currentDate && (
+            <div className="text-center">
+              <div className="text-white/60 text-xs">Current Date</div>
+              <div className="text-white font-mono text-sm">
+                {new Date(currentDate).toLocaleDateString()}
+              </div>
+            </div>
+          )}
+        </ControlPanel>
+        <div className="bg-black/80 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+          <div className="text-white font-semibold text-sm mb-3">
+            Performance
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="text-green-400 text-xs">FPS: 60</div>
+            <div className="text-blue-400 text-xs">Speed: {speed}x</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-// Loading fallback component
 const ViewLoadingFallback: React.FC = () => (
   <div className="flex items-center justify-center h-full bg-black">
     <p className="text-white">Loading View...</p>
