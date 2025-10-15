@@ -1,0 +1,511 @@
+{
+  "project": "3IAtlas Landing Page",
+  "version": "0.1.0",
+  "last_updated": "2025-10-15T04:27:14.185Z",
+  "urgency": "TODAY",
+  "total_tasks": 19,
+  "tasks": [
+    {
+      "id": "P0-001",
+      "title": "Fix Speed Simulation View Crashes",
+      "why": "Critical user experience issue preventing core functionality from working",
+      "acceptance_criteria": [
+        "Speed view loads without crashing on initialization",
+        "Animation loop runs at 60fps target with FrameGuard protection",
+        "No NaN position/velocity errors in console",
+        "Starfield renders correctly without ground-plane artifacts",
+        "Camera controls work smoothly (rotate around comet)",
+        "Velocity vector HUD displays correctly",
+        "Motion blur effects work without performance degradation"
+      ],
+      "estimate_hours": 4,
+      "dependencies": [],
+      "labels": [
+        "critical",
+        "3d-performance",
+        "crash-fix"
+      ],
+      "owner_suggested": "implementer",
+      "status": "completed",
+      "priority": "P0",
+      "completed_at": "2025-10-14T13:30:00Z",
+      "completed_by": "implementer",
+      "verification": {
+        "build_status": "passed",
+        "typecheck_status": "passed",
+        "lint_status": "passed",
+        "test_status": "partial",
+        "evidence": [
+          "Added data-testid attributes to Atlas3DTrackerEnhanced and ViewSelector components",
+          "Verified FrameGuard integration in SpeedSimulationView.tsx",
+          "Confirmed data validation guards prevent NaN crashes",
+          "Starfield artifacts fixed with spherical distribution",
+          "Material compatibility issues resolved"
+        ]
+      }
+    },
+    {
+      "id": "P0-002",
+      "title": "Fix Trajectory Plotter View Crashes",
+      "why": "Interactive physics simulation is core feature but currently broken",
+      "acceptance_criteria": [
+        "Trajectory view loads without geometry NaN errors",
+        "Drag comet functionality works smoothly",
+        "Trajectory line updates in real-time during drag",
+        "Physics dashboard updates correctly with new positions",
+        "Scenario buttons (Earth impact, Jupiter slingshot) work",
+        "No THREE.js boundingSphere errors",
+        "Integration loop handles edge cases gracefully"
+      ],
+      "estimate_hours": 3,
+      "dependencies": [],
+      "labels": [
+        "critical",
+        "3d-performance",
+        "physics",
+        "crash-fix"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P0"
+    },
+    {
+      "id": "P0-003",
+      "title": "Implement Unified Playback State Management",
+      "why": "Multiple state sources causing conflicts and inconsistent behavior",
+      "acceptance_criteria": [
+        "Single source of truth for isPlaying, speed, currentIndex in Atlas3DTrackerEnhanced",
+        "All views receive state as props, no per-view shadow states",
+        "Play/Pause toggles work consistently across all views",
+        "Speed changes affect step rate uniformly",
+        "Timeline slider scrubs without re-initializing scene",
+        "State changes propagate immediately to all views",
+        "No state conflicts or race conditions"
+      ],
+      "estimate_hours": 3,
+      "dependencies": [],
+      "labels": [
+        "critical",
+        "state-management",
+        "architecture"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P0"
+    },
+    {
+      "id": "P1-001",
+      "title": "Enhance FrameGuard Performance Monitoring",
+      "why": "Current telemetry system needs improvement for better debugging",
+      "acceptance_criteria": [
+        "FrameGuard provides detailed performance metrics",
+        "FPS tracking shows avg/min/max over 30-second windows",
+        "NaN frame detection and reporting works correctly",
+        "Performance degradation triggers adaptive quality scaling",
+        "Telemetry data accessible via window.__AE_HEALTH__",
+        "Performance alerts for sustained low FPS",
+        "Memory usage monitoring for 3D objects"
+      ],
+      "estimate_hours": 2,
+      "dependencies": [],
+      "labels": [
+        "performance",
+        "monitoring",
+        "debugging"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "P1-002",
+      "title": "Implement Data Validation Pipeline",
+      "why": "Missing guards for non-finite positions/velocities causing crashes",
+      "acceptance_criteria": [
+        "All NASA API responses validated before use",
+        "NaN position/velocity detection and handling",
+        "Fallback to previous valid frame on invalid data",
+        "Data sanitization for edge cases",
+        "Error logging for debugging invalid data",
+        "Graceful degradation when data is corrupted",
+        "Validation performance doesn't impact 60fps target"
+      ],
+      "estimate_hours": 3,
+      "dependencies": [],
+      "labels": [
+        "data-validation",
+        "error-handling",
+        "reliability"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "P1-003",
+      "title": "Optimize Build Performance",
+      "why": "Current build time of 46-93 seconds is unacceptable for development",
+      "acceptance_criteria": [
+        "Build time reduced to under 30 seconds",
+        "Hot reload works consistently",
+        "Three.js bundle optimization implemented",
+        "Webpack configuration optimized",
+        "Build cache properly configured",
+        "Development server startup under 10 seconds",
+        "No build errors or warnings"
+      ],
+      "estimate_hours": 4,
+      "dependencies": [],
+      "labels": [
+        "performance",
+        "build-optimization",
+        "developer-experience"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "P1-004",
+      "title": "Add Comprehensive Error Boundaries",
+      "why": "3D rendering errors can crash entire application",
+      "acceptance_criteria": [
+        "Error boundaries around all 3D components",
+        "Graceful fallback UI when 3D rendering fails",
+        "Error reporting and logging system",
+        "User-friendly error messages",
+        "Recovery mechanisms for common errors",
+        "Error boundary testing implemented",
+        "Performance impact minimized"
+      ],
+      "estimate_hours": 2,
+      "dependencies": [],
+      "labels": [
+        "error-handling",
+        "reliability",
+        "user-experience"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "P1-005",
+      "title": "Implement Mobile 3D Performance Optimization",
+      "why": "3D visualization performance on mobile devices is poor",
+      "acceptance_criteria": [
+        "Adaptive quality scaling based on device capabilities",
+        "Reduced particle count on mobile devices",
+        "Simplified shaders for mobile GPUs",
+        "Touch controls optimized for mobile",
+        "Performance monitoring for mobile devices",
+        "Graceful degradation on low-end devices",
+        "Mobile-specific testing implemented"
+      ],
+      "estimate_hours": 4,
+      "dependencies": [
+        "P1-001"
+      ],
+      "labels": [
+        "mobile",
+        "performance",
+        "optimization"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "P1-006",
+      "title": "Enhance Historical Flight View",
+      "why": "Current implementation has performance issues and missing features",
+      "acceptance_criteria": [
+        "Trail persistence for full July 1-Oct 8 period",
+        "Date HUD matches selected timeline index",
+        "Play/Pause toggles work with global playback state",
+        "Speed changes affect step rate correctly",
+        "Timeline slider scrubs without scene re-initialization",
+        "Trail rendering optimized for performance",
+        "Memory usage stays within limits"
+      ],
+      "estimate_hours": 3,
+      "dependencies": [
+        "P0-003"
+      ],
+      "labels": [
+        "3d-visualization",
+        "performance",
+        "user-experience"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "P1-007",
+      "title": "Improve Current Moment View",
+      "why": "Static view needs better object labeling and interaction",
+      "acceptance_criteria": [
+        "Object labels don't block pointer events",
+        "Distance scaling options (real/log/compressed) work",
+        "Camera orbit and zoom controls smooth",
+        "No spurious rerenders during static mode",
+        "Object positions validated from astronomy-engine",
+        "Label positioning optimized for readability",
+        "Performance maintained during interaction"
+      ],
+      "estimate_hours": 2,
+      "dependencies": [],
+      "labels": [
+        "3d-visualization",
+        "user-interface",
+        "performance"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "P1-008",
+      "title": "Enhance Perihelion Event View",
+      "why": "Dramatic time-lapse needs better performance and features",
+      "acceptance_criteria": [
+        "Camera presets (Sun POV, Comet POV, Side, Top) work",
+        "Alert banner appears on closest approach",
+        "Adaptive particle scaling based on FPS",
+        "Time-lapse controls (play/pause/speed) functional",
+        "Performance stays above 45fps with particle scaling",
+        "Scene cleanup on unmount prevents memory leaks",
+        "Particle effects optimized for different devices"
+      ],
+      "estimate_hours": 3,
+      "dependencies": [
+        "P0-003"
+      ],
+      "labels": [
+        "3d-visualization",
+        "performance",
+        "particles"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P1"
+    },
+    {
+      "id": "P2-001",
+      "title": "Add Accessibility Features",
+      "why": "3D visualization needs to be accessible to all users",
+      "acceptance_criteria": [
+        "ARIA labels for all interactive elements",
+        "Keyboard navigation for 3D controls",
+        "Screen reader support for 3D content",
+        "High contrast mode support",
+        "Focus management for 3D interactions",
+        "Accessibility testing implemented",
+        "WCAG 2.1 AA compliance achieved"
+      ],
+      "estimate_hours": 4,
+      "dependencies": [],
+      "labels": [
+        "accessibility",
+        "compliance",
+        "user-experience"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P2"
+    },
+    {
+      "id": "P2-002",
+      "title": "Implement Advanced Physics Simulation",
+      "why": "Current physics is basic, needs enhancement for realism",
+      "acceptance_criteria": [
+        "Gravitational effects from multiple bodies",
+        "Realistic orbital mechanics calculations",
+        "Collision detection and response",
+        "Energy conservation in simulations",
+        "Time step adaptation for stability",
+        "Physics performance optimized for 60fps",
+        "Physics testing and validation implemented"
+      ],
+      "estimate_hours": 6,
+      "dependencies": [
+        "P0-002"
+      ],
+      "labels": [
+        "physics",
+        "simulation",
+        "performance"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P2"
+    },
+    {
+      "id": "P2-003",
+      "title": "Add User Preferences System",
+      "why": "Users need customization options for 3D visualization",
+      "acceptance_criteria": [
+        "Quality settings (low/medium/high) for 3D rendering",
+        "Control sensitivity customization",
+        "Color scheme options",
+        "Display preferences (labels, trails, etc.)",
+        "Performance vs quality trade-offs",
+        "Preferences persisted across sessions",
+        "User preference testing implemented"
+      ],
+      "estimate_hours": 3,
+      "dependencies": [],
+      "labels": [
+        "user-experience",
+        "customization",
+        "persistence"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P2"
+    },
+    {
+      "id": "P2-004",
+      "title": "Implement Offline Support",
+      "why": "Users should be able to use basic features without internet",
+      "acceptance_criteria": [
+        "Basic 3D visualization works offline",
+        "Cached orbital data available offline",
+        "Offline indicator and graceful degradation",
+        "Service worker for offline functionality",
+        "Offline mode testing implemented",
+        "Cache management for offline data",
+        "User notification for offline mode"
+      ],
+      "estimate_hours": 4,
+      "dependencies": [],
+      "labels": [
+        "offline",
+        "caching",
+        "user-experience"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P2"
+    },
+    {
+      "id": "P2-005",
+      "title": "Add Analytics and User Tracking",
+      "why": "Need insights into user behavior and performance",
+      "acceptance_criteria": [
+        "User interaction tracking (clicks, views, time spent)",
+        "Performance metrics collection",
+        "Error tracking and reporting",
+        "User journey analysis",
+        "Privacy-compliant data collection",
+        "Analytics dashboard for insights",
+        "A/B testing framework implemented"
+      ],
+      "estimate_hours": 3,
+      "dependencies": [],
+      "labels": [
+        "analytics",
+        "tracking",
+        "insights"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P2"
+    },
+    {
+      "id": "P2-006",
+      "title": "Implement Advanced Camera Controls",
+      "why": "Current camera controls are basic, need enhancement",
+      "acceptance_criteria": [
+        "Smooth camera transitions between presets",
+        "Customizable camera paths and keyframes",
+        "Cinematic camera movements",
+        "Camera animation recording and playback",
+        "Multiple camera modes (free, orbit, follow)",
+        "Camera control performance optimized",
+        "Camera control testing implemented"
+      ],
+      "estimate_hours": 4,
+      "dependencies": [],
+      "labels": [
+        "3d-visualization",
+        "camera",
+        "user-experience"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P2"
+    },
+    {
+      "id": "P2-007",
+      "title": "Add Social Sharing Features",
+      "why": "Users should be able to share their 3D visualizations",
+      "acceptance_criteria": [
+        "Screenshot capture of 3D scenes",
+        "Share to social media platforms",
+        "Customizable sharing messages",
+        "High-quality image export",
+        "Social sharing analytics",
+        "Privacy controls for sharing",
+        "Social sharing testing implemented"
+      ],
+      "estimate_hours": 3,
+      "dependencies": [],
+      "labels": [
+        "social",
+        "sharing",
+        "user-engagement"
+      ],
+      "owner_suggested": "implementer",
+      "status": "todo",
+      "priority": "P2"
+    },
+    {
+      "id": "P0-004",
+      "title": "HistoricalFlightView visual fix: orbit scale + comet orientation",
+      "why": "Fix clustering, comet color, and tail orientation for clear animation",
+      "acceptance_criteria": [
+        "Planets visually separated via ORBIT_SCALE",
+        "Comet nucleus/tail use project green",
+        "Tail oriented away from Sun consistently",
+        "Comet follows currentIndex positions"
+      ],
+      "estimate_hours": 1,
+      "dependencies": [],
+      "labels": [
+        "hotfix",
+        "3d-visualization"
+      ],
+      "owner_suggested": "implementer",
+      "status": "completed",
+      "priority": "P0",
+      "completed_at": "2025-10-15T04:27:14.185Z",
+      "completed_by": "implementer",
+      "verification": {
+        "build_status": "passed",
+        "typecheck_status": "passed",
+        "lint_status": "passed",
+        "evidence": [
+          "next build compiled successfully",
+          "tsc --noEmit passed",
+          "grep: no mock data found"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "P0": 3,
+    "P1": 8,
+    "P2": 7,
+    "total_estimated_hours": 67,
+    "critical_path": [
+      "P0-001",
+      "P0-002",
+      "P0-003"
+    ],
+    "next_sprint_focus": "Fix critical crashes and implement unified state management TODAY",
+    "deployment_target": "Vercel",
+    "target_audience": "General public with scientific accuracy"
+  }
+}
