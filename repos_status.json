@@ -1,0 +1,222 @@
+{
+  "project": {
+    "name": "3IAtlas Landing Page",
+    "type": "Next.js Application",
+    "version": "0.1.0",
+    "branch": "feat/astronomy-engine",
+    "last_commit": "685ac69",
+    "analysis_date": "2025-10-11"
+  },
+  "modules": [
+    {
+      "name": "3D Orbital Tracker",
+      "path": "components/Atlas3DTracker*.tsx",
+      "status": "active",
+      "completion_percent": 85,
+      "effort_remaining": 3,
+      "technical_risk": 3,
+      "freshness_days": 1,
+      "differentiation": 5,
+      "weighted_priority": 4,
+      "description": "Three.js-based 3D visualization of 3I/ATLAS trajectory",
+      "issues": [
+        "TypeScript type mismatches in trajectoryData.atlas",
+        "Camera control complexity",
+        "Performance optimization needed"
+      ],
+      "dependencies": ["NASA Horizons API", "Three.js", "React Three Fiber"],
+      "last_modified": "2025-10-11",
+      "files": [
+        "components/Atlas3DTracker.tsx",
+        "components/Atlas3DTrackerEnhanced.tsx", 
+        "components/Atlas3DTrackerWrapper.tsx",
+        "components/ClientOnly3DTracker.tsx",
+        "lib/solar-system-data.ts"
+      ]
+    },
+    {
+      "name": "Printify Integration",
+      "path": "lib/printify.ts",
+      "status": "stable",
+      "completion_percent": 90,
+      "effort_remaining": 2,
+      "technical_risk": 2,
+      "freshness_days": 3,
+      "differentiation": 3,
+      "weighted_priority": 4,
+      "description": "Merchandise display system using Printify API",
+      "issues": [
+        "Product image fallback handling",
+        "Error handling for API failures"
+      ],
+      "dependencies": ["Printify API", "Next.js Server Components"],
+      "last_modified": "2025-10-08",
+      "files": [
+        "lib/printify.ts",
+        "components/FeaturedRow.tsx",
+        "components/ProductCarousel.tsx"
+      ]
+    },
+    {
+      "name": "Flightpath Simulator",
+      "path": "components/FlightpathSimulator.tsx",
+      "status": "complete",
+      "completion_percent": 95,
+      "effort_remaining": 1,
+      "technical_risk": 1,
+      "freshness_days": 5,
+      "differentiation": 2,
+      "weighted_priority": 2,
+      "description": "Animated SVG path visualization",
+      "issues": [],
+      "dependencies": ["Framer Motion"],
+      "last_modified": "2025-10-06",
+      "files": [
+        "components/FlightpathSimulator.tsx"
+      ]
+    },
+    {
+      "name": "Atlas Directive",
+      "path": "components/AtlasDirective*.tsx",
+      "status": "in_progress",
+      "completion_percent": 60,
+      "effort_remaining": 4,
+      "technical_risk": 3,
+      "freshness_days": 2,
+      "differentiation": 4,
+      "weighted_priority": 3,
+      "description": "Interactive narrative experience game",
+      "issues": [
+        "Modal implementation incomplete",
+        "Game logic not fully implemented"
+      ],
+      "dependencies": ["React", "Framer Motion"],
+      "last_modified": "2025-10-09",
+      "files": [
+        "components/AtlasDirectiveSection.tsx",
+        "components/AtlasDirectiveModal.tsx",
+        "components/AtlasDirectiveCTA.tsx",
+        "types/atlas-directive.d.ts"
+      ]
+    },
+    {
+      "name": "NASA Horizons API",
+      "path": "app/api/horizons/",
+      "status": "stable",
+      "completion_percent": 80,
+      "effort_remaining": 2,
+      "technical_risk": 2,
+      "freshness_days": 7,
+      "differentiation": 4,
+      "weighted_priority": 3,
+      "description": "Real-time orbital data from NASA JPL",
+      "issues": [
+        "Error handling for API failures",
+        "Caching strategy optimization"
+      ],
+      "dependencies": ["NASA Horizons API", "Next.js API Routes"],
+      "last_modified": "2025-10-04",
+      "files": [
+        "app/api/horizons/ephemeris/route.ts",
+        "app/api/horizons/lookup/route.ts",
+        "lib/horizons-api.ts",
+        "lib/horizons-cache.ts"
+      ]
+    },
+    {
+      "name": "Landing Page",
+      "path": "app/page.tsx",
+      "status": "complete",
+      "completion_percent": 95,
+      "effort_remaining": 1,
+      "technical_risk": 1,
+      "freshness_days": 1,
+      "differentiation": 2,
+      "weighted_priority": 2,
+      "description": "Main landing page with brand sections",
+      "issues": [],
+      "dependencies": ["Next.js", "Tailwind CSS"],
+      "last_modified": "2025-10-11",
+      "files": [
+        "app/page.tsx",
+        "app/layout.tsx",
+        "app/globals.css"
+      ]
+    },
+    {
+      "name": "Social Links",
+      "path": "components/SocialLinks.tsx",
+      "status": "complete",
+      "completion_percent": 100,
+      "effort_remaining": 0,
+      "technical_risk": 1,
+      "freshness_days": 10,
+      "differentiation": 1,
+      "weighted_priority": 1,
+      "description": "Social media links for brands",
+      "issues": [],
+      "dependencies": ["React"],
+      "last_modified": "2025-10-01",
+      "files": [
+        "components/SocialLinks.tsx"
+      ]
+    },
+    {
+      "name": "Error Handling",
+      "path": "components/ErrorBoundary.tsx",
+      "status": "stable",
+      "completion_percent": 85,
+      "effort_remaining": 1,
+      "technical_risk": 2,
+      "freshness_days": 8,
+      "differentiation": 2,
+      "weighted_priority": 2,
+      "description": "Global error boundary and runtime error handling",
+      "issues": [
+        "Three.js specific error handling"
+      ],
+      "dependencies": ["React", "Three.js"],
+      "last_modified": "2025-10-03",
+      "files": [
+        "components/ErrorBoundary.tsx",
+        "components/ThreeJSErrorBoundary.tsx",
+        "lib/runtime-error-handler.ts"
+      ]
+    }
+  ],
+  "build_status": {
+    "typescript": "pass",
+    "nextjs": "pass",
+    "linting": "disabled",
+    "tests": "fail",
+    "last_build": "2025-10-11T20:30:00Z"
+  },
+  "technical_debt": {
+    "backup_files": 2,
+    "todo_comments": 15,
+    "type_casts": 3,
+    "fallback_systems": 4,
+    "duplicate_components": 3
+  },
+  "dependencies": {
+    "next": "14.2.33",
+    "react": "18.2.0",
+    "three": "0.180.0",
+    "framer-motion": "11.2.10",
+    "astronomy-engine": "2.1.19"
+  },
+  "external_apis": [
+    {
+      "name": "NASA Horizons",
+      "status": "active",
+      "auth_required": false,
+      "rate_limit": "unknown"
+    },
+    {
+      "name": "Printify",
+      "status": "active", 
+      "auth_required": true,
+      "rate_limit": "unknown"
+    }
+  ]
+}

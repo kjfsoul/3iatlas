@@ -1,0 +1,11 @@
+module,Reach,RevenueImpact,EffortRemaining,TechnicalRisk,Confidence,StrategicFit,PriorityScore
+3D_Orbital_Tracker,5,4,2,3,4,5,30.5
+Printify_Integration,4,5,1,4,5,4,27.0
+Flightpath_Simulator,3,3,1,5,5,3,21.0
+Atlas_Directive_Game,4,4,3,2,3,5,26.0
+NASA_Horizons_API,4,3,2,3,4,4,24.0
+Landing_Page_Core,5,4,1,4,5,4,27.5
+Brand_Social_Links,2,2,1,5,5,2,14.0
+Error_Handling,3,2,1,4,4,3,17.0
+Performance_Monitoring,2,2,2,3,3,2,13.0
+Historical_Data_Generator,3,3,1,4,4,3,19.0

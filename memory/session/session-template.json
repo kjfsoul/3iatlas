@@ -1,0 +1,18 @@
+{
+  "session_id": "SESSION_ID_PLACEHOLDER",
+  "start_time": "TIMESTAMP_PLACEHOLDER",
+  "end_time": null,
+  "context": {
+    "active_component": null,
+    "current_task": null,
+    "user_context": null,
+    "memory_snapshot": {}
+  },
+  "activities": [],
+  "insights": [],
+  "performance": {
+    "context_switches": 0,
+    "memory_accesses": 0,
+    "error_count": 0
+  }
+}

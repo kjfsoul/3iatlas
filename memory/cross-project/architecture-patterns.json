@@ -1,0 +1,11 @@
+{
+  "patterns": [
+    {
+      "name": "3D Component Architecture",
+      "description": "Modular 3D components with clear boundaries",
+      "applicability": ["3d-tracker", "flightpath-simulator"],
+      "implementation": "TypeScript interfaces and React components"
+    }
+  ],
+  "last_updated": "2025-10-14T05:58:46Z"
+}

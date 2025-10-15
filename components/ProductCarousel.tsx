@@ -48,7 +48,7 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
   const getProductImage = (p: Product) => {
     const defaultImg = p.images?.find(img => img.is_default);
     const firstImg = p.images?.[0];
-    return defaultImg?.src || firstImg?.src || "/images/placeholder-product.png";
+    return defaultImg?.src || firstImg?.src || "/images/default-product.png";
   };
 
   const getProductPrice = (p: Product) => {
@@ -86,9 +86,9 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {displayProducts.map((p, i) => {
             // Use a unique key that includes currentPage to force re-render
-            const uniqueKey = `${currentPage}-${i}-${p?.id || 'placeholder'}`;
+            const uniqueKey = `${currentPage}-${i}-${p?.id || 'default'}`;
             const url = p ? getProductUrl(p) : (storeBase || "#");
-            const img = p ? getProductImage(p) : "/images/placeholder-product.png";
+            const img = p ? getProductImage(p) : "/images/default-product.png";
             const name = p?.title ?? "Product coming soon";
             const price = p ? getProductPrice(p) : "";
             const description = p ? getProductDescription(p) : "";

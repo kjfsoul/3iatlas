@@ -1,0 +1,329 @@
+# 3I/ATLAS Project Facts
+
+*Comprehensive technical and scientific reference for the 3IAtlas project*
+
+---
+
+## 🎯 Project Overview
+
+### Core Mission
+Transform basic NASA data into an unforgettable, interactive 3D experience that makes users want to share the 3I/ATLAS interstellar comet with friends.
+
+### Value Proposition
+- **Real NASA Data** - 100% authentic orbital calculations from JPL Horizons API
+- **Cinematic Experience** - First-person comet view, dynamic camera work
+- **Interactive Learning** - Gamified education with "The ATLAS Directive" narrative
+- **Scientific Authority** - Build THE definitive 3I/ATLAS resource
+
+---
+
+## 🌌 3I/ATLAS Scientific Facts
+
+### Discovery & Classification
+- **Discovery Date:** July 1, 2025
+- **Discoverer:** ATLAS Telescope, Chile
+- **Classification:** Interstellar Comet (3I designation)
+- **Designation:** 3I/ATLAS or C/2025 N1
+- **NASA Horizons ID:** SPK-ID 1004083
+
+### Physical Characteristics
+- **Nucleus Diameter:** 440 meters to 5.6 kilometers
+- **Speed:** ~137,000 mph (221,000 km/h)
+- **Age:** Over 7 billion years old
+- **Origin:** Milky Way thick disk
+- **Color:** Reddish-brown, consistent with organic-rich surface
+
+### Orbital Dynamics
+- **Trajectory:** Hyperbolic (will exit solar system)
+- **Eccentricity:** > 1.0 (hyperbolic)
+- **Perihelion:** ~1.5 AU (just inside Mars' orbit)
+- **Perihelion Date:** Late October 2025
+- **Closest Approach to Earth:** 1.8 AU (~170 million miles)
+- **Safety:** No threat to Earth - trajectory entirely outside Earth's orbital path
+
+### Scientific Significance
+- **Third confirmed interstellar object** (following 1I/'Oumuamua and 2I/Borisov)
+- **Largest interstellar object** discovered to date
+- **Oldest confirmed cosmic object** ever observed
+- **Best-studied** due to early detection and modern instruments
+- **Known origin region** (Milky Way thick disk)
+
+---
+
+## 🏗️ Technical Architecture
+
+### Tech Stack
+```yaml
+Frontend:
+  Framework: Next.js 15.5.4 (App Router)
+  UI: React 18.2.0 + TypeScript 5.6.3
+  Styling: Tailwind CSS 3.4.13
+  Animation: Framer Motion 11.2.10
+  3D: Three.js 0.180.0
+
+Backend:
+  API Routes: Next.js serverless functions
+  Data Source: NASA JPL Horizons API (public, no auth)
+  Caching: 7-day localStorage with fallback
+
+External APIs:
+  NASA Horizons Lookup: Object identification
+  NASA Horizons Ephemeris: Vector data (position + velocity)
+  Printify API: Product integration
+```
+
+### Key File Structure
+```
+/components/
+  ├── Atlas3DTrackerEnhanced.tsx     # Main 3D visualization
+  ├── Atlas3DTrackerWrapper.tsx      # Client-side wrapper
+  ├── ProductCarousel.tsx             # Printify products
+  └── FlightpathSimulator.tsx         # Legacy simulator
+
+/lib/
+  ├── horizons-api.ts                 # NASA API integration
+  ├── horizons-cache.ts               # Intelligent caching
+  ├── solar-system-data.ts            # Multi-object fetcher
+  └── atlas-orbital-data.ts           # Fallback calculations
+
+/app/api/horizons/
+  ├── lookup/route.ts                 # CORS proxy for lookups
+  └── ephemeris/route.ts              # CORS proxy for vectors
+```
+
+---
+
+## 🔧 Implementation Status
+
+### ✅ Completed (Phase 1)
+1. **NASA Horizons API Integration**
+   - CORS proxy routes (`/api/horizons/lookup`, `/api/horizons/ephemeris`)
+   - Fallback orbital calculations when API fails
+   - Multi-object fetching (7 celestial bodies)
+   - Real-time data caching system
+
+2. **3D Visualization Foundation**
+   - Three.js scene with proper lighting
+   - Multiple celestial objects rendered
+   - Interactive controls (Play/Pause/Speed/Camera)
+   - Mouse rotation and zoom
+   - Responsive UI with proper sizing
+
+3. **3I/ATLAS Core Features**
+   - Green comet rendering (0x00ff88)
+   - Orbital path visualization
+   - Timeline progression (Oct 1-31, 2025)
+   - Real NASA data integration
+
+4. **Printify Integration**
+   - Multi-shop product fetching
+   - Dynamic product carousels
+   - Real-time pricing and descriptions
+   - Automatic image updates
+
+### 🚧 In Progress (Phase 2)
+1. **Five-View Tracker System**
+   - Historical Flight View
+   - Current Moment View
+   - Speed Simulation View
+   - Perihelion Event View
+   - Trajectory Plotter View
+
+2. **Performance Optimization**
+   - FrameGuard telemetry system
+   - Performance degradation handling
+   - Adaptive particle scaling
+   - Memory management
+
+3. **Error Handling**
+   - NaN position/velocity guards
+   - THREE.js boundingSphere error prevention
+   - Graceful API failure handling
+   - Scene cleanup on unmount
+
+---
+
+## 📊 Performance Metrics
+
+### Current Performance
+- **Build Time:** 46-93 seconds (target: 5-10 seconds)
+- **3D Frame Rate:** 60fps target
+- **API Response Time:** ~200ms average
+- **Cache Hit Rate:** 95%+ for repeated requests
+
+### Performance Targets
+- **All buttons functional** - No broken interactions
+- **All planets/artifacts visible** - Complete solar system rendering
+- **Correct rotation and motion** - Accurate orbital mechanics
+- **Appropriate sizing** - Realistic scale relationships
+- **Expected speed** - Proper time progression
+- **No crashes** - Stable 3D visualization
+- **3D Frame Rate:** 60fps target
+- **Build Time:** < 30s
+
+### Optimization Features
+- **Code Splitting:** Dynamic imports for Three.js
+- **Caching:** 7-day NASA data cache
+- **FrameGuard:** Performance monitoring and degradation
+- **Image Optimization:** Next.js automatic optimization
+- **Bundle Analysis:** Webpack bundle optimization
+
+---
+
+## 🔒 Project Rules (NEVER VIOLATE)
+
+### Critical Rules
+1. **NO mock data, NO stubs, NO hardcoded orbital data**
+2. **NO changes to Printify logic without explicit request**
+3. **NO linting or TypeScript errors**
+4. **NO using "any" type in TypeScript**
+5. **Always use actual API calls with real data**
+
+### Data Validation
+- All orbital data from NASA API calls
+- Terminal logs show real API calls:
+  ```
+  [API Proxy] Command: 1004083  ← 3I/ATLAS
+  [API Proxy] Command: 399       ← Earth
+  [API Proxy] Command: 499       ← Mars
+  [API Proxy] Command: 599       ← Jupiter
+  [API Proxy] Command: 699       ← Saturn
+  [API Proxy] Command: 199       ← Mercury
+  [API Proxy] Command: 299       ← Venus
+  ```
+
+### Code Quality Standards
+- **TypeScript:** Strict mode enabled
+- **ESLint:** Disabled for starter (configure as needed)
+- **Prettier:** Not configured (add if needed)
+- **Git Hooks:** Not configured (add if needed)
+
+---
+
+## 🌐 API Integration
+
+### NASA Horizons API
+- **Base URL:** `https://ssd-api.jpl.nasa.gov/doc/horizons.html`
+- **Authentication:** None required (public API)
+- **Rate Limits:** None specified
+- **Data Format:** JSON, CSV, or text
+
+### Key Endpoints
+1. **Object Lookup**
+   ```
+   GET /api/horizons/lookup?name=3I/ATLAS
+   ```
+
+2. **Ephemeris Data**
+   ```
+   GET /api/horizons/ephemeris?COMMAND=1004083&EPHEM_TYPE=VECTOR&...
+   ```
+
+### Printify API
+- **Base URL:** `https://api.printify.com/v1/`
+- **Authentication:** Bearer token required
+- **Rate Limits:** 1000 requests/hour
+- **Data Format:** JSON
+
+---
+
+## 🧪 Testing Strategy
+
+### E2E Testing with Playwright
+- **3D Tracker:** Interactive visualization testing
+- **API Routes:** NASA Horizons integration
+- **Performance:** FrameGuard telemetry validation
+- **Responsive:** Mobile and desktop compatibility
+
+### Test Coverage
+- **Unit Tests:** Not implemented
+- **Integration Tests:** Not implemented
+- **E2E Tests:** Playwright configured
+- **Performance Tests:** FrameGuard telemetry
+
+---
+
+## 📈 SEO & Content Strategy
+
+### Primary Keywords
+- 3I/ATLAS
+- Third interstellar object
+- Interstellar comet 2025
+- ATLAS telescope discovery
+- Oldest comet
+- Milky Way thick disk
+- Hyperbolic trajectory comet
+
+### Content Strategy
+- **Real-time 3D visualization** (unique competitive advantage)
+- **Scientific accuracy** (NASA data authority)
+- **Interactive learning** (gamified education)
+- **Community engagement** (social sharing)
+- **Educational value** (citizen science)
+- **General public accessibility** (scientifically accurate but approachable)
+
+---
+
+## 🔍 Current Issues & Gaps
+
+### Critical Issues
+1. **Motion/Play System:** Crashes in Speed Simulation and Trajectory Plotter views
+2. **Performance:** NaN geometry errors, THREE.js boundingSphere errors
+3. **State Management:** Multiple playback state sources causing conflicts
+4. **Data Validation:** Missing guards for non-finite positions/velocities
+
+### Technical Debt
+- **Build Performance:** 46-93 seconds (target: 5-10 seconds)
+- **Code Organization:** Some components need refactoring
+- **Error Handling:** Inconsistent error handling patterns
+- **Documentation:** Some components lack proper documentation
+
+### Missing Features
+- **Accessibility:** No ARIA labels or keyboard navigation
+- **Mobile Optimization:** 3D performance on mobile devices
+- **Offline Support:** No offline functionality
+- **Analytics:** No user behavior tracking
+
+---
+
+## 📚 Documentation References
+
+### Key Documents
+- [`PROJECT_MEMORY.md`](PROJECT_MEMORY.md) - Project status & architecture
+- [`ARCHITECTURE_VALIDATION.md`](ARCHITECTURE_VALIDATION.md) - Technical implementation details
+- [`CONTENT_STRATEGY_DOMINANCE.md`](CONTENT_STRATEGY_DOMINANCE.md) - SEO/GEO strategy
+- [`3I_ATLAS_KNOWLEDGE_BASE.md`](3I_ATLAS_KNOWLEDGE_BASE.md) - Scientific facts & SEO content
+
+### External Resources
+- **NASA Horizons API:** [JPL Horizons System](https://ssd-api.jpl.nasa.gov/doc/horizons.html)
+- **Printify API:** [Printify API Docs](https://developers.printify.com/)
+- **Three.js Documentation:** [Three.js Docs](https://threejs.org/docs/)
+- **Next.js Documentation:** [Next.js Docs](https://nextjs.org/docs)
+
+---
+
+## 🎯 Success Metrics
+
+### User Engagement
+- **Time on Site:** Target > 5 minutes
+- **3D Interaction:** Target > 80% users interact with 3D view
+- **Social Sharing:** Target > 20% users share content
+- **Return Visits:** Target > 30% return rate
+
+### Technical Performance
+- **Page Load Speed:** Target < 3 seconds
+- **3D Frame Rate:** Target 60fps
+- **API Response Time:** Target < 500ms
+- **Error Rate:** Target < 1%
+
+### Scientific Accuracy
+- **Data Source:** 100% NASA Horizons API
+- **Orbital Accuracy:** Within 0.1% of NASA calculations
+- **Real-time Updates:** Daily orbital data refresh
+- **Educational Value:** Measured through user feedback
+
+---
+
+*Last Updated: October 1, 2025*  
+*Version: 0.1.0*  
+*Status: Active Development*

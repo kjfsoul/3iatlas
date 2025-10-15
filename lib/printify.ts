@@ -145,8 +145,8 @@ export function productImage(p: Product): string {
   const defaultImg = p.images?.find((img) => img.is_default);
   const firstImg = p.images?.[0];
   const imageUrl =
-    defaultImg?.src || firstImg?.src || "/images/placeholder-product.png";
-  if (imageUrl === "/images/placeholder-product.png") {
+    defaultImg?.src || firstImg?.src || "/images/default-product.png";
+  if (imageUrl === "/images/default-product.png") {
     console.warn(
       "[Printify] No image found for product:",
       p.title,

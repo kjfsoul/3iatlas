@@ -300,54 +300,62 @@ const SpeedSimulationView: React.FC<SpeedSimulationViewProps> = ({
   }, [onSpeedChange]);
 
   return (
-    <div className={`relative w-full h-full ${className}`}>
+    <div
+      data-testid="speed-simulation-view"
+      className={`relative w-full h-full ${className}`}
+    >
       {atlasData.length === 0 ? (
         <div className="flex items-center justify-center h-full bg-black">
           <div className="text-center text-white">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto mb-4" />
             <p className="text-lg">Loading Speed Simulation...</p>
-            <p className="text-sm text-white/60 mt-2">Waiting for orbital data</p>
+            <p className="text-sm text-white/60 mt-2">
+              Waiting for orbital data
+            </p>
           </div>
         </div>
       ) : (
         <>
           <div ref={containerRef} className="w-full h-full" />
-          
+
           {/* Speed Controls Overlay */}
           <div className="absolute top-4 left-4 bg-black/80 text-white p-4 rounded-lg">
-        <h3 className="text-lg font-bold mb-2">Speed Simulation</h3>
-        <div className="space-y-2">
-          <div className="text-sm">
-            <div>Velocity: {velocity.x.toFixed(3)}, {velocity.y.toFixed(3)}, {velocity.z.toFixed(3)} AU/day</div>
-            <div>Speed: {speedKmh.toFixed(0)} km/h</div>
+            <h3 className="text-lg font-bold mb-2">Speed Simulation</h3>
+            <div className="space-y-2">
+              <div className="text-sm">
+                <div>
+                  Velocity: {velocity.x.toFixed(3)}, {velocity.y.toFixed(3)},{" "}
+                  {velocity.z.toFixed(3)} AU/day
+                </div>
+                <div>Speed: {speedKmh.toFixed(0)} km/h</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm">Simulation Speed:</label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="50"
+                  step="0.1"
+                  value={speed}
+                  onChange={(e) => handleSpeedChange(Number(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="text-sm w-12">{speed.toFixed(1)}x</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm">Simulation Speed:</label>
-            <input
-              type="range"
-              min="0.1"
-              max="50"
-              step="0.1"
-              value={speed}
-              onChange={(e) => handleSpeedChange(Number(e.target.value))}
-              className="flex-1"
-            />
-            <span className="text-sm w-12">{speed.toFixed(1)}x</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Instructions */}
-      <div className="absolute bottom-4 left-4 bg-black/80 text-white p-4 rounded-lg max-w-sm">
-        <h4 className="font-bold mb-2">Speed Simulation Controls</h4>
-        <div className="text-sm space-y-1">
-          <div>• Drag to rotate camera around 3I/ATLAS</div>
-          <div>• Scroll to zoom in/out</div>
-          <div>• Green arrow shows velocity direction</div>
-          <div>• Particle tail shows motion path</div>
-          <div>• Star field rotates for motion effect</div>
-        </div>
-      </div>
+          {/* Instructions */}
+          <div className="absolute bottom-4 left-4 bg-black/80 text-white p-4 rounded-lg max-w-sm">
+            <h4 className="font-bold mb-2">Speed Simulation Controls</h4>
+            <div className="text-sm space-y-1">
+              <div>• Drag to rotate camera around 3I/ATLAS</div>
+              <div>• Scroll to zoom in/out</div>
+              <div>• Green arrow shows velocity direction</div>
+              <div>• Particle tail shows motion path</div>
+              <div>• Star field rotates for motion effect</div>
+            </div>
+          </div>
         </>
       )}
     </div>

@@ -491,7 +491,8 @@
           "tsc --noEmit passed",
           "grep: no mock data found"
         ]
-      }
+      },
+      "commit_hash": "b9f39dd"
     }
   ],
   "summary": {

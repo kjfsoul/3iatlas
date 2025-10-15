@@ -111,6 +111,7 @@ const ViewSelector: React.FC<ViewSelectorProps> = ({
 
   return (
     <div
+      data-testid="view-selector"
       className={`bg-black/80 backdrop-blur-sm rounded-lg p-4 border border-white/20 ${className}`}
     >
       <div className="text-white font-semibold text-sm mb-3">

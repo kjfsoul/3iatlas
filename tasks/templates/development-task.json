@@ -1,0 +1,17 @@
+{
+  "task_type": "development",
+  "template": {
+    "id": "TASK_ID_PLACEHOLDER",
+    "title": "TASK_TITLE_PLACEHOLDER",
+    "description": "TASK_DESCRIPTION_PLACEHOLDER",
+    "component": "COMPONENT_PLACEHOLDER",
+    "priority": "medium",
+    "status": "pending",
+    "assigned_agent": null,
+    "dependencies": [],
+    "acceptance_criteria": [],
+    "estimated_effort": "2-4 hours",
+    "created_at": "TIMESTAMP_PLACEHOLDER",
+    "updated_at": "TIMESTAMP_PLACEHOLDER"
+  }
+}

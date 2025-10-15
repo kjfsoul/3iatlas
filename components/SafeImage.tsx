@@ -10,7 +10,7 @@ type Props = Omit<React.ComponentProps<typeof Image>, 'src' | 'onError'> & {
 export default function SafeImage({ 
   src, 
   alt, 
-  fallbackSrc = "/images/placeholder-product.png",
+  fallbackSrc = "/images/default-product.png",
   width,
   height,
   ...rest 

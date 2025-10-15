@@ -1,0 +1,25 @@
+module,task_id,description,dependencies,est_hours
+3D_Orbital_Tracker,3d_001,Implement missing view components (CurrentMoment, SpeedSimulation, PerihelionEvent, TrajectoryPlotter),AtlasViewsContainer,40
+3D_Orbital_Tracker,3d_002,Add real-time NASA Horizons data integration,NASA_Horizons_API,16
+3D_Orbital_Tracker,3d_003,Implement camera controls and zoom functionality,ThreeJS components,12
+3D_Orbital_Tracker,3d_004,Add trajectory trail visualization,Historical_Data_Generator,8
+3D_Orbital_Tracker,3d_005,Optimize performance for smooth 60fps animation,Performance_Monitoring,6
+Atlas_Directive_Game,game_001,Implement interactive narrative system,Landing_Page_Core,24
+Atlas_Directive_Game,game_002,Create choice branching logic,game_001,16
+Atlas_Directive_Game,game_003,Add save/load game state functionality,game_002,8
+Atlas_Directive_Game,game_004,Implement oracle card reveal system,game_003,12
+NASA_Horizons_API,api_001,Add error handling for API failures,Error_Handling,4
+NASA_Horizons_API,api_002,Implement data caching strategy,Historical_Data_Generator,6
+NASA_Horizons_API,api_003,Add fallback data sources,api_002,8
+Landing_Page_Core,core_001,Add responsive design improvements,Printify_Integration,8
+Landing_Page_Core,core_002,Implement SEO optimizations,3I_ATLAS_KNOWLEDGE_BASE,6
+Landing_Page_Core,core_003,Add analytics tracking,core_002,4
+Printify_Integration,printify_001,Add product image optimization,SafeImage component,4
+Printify_Integration,printify_002,Implement product search functionality,printify_001,8
+Printify_Integration,printify_003,Add cart functionality,printify_002,12
+Error_Handling,error_001,Add comprehensive error boundaries,Landing_Page_Core,6
+Error_Handling,error_002,Implement error reporting system,error_001,8
+Performance_Monitoring,perf_001,Add performance metrics collection,3D_Orbital_Tracker,6
+Performance_Monitoring,perf_002,Implement performance alerts,perf_001,4
+Historical_Data_Generator,hist_001,Add data validation and quality checks,NASA_Horizons_API,6
+Historical_Data_Generator,hist_002,Implement data compression,hist_001,4

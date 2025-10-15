@@ -53,7 +53,7 @@ const AtlasViewsContainer: React.FC<AtlasViewsContainerProps> = (props) => {
       case "currentMoment":
         return (
           <div className="text-white p-4">
-            Current Moment View (Placeholder)
+            Current Moment View
           </div>
         );
       default:

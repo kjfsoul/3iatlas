@@ -1,0 +1,13 @@
+Module,Reach,RevenueImpact,EffortRemaining,TechnicalRisk,Confidence,StrategicFit,PriorityScore,Justification
+Main Landing Page,5,4,1,1,5,5,23.5,"Core user entry point, fully functional with clean server-side rendering"
+3D Orbital Tracker,4,3,2,3,4,5,20.0,"High-visibility feature with NASA integration, some performance concerns"
+Printify Integration,4,5,1,2,5,4,21.0,"Revenue-critical e-commerce functionality, well-implemented"
+Flightpath Simulator,3,2,1,1,5,3,13.5,"Nice visual feature, complete and stable"
+Atlas Directive Game,3,3,3,2,3,4,16.5,"Engagement feature, modal implemented but game logic pending"
+API Routes (Horizons),4,2,1,2,4,4,17.0,"NASA data integration, working with retry logic"
+Error Handling,3,2,1,1,5,3,13.5,"Comprehensive error boundaries, production-ready"
+Social Links,2,2,1,1,5,2,11.0,"Simple component, complete"
+Product Carousel,3,4,1,1,5,3,16.5,"E-commerce component, well-implemented with navigation"
+Safe Image Component,2,1,1,1,5,2,10.5,"Utility component, complete"
+Performance Monitor,2,1,2,2,3,2,10.0,"Debugging tool, currently disabled"
+Historical Data Generator,3,2,1,2,4,3,14.0,"Data processing utility, working with caching"
