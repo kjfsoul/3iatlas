@@ -395,3 +395,5 @@ All evaluation artifacts saved to [LOCATION] with verified data.
 8. **Document all security and performance issues**
 
 This prompt ensures comprehensive project analysis with zero fabrication, covering all aspects needed to take command of any project midstream and deliver flawless completion.
+
+

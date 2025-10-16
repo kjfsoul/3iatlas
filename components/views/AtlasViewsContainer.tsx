@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useMemo } from "react"; // FIXED THE TYPO
-import dynamic from "next/dynamic";
 import { type ViewType } from "@/lib/view-manager";
-import ViewSelector from "./ViewSelector";
+import dynamic from "next/dynamic";
+import React from "react"; // FIXED THE TYPO
 import ControlPanel from "./ControlPanel";
+import ViewSelector from "./ViewSelector";
 
 const HistoricalFlightView = dynamic(() => import("./HistoricalFlightView"), {
   loading: () => <ViewLoadingFallback />,
@@ -85,9 +85,7 @@ const AtlasViewsContainer: React.FC<AtlasViewsContainerProps> = (props) => {
           {currentDate && (
             <div className="text-center">
               <div className="text-white/60 text-xs">Current Date</div>
-              <div className="text-white font-mono text-sm">
-                {new Date(currentDate).toLocaleDateString()}
-              </div>
+              <div className="text-white font-mono text-sm">{currentDate}</div>
             </div>
           )}
         </ControlPanel>

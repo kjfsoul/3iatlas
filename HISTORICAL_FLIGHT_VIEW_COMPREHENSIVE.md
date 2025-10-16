@@ -1,42 +1,139 @@
-# 3I/ATLAS Historical Flight View - Comprehensive Information Source
+# 3I/ATLAS Historical Flight View System - Comprehensive Information Source
 
 ## Overview
 
-The Historical Flight View is a 3D interactive visualization component that displays the trajectory of 3I/ATLAS (the third confirmed interstellar object) from its discovery on July 1, 2025 through its perihelion approach in October 2025. The component features real-time telemetry, celestial object labels, and interactive playback controls.
+The Historical Flight View System is a comprehensive 3D interactive visualization platform that displays the trajectory of 3I/ATLAS (the third confirmed interstellar object) from its discovery on July 1, 2025 through its perihelion approach in October 2025. The system features five distinct views, real-time telemetry, celestial object labels, interactive playback controls, and advanced physics simulation capabilities.
 
-## Core Architecture
+## System Architecture
 
-### Main Component Structure
+### Main Component Hierarchy
 
 ```
-HistoricalFlightView.tsx
-├── Scene (3D Canvas)
-│   ├── Sun (Static at origin)
-│   ├── Planet (Earth & Mars with trajectories)
-│   ├── Comet (3I/ATLAS with trail)
-│   ├── TrajectoryTrail (Green path line)
-│   ├── CelestialLabel components
-│   ├── Stars (Background starfield)
-│   ├── GridHelper (Reference grid)
-│   └── OrbitControls (User interaction)
-├── TelemetryHUD (Real-time metrics)
-└── Playback Controls (Timeline, Play/Pause, Speed)
+Atlas3DTrackerEnhanced.tsx (Root Container)
+├── AtlasViewsContainer.tsx (View Router)
+│   ├── ViewSelector.tsx (Navigation)
+│   ├── ControlPanel.tsx (Shared Controls)
+│   └── View Components:
+│       ├── HistoricalFlightView.tsx
+│       ├── CurrentMomentView.tsx
+│       ├── SpeedSimulationView.tsx
+│       ├── PerihelionEventView.tsx
+│       └── TrajectoryPlotterView.tsx
+└── ErrorBoundary.tsx (Error Handling)
 ```
 
-## File Structure and Dependencies
+### Data Flow Architecture
 
-### Core Files
+```
+NASA Horizons API
+├── lib/horizons-api.ts (API Client)
+├── lib/horizons-cache.ts (7-day Cache)
+├── lib/solar-system-data.ts (Solar System Objects)
+├── lib/trajectory-calculator.ts (Physics Engine)
+└── Atlas3DTrackerEnhanced.tsx (State Management)
+    └── View Components (Rendering)
+```
 
-#### 1. `components/views/HistoricalFlightView.tsx`
-**Main component containing all 3D visualization logic**
+## Core Components
+
+### 1. Atlas3DTrackerEnhanced.tsx
+**Root container managing global state and data loading**
 
 ```typescript
-interface VectorData {
-  date: string;
-  position: { x: number; y: number; z: number };
-  velocity: { vx: number; vy: number; vz: number };
+interface Props {
+  autoPlay?: boolean;
+  playbackSpeed?: number;
+  className?: string;
 }
 
+interface State {
+  loading: boolean;
+  error: string | null;
+  atlasData: VectorData[];
+  currentIndex: number;
+  isPlaying: boolean;
+  speed: number;
+  currentView: ViewType;
+}
+```
+
+**Key Features:**
+- Loads NASA Horizons data using corrected DES format (`'DES=1004083;'`)
+- Manages global playback state (`isPlaying`, `speed`, `currentIndex`)
+- Provides fallback data for comet visibility
+- Controls animation loop with `requestAnimationFrame`
+- Handles error states and loading indicators
+
+**Data Loading Process:**
+1. Calls `getCached3IAtlasVectors()` with date range 2025-07-01 to 2025-10-15
+2. Uses 6-hour step size for detailed trajectory
+3. Falls back to orbital elements if API fails
+4. Updates state with loaded vector data
+
+### 2. AtlasViewsContainer.tsx
+**View router and container for all visualization modes**
+
+```typescript
+interface AtlasViewsContainerProps {
+  atlasData: VectorData[];
+  solarSystemData: Record<string, any[]>;
+  currentIndex: number;
+  isPlaying: boolean;
+  speed: number;
+  currentView: ViewType;
+  onViewChange: (view: ViewType) => void;
+  onSpeedChange: (speed: number) => void;
+  onTrajectoryChange: (trajectory: any) => void;
+  onPlayPause: () => void;
+  onReset: () => void;
+  onIndexChange: (index: number) => void;
+  dailyPosition: any;
+  observerMetrics: any;
+  currentDate: string;
+  className?: string;
+}
+```
+
+**Layout Structure:**
+- **Left Panel**: ViewSelector (256px)
+- **Center Panel**: Active View (flexible)
+- **Right Panel**: ControlPanel (256px)
+
+### 3. ViewSelector.tsx
+**Navigation component for switching between views**
+
+```typescript
+export type ViewType = 
+  | "historical"      // Timeline from discovery to current
+  | "currentMoment"   // Super-lens view at Oct 8, 2025
+  | "speedSimulation" // Experience velocity from comet POV
+  | "perihelionEvent" // Closest solar approach Oct 28-29
+  | "trajectoryPlotter"; // Interactive path modification
+
+interface ViewConfig {
+  id: ViewType;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+  hoverColor: string;
+}
+```
+
+**View Descriptions:**
+- **Historical Flight**: Timeline from discovery to current
+- **Current Moment**: Super-lens view at Oct 8, 2025
+- **Speed Simulation**: Experience velocity from comet POV
+- **Perihelion Event**: Closest solar approach Oct 28-29
+- **Trajectory Plotter**: Interactive path modification
+
+## View Components
+
+### 1. HistoricalFlightView.tsx
+**Main historical trajectory visualization**
+
+```typescript
 interface HistoricalFlightViewProps {
   atlasData: VectorData[];
   isPlaying: boolean;
@@ -49,91 +146,226 @@ interface HistoricalFlightViewProps {
 }
 ```
 
-**Key Components:**
-- `TrajectoryTrail`: Renders green path line showing comet's trajectory up to current position
-- `Sun`: Static yellow sphere at origin [0,0,0] with emissive material
-- `Planet`: Dynamic spheres for Earth and Mars with trajectory-based movement
-- `Comet`: 3I/ATLAS representation with red sphere and orange tail cone
-- `FollowCamera`: Camera that follows the comet's position
-- `Scene`: Main 3D scene with lighting, stars, and controls
+**3D Scene Elements:**
+- **Sun**: Static yellow sphere at origin [0,0,0] with emissive material
+- **Planets**: Earth and Mars with trajectory-based movement
+- **3I/ATLAS**: Red sphere with orange tail cone
+- **TrajectoryTrail**: Green path line showing comet's trajectory
+- **Stars**: Animated starfield background
+- **GridHelper**: Reference grid
+- **OrbitControls**: User interaction
 
 **Motion Elements:**
-- **Sun**: Static at origin `[0,0,0]`
+- **Sun**: Static at origin `[0, 0, 0]`
 - **Earth**: Moves via `trajectoryData.earth` array
 - **Mars**: Moves via `trajectoryData.mars` array  
 - **3I/ATLAS**: Moves via `atlasData` prop
 - **Trajectory Trail**: Green line showing comet path
 - **Camera**: Follows comet via `FollowCamera` component
 - **Stars**: Animated starfield background
-- **Grid**: Reference grid helper
 
-#### 2. `components/ui/CelestialLabel.tsx`
-**3D text labels for celestial objects**
+**Real-time Metrics:**
+- Distance from Sun (AU)
+- Current velocity (km/s)
+- Current date (ISO format)
+- Playback progress
+
+### 2. CurrentMomentView.tsx
+**Freeze-frame view at October 8, 2025 position**
 
 ```typescript
-interface CelestialLabelProps {
-  position: [number, number, number];
-  label: string;
-  color?: string;
-  fontSize?: number;
-  offset?: [number, number, number];
-  visible?: boolean;
+interface CurrentMomentViewProps {
+  className?: string;
+  onObjectSelect?: (objectName: string) => void;
+  initialZoom?: number;
+  showLabels?: boolean;
 }
 ```
 
-**Features:**
-- Uses `@react-three/drei` Text component
-- Automatically faces camera using `useFrame` hook
-- Positioned above objects with configurable offset
-- Black outline for visibility against space background
+**Key Features:**
+- **Target Date**: October 8, 2025 (fixed position)
+- **Free Camera**: Rotation around 3I/ATLAS
+- **Zoom Controls**: Detailed inspection capabilities
+- **Object Labels**: Planets, moons, asteroids
+- **Distance Scaling**: Real, logarithmic, compressed modes
+- **Interactive Selection**: Click objects for details
 
-#### 3. `components/ui/TelemetryHUD.tsx`
-**Real-time telemetry display overlay**
+**Visual Elements:**
+- **Enhanced Sun**: Multiple corona layers
+- **3I/ATLAS**: Coma and ion tail effects
+- **Starfield**: 3000 stars with color temperature variation
+- **Distance Indicators**: Scale references
+- **Object Information**: Real-time metrics panel
+
+**Controls:**
+- **Zoom Level**: 1-100 AU range
+- **Distance Scale**: Real/logarithmic/compressed
+- **Label Toggle**: Show/hide object names
+- **Object Selection**: Click for detailed info
+
+### 3. SpeedSimulationView.tsx
+**Comet's perspective velocity experience**
 
 ```typescript
-interface TelemetryHUDProps {
-  distanceFromSun: number;
-  currentVelocity: number;
-  currentDate: string;
+interface SpeedSimulationViewProps {
+  atlasData: VectorData[];
+  currentIndex: number;
+  isPlaying: boolean;
+  speed: number;
+  onSpeedChange: (speed: number) => void;
   className?: string;
 }
 ```
 
-**Features:**
-- Displays distance from Sun in AU/km
-- Shows velocity in km/s or m/s
-- Formats dates to readable format
-- Color-coded labels (green date, blue distance, yellow velocity)
-- Positioned in top-right corner with semi-transparent background
+**Key Features:**
+- **Comet POV**: Camera locked to 3I/ATLAS
+- **Motion Blur**: Velocity visualization effects
+- **Particle Tail**: 1000-particle system
+- **Velocity Arrow**: Direction and magnitude
+- **Star Field**: Rotating background for motion effect
+- **Speed Controls**: 0.1x to 50x simulation speed
 
-### Data Files
+**Visual Effects:**
+- **Comet Glow**: Additive blending
+- **Particle Tail**: Velocity-based particle system
+- **Velocity Arrow**: Green arrow showing direction
+- **Motion Blur**: Camera-based effects
+- **Star Rotation**: Background motion
 
-#### 4. `public/trajectory.json`
-**Pre-calculated trajectory data for celestial objects**
+**Controls:**
+- **Speed Slider**: 0.1x to 50x range
+- **Camera Rotation**: Orbit around comet
+- **Zoom**: 0.5-10 AU range
+- **Velocity Display**: Real-time metrics
 
-```json
-{
-  "earth": [
-    {
-      "date": "2025-07-01T00:00:00.000Z",
-      "position": { "x": 0.16049763443207582, "y": -0.9210627527669047, "z": -0.39926797697966143 },
-      "velocity": { "vx": 0.01671206803817426, "vy": 0.0024387048904397322, "vz": 0.001057055502895515 }
-    }
-  ],
-  "mars": [
-    // Similar structure for Mars trajectory
-  ]
+### 4. PerihelionEventView.tsx
+**Closest solar approach visualization**
+
+```typescript
+interface PerihelionEventViewProps {
+  className?: string;
+  onPerihelionReached?: (date: string) => void;
+  initialCameraAngle?: 'sun' | 'comet' | 'side' | 'top';
+  autoPlay?: boolean;
 }
 ```
 
-**Data Structure:**
-- Position coordinates in Astronomical Units (AU)
-- Velocity in AU/day
-- ISO 8601 date strings
-- 100+ data points per object
+**Key Features:**
+- **Date Range**: October 25 - November 2, 2025
+- **Perihelion Date**: October 29, 2025
+- **Multiple Camera Angles**: Sun, comet, side, top views
+- **Enhanced Effects**: Corona, radiation, tail intensification
+- **Timeline Scrubber**: Precise time control
+- **Intensity Visualization**: Distance-based effects
 
-#### 5. `lib/horizons-api.ts`
-**NASA JPL Horizons API integration and type definitions**
+**Visual Effects:**
+- **Enhanced Sun**: Multiple corona layers
+- **Solar Particles**: 1000-particle system
+- **Radiation Particles**: 500-particle system
+- **Corona Particles**: 300-particle system
+- **Dynamic Tail**: Intensity-based scaling
+- **Ion Tail**: Separate particle system
+
+**Controls:**
+- **Camera Angles**: Sun, comet, side, top
+- **Playback Speed**: 1x to 100x
+- **Timeline Scrubber**: Frame-by-frame control
+- **Effect Toggles**: Corona, radiation, tail
+- **Perihelion Alert**: Automatic notification
+
+### 5. TrajectoryPlotterView.tsx
+**Interactive trajectory modification**
+
+```typescript
+interface TrajectoryPlotterViewProps {
+  solarSystemData: Record<string, any[]>;
+  onTrajectoryChange: (trajectory: any) => void;
+  className?: string;
+}
+
+interface PhysicsData {
+  velocity: { x: number; y: number; z: number };
+  acceleration: { x: number; y: number; z: number };
+  energy: number;
+  angularMomentum: number;
+  timeToImpact: number | null;
+  impactObject: string | null;
+  health: PhysicsHealthStats | null;
+}
+```
+
+**Key Features:**
+- **Drag-and-Drop**: Interactive comet positioning
+- **Real-time Physics**: N-body simulation
+- **Impact Prediction**: Collision detection
+- **Trajectory Visualization**: Green path line
+- **Physics Dashboard**: Real-time calculations
+- **Scenario Presets**: Predefined trajectories
+
+**Physics Engine:**
+- **StableNBodySimulator**: Advanced physics calculations
+- **Object Pooling**: Performance optimization
+- **Debounced Updates**: 100ms calculation intervals
+- **Health Monitoring**: Simulation stability
+- **Impact Detection**: Collision prediction
+
+**Controls:**
+- **Drag Comet**: Click and drag to reposition
+- **Physics Dashboard**: Real-time metrics
+- **Scenario Presets**: Earth impact, Jupiter slingshot, etc.
+- **Trajectory Line**: Predicted path visualization
+
+## Supporting Components
+
+### 1. ControlPanel.tsx
+**Shared UI controls across all views**
+
+```typescript
+interface ControlPanelProps {
+  isPlaying?: boolean;
+  onPlayPause?: () => void;
+  onReset?: () => void;
+  onSettings?: () => void;
+  loading?: boolean;
+  error?: string | null;
+  className?: string;
+  children?: React.ReactNode;
+  title?: string;
+  subtitle?: string;
+}
+```
+
+**Features:**
+- **Play/Pause Button**: Consistent across views
+- **Reset Button**: Return to initial state
+- **Settings Button**: View-specific options
+- **Loading States**: Spinner and progress
+- **Error Handling**: User-friendly messages
+- **Responsive Design**: Mobile/desktop support
+
+### 2. ErrorBoundary.tsx
+**Error handling for 3D rendering failures**
+
+**Features:**
+- **WebGL Errors**: Catches rendering failures
+- **Fallback UI**: Retry options
+- **Error Reporting**: Detailed error information
+- **Graceful Degradation**: Prevents app crashes
+
+### 3. ThreeJSErrorBoundary.tsx
+**Specialized error boundary for Three.js**
+
+**Features:**
+- **3D Rendering Errors**: WebGL/Three.js specific
+- **Context Preservation**: Maintains app state
+- **Recovery Options**: Restart rendering
+- **Performance Monitoring**: FPS tracking
+
+## Data Management
+
+### 1. NASA Horizons API Integration
+
+**File: `lib/horizons-api.ts`**
 
 ```typescript
 export interface VectorData {
@@ -150,265 +382,247 @@ export interface VectorData {
     vz: number;         // Z velocity in AU/day
   };
 }
+
+export async function get3IAtlasVectors(
+  startDate: string,
+  endDate: string,
+  stepSize: string = '6h'
+): Promise<VectorData[]>
 ```
-
-### Supporting Files
-
-#### 6. `components/Atlas3DTrackerEnhanced.tsx`
-**Parent component managing playback state**
 
 **Key Features:**
-- Manages `isPlaying`, `speed`, `currentIndex` state
-- Loads trajectory data via `getHistoricalAtlasData()`
-- Provides fallback data for comet visibility
-- Passes `atlasData` to HistoricalFlightView
-- Controls animation loop with `requestAnimationFrame`
+- **Correct DES Format**: `'DES=1004083;'` for 3I/ATLAS
+- **Vector Ephemeris**: Position and velocity data
+- **Heliocentric Coordinates**: Sun-centered reference frame
+- **ICRF System**: International Celestial Reference Frame
+- **AU-D Units**: Astronomical Units, Days
 
-**State Management:**
+### 2. Data Caching System
+
+**File: `lib/horizons-cache.ts`**
+
 ```typescript
-const [atlasData, setAtlasData] = useState<VectorData[]>([]);
-const [currentIndex, setCurrentIndex] = useState(0);
-const [isPlaying, setIsPlaying] = useState(autoPlay);
-const [speed, setSpeed] = useState(playbackSpeed);
+export async function getCached3IAtlasVectors(
+  startDate: string,
+  endDate: string,
+  stepSize: string = '6h'
+): Promise<VectorData[]>
 ```
-
-#### 7. `components/views/AtlasViewsContainer.tsx`
-**Container routing props to HistoricalFlightView**
-
-#### 8. `hooks/useAdaptiveQuality.ts`
-**Performance optimization hook**
 
 **Features:**
-- Adjusts rendering quality based on FPS
-- Scales star count, geometry detail, shadow map size
-- Maintains 60fps target performance
-- Provides quality metrics to components
+- **7-day Cache**: localStorage-based caching
+- **Fallback Data**: Orbital elements if API fails
+- **Cache Invalidation**: Automatic expiry
+- **Performance Optimization**: Reduced API calls
 
-#### 9. `components/ThreeJSErrorBoundary.tsx`
-**Error boundary for 3D rendering failures**
+### 3. Solar System Data
+
+**File: `lib/solar-system-data.ts`**
+
+```typescript
+export const SOLAR_SYSTEM_OBJECTS = {
+  atlas: { name: '3I/ATLAS', color: 0x00ff88, size: 0.8 },
+  sun: { name: 'Sun', color: 0xffaa00, size: 1.0 },
+  mercury: { name: 'Mercury', color: 0x8c7853, size: 0.02 },
+  venus: { name: 'Venus', color: 0xffc649, size: 0.06 },
+  earth: { name: 'Earth', color: 0x6b93d6, size: 0.06 },
+  mars: { name: 'Mars', color: 0xff6666, size: 0.04 },
+  jupiter: { name: 'Jupiter', color: 0xffaa00, size: 0.2 },
+  saturn: { name: 'Saturn', color: 0xffaa00, size: 0.18 },
+  uranus: { name: 'Uranus', color: 0x4fd0e7, size: 0.08 },
+  neptune: { name: 'Neptune', color: 0x4b70dd, size: 0.08 }
+};
+```
+
+### 4. Physics Engine
+
+**File: `lib/trajectory-calculator.ts`**
+
+```typescript
+export class StableNBodySimulator {
+  initializeWithSolarSystem(positions: Record<string, any>): void;
+  step(): void;
+  getState(): SimulationState;
+  getHealthStats(): PhysicsHealthStats;
+}
+```
 
 **Features:**
-- Catches WebGL/Three.js errors
-- Provides fallback UI with retry options
-- Prevents entire app crashes from 3D errors
+- **N-body Simulation**: Gravitational interactions
+- **Stability Monitoring**: Health statistics
+- **Performance Optimization**: Object pooling
+- **Impact Detection**: Collision prediction
 
-## Motion and Animation System
+## Performance Optimizations
 
-### Animation Loop
+### 1. Adaptive Quality System
+
+**File: `hooks/useAdaptiveQuality.ts`**
+
 ```typescript
-useEffect(() => {
-  if (!isPlaying || atlasData.length === 0) return;
-  let animationFrameId: number;
-  let lastTime = performance.now();
-
-  const animate = (currentTime: number) => {
-    const deltaTime = (currentTime - lastTime) / 1000;
-    lastTime = currentTime;
-
-    setCurrentIndex((prevIndex) => {
-      const nextIndex = prevIndex + speed * deltaTime * 2.0;
-      return nextIndex >= atlasData.length - 1 ? 0 : nextIndex;
-    });
-    animationFrameId = requestAnimationFrame(animate);
-  };
-  animationFrameId = requestAnimationFrame(animate);
-  return () => cancelAnimationFrame(animationFrameId);
-}, [isPlaying, speed, atlasData.length]);
+export function useAdaptiveQuality(): {
+  quality: QualitySettings;
+  setFps: (fps: number) => void;
+  adjustQuality: () => void;
+}
 ```
 
-### Position Calculation
+**Features:**
+- **FPS Monitoring**: Real-time performance tracking
+- **Quality Scaling**: Star count, geometry detail
+- **Shadow Maps**: Resolution adjustment
+- **Pixel Ratio**: Rendering resolution scaling
+
+### 2. Object Pooling
+
+**File: `lib/performance-utils.ts`**
+
 ```typescript
-const position = useMemo(() => {
-  const frame = trajectory[Math.floor(currentIndex)];
-  if (frame) {
-    return [frame.position.x, frame.position.z, -frame.position.y];
-  }
-  return [10, 5, 0]; // Fallback position
-}, [trajectory, currentIndex]);
+export const sphereGeometryPool = new ObjectPool<THREE.SphereGeometry>();
+export const bufferGeometryPool = new ObjectPool<THREE.BufferGeometry>();
+export const lineBasicMaterialPool = new ObjectPool<THREE.LineBasicMaterial>();
+export const meshStandardMaterialPool = new ObjectPool<THREE.MeshStandardMaterial>();
 ```
 
-### Real-time Metrics Calculation
+**Features:**
+- **Geometry Reuse**: Prevents memory leaks
+- **Material Pooling**: Efficient resource management
+- **Performance Monitoring**: FPS and memory tracking
+- **Debouncing**: Limits excessive calculations
+
+### 3. Frame Guard System
+
+**File: `components/utils/frame-guard.ts`**
+
 ```typescript
-useEffect(() => {
-  if (!data || data.length === 0) return;
-
-  const currentFrame = data[Math.floor(currentIndex)];
-  if (!currentFrame) return;
-
-  // Calculate distance from Sun (origin [0,0,0]) in AU
-  const { position } = currentFrame;
-  const distance = Math.sqrt(
-    position.x * position.x +
-    position.y * position.y +
-    position.z * position.z
-  );
-  setDistanceFromSun(distance);
-
-  // Calculate velocity in km/s from AU/day
-  const { velocity } = currentFrame;
-  const velocityMagnitude = Math.sqrt(
-    velocity.vx * velocity.vx +
-    velocity.vy * velocity.vy +
-    velocity.vz * velocity.vz
-  );
-  const velocityKmPerSec = (velocityMagnitude * AU_TO_KM) / DAY_TO_SECONDS;
-  setCurrentVelocity(velocityKmPerSec);
-
-  // Extract current date
-  setCurrentDate(currentFrame.date || "");
-}, [currentIndex, data]);
+export function withFrameGuard<T extends (...args: any[]) => void>(
+  fn: T
+): T;
+export function setFps(fps: number): void;
 ```
 
-## Visual Elements
-
-### Celestial Objects
-
-#### Sun
-- **Position**: Static at `[0, 0, 0]`
-- **Geometry**: Sphere with radius 1.0 AU
-- **Material**: Yellow emissive material with intensity 5
-- **Label**: "Sun" in yellow text, offset `[0, 1.5, 0]`
-
-#### Earth
-- **Trajectory**: `trajectoryData.earth` array
-- **Geometry**: Sphere with radius 0.06 AU
-- **Material**: Sky blue color
-- **Label**: "Earth" in sky blue text, offset `[0, 0.8, 0]`
-
-#### Mars
-- **Trajectory**: `trajectoryData.mars` array
-- **Geometry**: Sphere with radius 0.04 AU
-- **Material**: Red color (#ff6666)
-- **Label**: "Mars" in red text, offset `[0, 0.8, 0]`
-
-#### 3I/ATLAS Comet
-- **Trajectory**: `atlasData` prop
-- **Geometry**: Red sphere (radius 0.8) + orange tail cone
-- **Material**: Red emissive material with intensity 5
-- **Tail**: Orange cone with additive blending
-- **Label**: "3I/ATLAS" in red text, offset `[0, 1.2, 0]`
-
-### Trajectory Trail
-- **Color**: Green (#00ff88)
-- **Width**: 2 pixels
-- **Opacity**: 0.8
-- **Length**: Shows path up to current position
-- **Geometry**: BufferGeometry with position attributes
-
-### Background Elements
-- **Stars**: Animated starfield using `@react-three/drei` Stars component
-- **Grid**: Reference grid helper (20x20 units)
-- **Lighting**: Ambient light (intensity 0.2) + point light at origin (intensity 25)
+**Features:**
+- **NaN Detection**: Prevents invalid calculations
+- **Frame Clipping**: Detects performance issues
+- **FPS Monitoring**: Real-time performance tracking
+- **Error Recovery**: Automatic degradation
 
 ## User Interface
 
-### Playback Controls
+### 1. Playback Controls
+
+**Common Controls Across Views:**
 - **Timeline Slider**: Range from first to last data point
 - **Play/Pause Button**: Toggles animation
 - **Reset Button**: Returns to beginning
-- **Speed Slider**: Adjusts playback speed (1x to 25x)
+- **Speed Slider**: Adjusts playback speed (1x to 100x)
 
-### Telemetry HUD
+### 2. Telemetry HUD
+
+**Real-time Metrics Display:**
 - **Position**: Top-right corner
 - **Background**: Semi-transparent black with blur
 - **Data**: Date, distance from Sun, velocity
 - **Colors**: Green (date), blue (distance), yellow (velocity)
 
-### Camera Controls
-- **OrbitControls**: Pan, zoom, rotate
+### 3. Camera Controls
+
+**OrbitControls Configuration:**
+- **Pan, Zoom, Rotate**: Standard 3D navigation
 - **FollowCamera**: Automatically follows comet
-- **Limits**: Min distance 5 AU, max distance 50 AU
+- **Limits**: Min/max distance constraints
 - **Damping**: Smooth camera movement
-
-## Performance Optimizations
-
-### Adaptive Quality
-- **Star Count**: Adjusts based on FPS (2000-20000 stars)
-- **Geometry Detail**: Scales sphere segments (16-128)
-- **Shadow Map Size**: Adjusts resolution (512-4096)
-- **Pixel Ratio**: Scales rendering resolution (0.5-2.0)
-
-### Memory Management
-- **Object Pooling**: Reuses Three.js objects
-- **Cleanup**: Proper disposal in useEffect cleanup
-- **Debouncing**: Limits trajectory updates
-- **Caching**: Stores calculated positions
-
-### Error Handling
-- **Error Boundaries**: Catches 3D rendering errors
-- **Fallback Data**: Provides default trajectory if loading fails
-- **Loading States**: Shows spinner during data loading
-- **Retry Mechanisms**: Allows recovery from errors
-
-## Data Flow
-
-### Input Data
-1. `atlasData` prop from parent component
-2. `trajectoryData.earth` and `trajectoryData.mars` from JSON
-3. `currentIndex` determines current frame
-4. `isPlaying` controls animation state
-
-### Processing
-1. Position calculation from trajectory arrays
-2. Real-time metrics calculation (distance, velocity)
-3. Trail generation up to current index
-4. Camera following comet position
-
-### Output
-1. 3D scene rendering with all objects
-2. Telemetry HUD with real-time data
-3. Playback controls for user interaction
-4. Performance metrics for optimization
 
 ## Technical Specifications
 
 ### Dependencies
+
+**Core Libraries:**
 - **@react-three/fiber**: React renderer for Three.js
 - **@react-three/drei**: Useful helpers and components
 - **three**: 3D graphics library
 - **react**: UI framework
 - **typescript**: Type safety
 
+**Performance Libraries:**
+- **Framer Motion**: Animation library
+- **Tailwind CSS**: Styling framework
+
 ### Browser Requirements
+
+**Minimum Requirements:**
 - **WebGL**: Required for 3D rendering
 - **ES6+**: Modern JavaScript features
 - **Canvas API**: For 2D overlays
+- **LocalStorage**: For data caching
 
 ### Performance Targets
+
+**Optimization Goals:**
 - **60 FPS**: Smooth animation target
 - **<100ms**: Scenario switching response time
 - **<50MB**: Memory usage limit
 - **<3s**: Initial loading time
 
-## Future Enhancements
+## Data Flow
 
-### Planned Features
-- **Object Labels**: Additional celestial body labels
-- **Trajectory Prediction**: Future path visualization
-- **Impact Detection**: Collision prediction algorithms
-- **Multi-body Physics**: Gravitational interactions
-- **Export Functionality**: Save trajectory data
+### Input Data Sources
 
-### Performance Improvements
-- **Web Workers**: Background calculations
-- **Level of Detail**: Distance-based quality scaling
-- **Instanced Rendering**: Efficient multi-object rendering
-- **Spatial Partitioning**: Optimized collision detection
+1. **NASA Horizons API**: Primary ephemeris data
+2. **Solar System Data**: Planetary positions
+3. **Trajectory Calculator**: Physics simulations
+4. **User Interactions**: Playback controls
 
-## Troubleshooting
+### Processing Pipeline
+
+1. **Data Loading**: API calls with caching
+2. **Position Calculation**: Trajectory interpolation
+3. **Real-time Metrics**: Distance, velocity calculations
+4. **Trail Generation**: Path visualization
+5. **Camera Following**: Comet tracking
+
+### Output Rendering
+
+1. **3D Scene**: All celestial objects
+2. **Telemetry HUD**: Real-time data
+3. **Playback Controls**: User interaction
+4. **Performance Metrics**: Optimization data
+
+## Error Handling
 
 ### Common Issues
+
 1. **Comet Not Visible**: Check fallback data generation
 2. **Performance Drops**: Verify adaptive quality settings
 3. **Camera Issues**: Check OrbitControls configuration
 4. **Data Loading**: Verify trajectory.json structure
 
 ### Debug Tools
-- **Console Logs**: Position calculation debugging
-- **Performance Monitor**: FPS and memory tracking
-- **Error Boundaries**: 3D rendering error capture
-- **Loading States**: Data loading progress indication
+
+1. **Console Logs**: Position calculation debugging
+2. **Performance Monitor**: FPS and memory tracking
+3. **Error Boundaries**: 3D rendering error capture
+4. **Loading States**: Data loading progress indication
+
+## Future Enhancements
+
+### Planned Features
+
+1. **Object Labels**: Additional celestial body labels
+2. **Trajectory Prediction**: Future path visualization
+3. **Impact Detection**: Collision prediction algorithms
+4. **Multi-body Physics**: Gravitational interactions
+5. **Export Functionality**: Save trajectory data
+
+### Performance Improvements
+
+1. **Web Workers**: Background calculations
+2. **Level of Detail**: Distance-based quality scaling
+3. **Instanced Rendering**: Efficient multi-object rendering
+4. **Spatial Partitioning**: Optimized collision detection
 
 ## Conclusion
 
-The Historical Flight View provides a comprehensive 3D visualization of 3I/ATLAS's journey through the solar system, combining real-time telemetry, interactive controls, and performance optimizations to deliver an engaging educational experience. The modular architecture allows for easy maintenance and future enhancements while maintaining high performance standards.
+The Historical Flight View System provides a comprehensive 3D visualization platform for 3I/ATLAS's journey through the solar system. The modular architecture supports five distinct views, each optimized for specific use cases, while maintaining consistent performance and user experience. The system combines real-time telemetry, interactive controls, and advanced physics simulation to deliver an engaging educational experience about interstellar objects and orbital mechanics.
+
+The architecture's emphasis on performance optimization, error handling, and user experience makes it suitable for both educational and research applications, while the modular design allows for easy maintenance and future enhancements.

@@ -240,3 +240,5 @@ This is **not realistic** for a tomorrow deadline. The game component should eit
 - Or implement a basic version that can be expanded later
 
 **The project can be launched tomorrow with 2 out of 3 components fully functional.**
+
+

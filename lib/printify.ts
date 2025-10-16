@@ -9,7 +9,7 @@ type Shop = {
   sales_channel?: string;
 };
 
-type Product = {
+export type Product = {
   id: string;
   title: string;
   description?: string;
@@ -116,7 +116,7 @@ export async function getLatestPublishedProducts(
         new Date(a.updated_at ?? a.created_at ?? 0).getTime()
     );
 
-  return published.slice(0, Math.min(limit, 6));
+  return published.slice(0, limit);
 }
 
 // --- UTILITY FUNCTIONS (Unchanged) ---

@@ -265,3 +265,5 @@ echo ""
 echo "To enable automatic startup, add the integration code to your shell startup file."
 echo "See: SHELL_INTEGRATION_INSTRUCTIONS.md"
 echo ""
+
+

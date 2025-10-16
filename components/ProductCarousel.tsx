@@ -1,16 +1,8 @@
 "use client";
 import SafeImage from "@/components/SafeImage";
+import type { Product } from "@/lib/printify";
 import Link from "next/link";
 import { useState } from "react";
-
-type Product = {
-  id: string;
-  title: string;
-  description?: string;
-  images?: { src: string; is_default?: boolean }[];
-  variants?: { id: number; price: number }[];
-  external?: { id?: string; handle?: string };
-};
 
 type Props = {
   products: Product[];
@@ -18,26 +10,36 @@ type Props = {
   productsPerPage?: number;
 };
 
-export default function ProductCarousel({ products, storeBase, productsPerPage = 3 }: Props) {
+export default function ProductCarousel({
+  products,
+  storeBase,
+  productsPerPage = 3,
+}: Props) {
   const [currentPage, setCurrentPage] = useState(0);
-  const totalPages = Math.ceil(products.length / productsPerPage);
-  
+  const totalPages = Math.max(1, Math.ceil(products.length / productsPerPage));
+
   const startIdx = currentPage * productsPerPage;
   const currentProducts = products.slice(startIdx, startIdx + productsPerPage);
-  
+
   // Pad with nulls if we have fewer than productsPerPage
-  const displayProducts = [...currentProducts, ...Array(productsPerPage - currentProducts.length).fill(null)];
+  const displayProducts = [
+    ...currentProducts,
+    ...Array(productsPerPage - currentProducts.length).fill(null),
+  ];
 
   const nextPage = () => setCurrentPage((prev) => (prev + 1) % totalPages);
-  const prevPage = () => setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
-  
+  const prevPage = () =>
+    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+
   const getProductUrl = (p: Product) => {
-    if (p.external?.handle?.startsWith('http')) {
+    if (p.external?.handle?.startsWith("http")) {
       return p.external.handle;
     }
     const base = storeBase.replace(/\/$/, "");
     if (p.external?.handle) {
-      return `${base}${p.external.handle.startsWith('/') ? '' : '/'}${p.external.handle}`;
+      return `${base}${p.external.handle.startsWith("/") ? "" : "/"}${
+        p.external.handle
+      }`;
     }
     if (p.external?.id) {
       return `${base}/product/${p.external.id}`;
@@ -46,25 +48,25 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
   };
 
   const getProductImage = (p: Product) => {
-    const defaultImg = p.images?.find(img => img.is_default);
+    const defaultImg = p.images?.find((img) => img.is_default);
     const firstImg = p.images?.[0];
     return defaultImg?.src || firstImg?.src || "/images/default-product.png";
   };
 
   const getProductPrice = (p: Product) => {
     if (!p.variants || p.variants.length === 0) return "";
-    const minPrice = Math.min(...p.variants.map(v => v.price));
+    const minPrice = Math.min(...p.variants.map((v) => v.price));
     return `$${(minPrice / 100).toFixed(2)}`;
   };
 
   const getProductDescription = (p: Product) => {
     if (!p.description) return "";
-    const text = p.description.replace(/<[^>]*>/g, '');
+    const text = p.description.replace(/<[^>]*>/g, "");
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-    const firstTwo = sentences.slice(0, 2).join(' ').trim();
+    const firstTwo = sentences.slice(0, 2).join(" ").trim();
     if (firstTwo) return firstTwo;
-    const words = text.split(/\s+/).slice(0, 25).join(' ');
-    return words + (text.split(/\s+/).length > 25 ? '...' : '');
+    const words = text.split(/\s+/).slice(0, 25).join(" ");
+    return words + (text.split(/\s+/).length > 25 ? "..." : "");
   };
 
   return (
@@ -77,22 +79,32 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
             aria-label="Previous products"
             className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/90 p-3 hover:bg-white shadow-lg transition-all hover:scale-110"
           >
-            <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-6 h-6 text-black"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
         )}
-        
+
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {displayProducts.map((p, i) => {
             // Use a unique key that includes currentPage to force re-render
-            const uniqueKey = `${currentPage}-${i}-${p?.id || 'default'}`;
-            const url = p ? getProductUrl(p) : (storeBase || "#");
+            const uniqueKey = `${currentPage}-${i}-${p?.id || "default"}`;
+            const url = p ? getProductUrl(p) : storeBase || "#";
             const img = p ? getProductImage(p) : "/images/default-product.png";
             const name = p?.title ?? "Product coming soon";
             const price = p ? getProductPrice(p) : "";
             const description = p ? getProductDescription(p) : "";
-            
+
             return (
               <Link
                 key={uniqueKey}
@@ -130,7 +142,7 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
             );
           })}
         </div>
-        
+
         {/* Right Navigation Arrow */}
         {products.length > productsPerPage && (
           <button
@@ -138,12 +150,22 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
             aria-label="Next products"
             className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/90 p-3 hover:bg-white shadow-lg transition-all hover:scale-110"
           >
-            <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            <svg
+              className="w-6 h-6 text-black"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         )}
-        
+
         {/* Page Indicator */}
         {products.length > productsPerPage && (
           <div className="mt-3 flex justify-center gap-1.5">
@@ -153,7 +175,9 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
                 onClick={() => setCurrentPage(i)}
                 aria-label={`Go to page ${i + 1}`}
                 className={`h-2 rounded-full transition-all ${
-                  i === currentPage ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
+                  i === currentPage
+                    ? "w-8 bg-white"
+                    : "w-2 bg-white/40 hover:bg-white/60"
                 }`}
               />
             ))}

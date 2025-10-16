@@ -124,3 +124,5 @@ The 3IAtlas project is a sophisticated Next.js application focused on astronomic
 - Performance optimization
 - Error handling improvements
 - User experience enhancements
+
+

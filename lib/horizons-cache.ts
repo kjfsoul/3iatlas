@@ -252,13 +252,20 @@ export async function getCached3IAtlasVectors(
   endDate: string,
   stepSize: string = '6h'
 ): Promise<VectorData[]> {
+  console.log("[Cache] getCached3IAtlasVectors called with:", {
+    startDate,
+    endDate,
+    stepSize,
+  });
   const cacheKey = generateCacheKey(startDate, endDate, stepSize);
+  console.log("[Cache] Generated cache key:", cacheKey);
 
   // Try to get from cache
   const cached = getFromLocalStorage(cacheKey);
+  console.log("[Cache] Cached data found:", !!cached);
 
   if (cached && isCacheValid(cached)) {
-    console.log('[Cache] Using cached data');
+    console.log("[Cache] Using cached data, length:", cached.data.length);
     return cached.data;
   }
 
@@ -266,7 +273,14 @@ export async function getCached3IAtlasVectors(
   console.log('[Cache] Fetching fresh data from Horizons API');
 
   try {
+    console.log("[Cache] Calling get3IAtlasVectors...");
     const vectors = await get3IAtlasVectors(startDate, endDate, stepSize);
+    console.log(
+      "[Cache] get3IAtlasVectors returned:",
+      vectors.length,
+      "vectors"
+    );
+    console.log("[Cache] First vector sample:", vectors[0]);
     last3IAtlasUsedFallback = false;
 
     // Save to cache

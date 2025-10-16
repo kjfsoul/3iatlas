@@ -6,7 +6,7 @@ import Atlas3DTrackerEnhanced from "@/components/Atlas3DTrackerEnhanced";
 export default function ClientOnly3DTracker() {
   return (
     <div className="relative w-full h-full">
-      <Atlas3DTrackerEnhanced autoPlay={true} playbackSpeed={2} />
+      <Atlas3DTrackerEnhanced />
     </div>
   );
 }

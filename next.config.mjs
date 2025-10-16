@@ -12,6 +12,11 @@ const nextConfig = {
   compress: true,
   experimental: {
     optimizePackageImports: ["three", "@react-three/fiber"],
+    turbopack: {
+      // This line forces Turbopack to use the current project directory as the root
+      // and prevents it from scanning parent folders.
+      root: import.meta.url,
+    },
   },
   images: {
     unoptimized: true,

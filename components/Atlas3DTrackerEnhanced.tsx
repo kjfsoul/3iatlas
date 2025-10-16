@@ -1,8 +1,8 @@
 // components/Atlas3DTrackerEnhanced.tsx (Corrected)
 "use client";
 
-import { getHistoricalAtlasData } from "@/lib/historical-data-generator"; // Use this for the full historical path
 import { type VectorData } from "@/lib/horizons-api";
+import { getCached3IAtlasVectors } from "@/lib/horizons-cache"; // Use NASA API with corrected DES format
 import { type ViewType } from "@/lib/view-manager";
 import { useCallback, useEffect, useState } from "react";
 import ErrorBoundary from "./ErrorBoundary";
@@ -20,6 +20,8 @@ export default function Atlas3DTrackerEnhanced({
   playbackSpeed = 5, // Default speed
   className = "",
 }: Props) {
+  console.log("Atlas3DTrackerEnhanced component mounted");
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [atlasData, setAtlasData] = useState<VectorData[]>([]);
@@ -28,42 +30,37 @@ export default function Atlas3DTrackerEnhanced({
   const [speed, setSpeed] = useState(playbackSpeed);
   const [currentView, setCurrentView] = useState<ViewType>("historical");
 
+  // Test if component is actually rendering
+  console.log(
+    "Atlas3DTrackerEnhanced render - mounted:",
+    mounted,
+    "loading:",
+    loading,
+    "atlasData length:",
+    atlasData.length
+  );
+
   // Load the FULL historical data once on mount
   useEffect(() => {
     console.log("Atlas3DTrackerEnhanced useEffect triggered");
+    setMounted(true);
+
     const loadData = async () => {
       try {
-        console.log("Starting data load, setting loading to true");
+        console.log("Starting data load...");
         setLoading(true);
-        
-        // Add a small delay to ensure client-side rendering
-        await new Promise(resolve => setTimeout(resolve, 100));
-        // TEMPORARY: Force fallback data to make comet visible
-        console.log("Using fallback data to ensure comet visibility");
-        const fallbackData: VectorData[] = [];
-        const startDate = new Date('2025-07-01');
-        for (let i = 0; i < 100; i++) {
-          const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
-          const angle = (i / 100) * Math.PI * 2;
-          const radius = 5 + Math.sin(angle) * 2;
-          fallbackData.push({
-            jd: 2460977.981439 + i,
-            date: date.toISOString().split('T')[0],
-            position: {
-              x: Math.cos(angle) * radius,
-              y: Math.sin(angle) * radius * 0.5,
-              z: Math.sin(angle) * radius * 0.3
-            },
-            velocity: {
-              vx: -Math.sin(angle) * 0.1,
-              vy: Math.cos(angle) * 0.05,
-              vz: Math.cos(angle) * 0.03
-            }
-          });
-        }
-        console.log("Fallback data created:", fallbackData.length, "points");
-        setAtlasData(fallbackData);
-        console.log("Atlas data set, loading complete");
+
+        // Load real NASA Horizons data
+        console.log("Loading NASA Horizons data...");
+        // Temporarily bypass cache to test direct API calls
+        const vectors = await getCached3IAtlasVectors(
+          "2025-07-01",
+          "2025-07-02", // Shorter range for testing
+          "6h"
+        );
+
+        console.log("NASA data loaded:", vectors.length, "points");
+        setAtlasData(vectors);
         setLoading(false);
       } catch (err) {
         console.error("Data loading error:", err);
@@ -71,6 +68,7 @@ export default function Atlas3DTrackerEnhanced({
         setLoading(false);
       }
     };
+
     loadData();
   }, []);
 
@@ -113,48 +111,61 @@ export default function Atlas3DTrackerEnhanced({
     []
   );
 
-  console.log("Atlas3DTrackerEnhanced render - loading:", loading, "atlasData length:", atlasData.length);
-  
-  if (loading)
-    return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500 mb-4" />
-        <p className="text-white text-lg">Loading Historical Trajectory...</p>
-        <p className="text-gray-400 text-sm mt-2">Debug: Loading={loading.toString()}</p>
-      </div>
-    );
-  if (error)
-    return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10">
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-
+  // Always render the same structure to avoid hydration mismatch
   return (
     <ErrorBoundary>
       <div
         data-testid="atlas-3d-tracker"
         className={`relative w-full h-full ${className}`}
       >
-        <AtlasViewsContainer
-          // Pass the single source of truth down to all children
-          atlasData={atlasData}
-          solarSystemData={{}} // We can load this later for other views
-          currentIndex={currentIndex}
-          isPlaying={isPlaying}
-          speed={speed}
-          currentView={currentView}
-          onViewChange={handleViewChange}
-          onSpeedChange={handleSpeedChange}
-          onPlayPause={handlePlayPause}
-          onReset={handleReset}
-          onIndexChange={handleIndexChange} // Pass down the index change handler
-          // Default props for initialization
-          onTrajectoryChange={() => {}}
-          dailyPosition={null}
-          observerMetrics={null}
-          currentDate={atlasData[Math.floor(currentIndex)]?.date || ""}
-        />
+        {loading && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500 mb-4" />
+            <p className="text-white text-lg">
+              Loading Historical Trajectory...
+            </p>
+            <p className="text-gray-400 text-sm mt-2">
+              Debug: Loading={loading.toString()}
+            </p>
+            {!mounted && (
+              <p className="text-yellow-400 text-xs mt-1">Hydrating...</p>
+            )}
+          </div>
+        )}
+
+        {error && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/90 z-10">
+            <p className="text-red-500">{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && atlasData.length > 0 && (
+          <AtlasViewsContainer
+            // Pass the single source of truth down to all children
+            atlasData={atlasData}
+            solarSystemData={{}} // We can load this later for other views
+            currentIndex={currentIndex}
+            isPlaying={isPlaying}
+            speed={speed}
+            currentView={currentView}
+            onViewChange={handleViewChange}
+            onSpeedChange={handleSpeedChange}
+            onPlayPause={handlePlayPause}
+            onReset={handleReset}
+            onIndexChange={handleIndexChange} // Pass down the index change handler
+            // Default props for initialization
+            onTrajectoryChange={() => {}}
+            dailyPosition={null}
+            observerMetrics={null}
+            currentDate={atlasData[Math.floor(currentIndex)]?.date || ""}
+          />
+        )}
+
+        {!loading && !error && atlasData.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center bg-orange-900/90 z-10">
+            <p className="text-white text-lg">No trajectory data available.</p>
+          </div>
+        )}
       </div>
     </ErrorBoundary>
   );

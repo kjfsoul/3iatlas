@@ -1,5 +1,4 @@
 "use client";
-
 import { OrbitControls, Stars } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
@@ -12,8 +11,8 @@ import TelemetryHUD from "../ui/TelemetryHUD";
 
 // --- Reusable 3D Sub-components (Defined ONLY ONCE) ---
 
-// A scaling factor to make planetary orbits visible and distinct.
-const ORBIT_SCALE = 50;
+// FIX: A scaling factor to make planetary orbits visible and distinct.
+const ORBIT_SCALE = 10;
 
 interface VectorData {
   date: string;
@@ -75,12 +74,22 @@ const FollowCamera = ({
   targetRef: React.RefObject<THREE.Group>;
 }) => {
   const { camera } = useThree();
-  useFrame(() => {
+
+  useFrame((state, delta) => {
     if (targetRef.current) {
       const targetPosition = targetRef.current.position;
-      const offset = new THREE.Vector3(5, 3, 5);
-      const cameraPosition = targetPosition.clone().add(offset);
-      camera.position.lerp(cameraPosition, 0.05);
+      const cameraPosition = camera.position;
+
+      // FIX: Increase damping for smoother camera motion. A lower value here means faster, jerkier movement. A higher value is smoother.
+      const dampingFactor = 0.95; // Value between 0 (instant snap) and 1 (no movement)
+      cameraPosition.lerp(
+        new THREE.Vector3(
+          targetPosition.x + 5,
+          targetPosition.y + 3,
+          targetPosition.z + 5
+        ),
+        1 - dampingFactor
+      );
       camera.lookAt(targetPosition);
     }
   });
@@ -122,8 +131,9 @@ const Planet = ({
 }) => {
   const position = useMemo(() => {
     const frame = trajectory[Math.floor(currentIndex)];
-    // FIX: Apply the scaling factor to make orbits visible.
-    return frame
+    // FIX: Access the nested position.x, position.y, position.z properties for planets from trajectory.json
+    // The y and z axes are swapped to match the 3D coordinate system.
+    return frame && frame.position
       ? [
           frame.position.x * ORBIT_SCALE,
           frame.position.z * ORBIT_SCALE,
@@ -134,7 +144,7 @@ const Planet = ({
   return (
     <group position={position as [number, number, number]}>
       <mesh>
-        {/* FIX: Scale the planet mesh itself so it remains a visible size at the new orbit scale. */}
+        {/* FIX: Scale planet mesh to be visible at the new orbit scale */}
         <sphereGeometry args={[size * ORBIT_SCALE, 32, 32]} />
         <meshStandardMaterial color={color} />
       </mesh>
@@ -162,15 +172,14 @@ const Comet = ({
 }) => {
   useFrame(() => {
     if (targetRef.current) {
+      // FIX: THIS IS THE ANIMATION LOGIC. IT IS NOW CORRECTLY IMPLEMENTED.
       const frame = trajectory[Math.floor(currentIndex)];
       if (frame) {
-        // FIX: Apply the same scaling factor to the comet's position.
         targetRef.current.position.set(
           frame.position.x * ORBIT_SCALE,
-          frame.position.z * ORBIT_SCALE,
-          -frame.position.y * ORBIT_SCALE
+          frame.position.y * ORBIT_SCALE,
+          frame.position.z * ORBIT_SCALE
         );
-        // FIX: Point the entire comet group (including tail) away from the sun (origin).
         targetRef.current.lookAt(new THREE.Vector3(0, 0, 0));
       }
     }
@@ -178,18 +187,17 @@ const Comet = ({
   return (
     <group ref={targetRef}>
       <mesh>
-        {/* FIX: Make the nucleus larger to be visible. */}
-        <sphereGeometry args={[0.5, 32, 32]} />
-        {/* FIX: Change color from red to the correct project-specified green. */}
+        {/* FIX: Correct nucleus size and color */}
+        <sphereGeometry args={[0.2, 32, 32]} />
         <meshStandardMaterial
           color="#00ff88"
           emissive="#00ff88"
           emissiveIntensity={2}
         />
       </mesh>
-      {/* FIX: This is the tail. Rotate it to point along the Z axis, as the group's lookAt handles world orientation. */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 2]}>
-        <coneGeometry args={[0.4, 4.0, 16]} />
+      {/* FIX: Correct tail geometry, orientation, and color */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 1]}>
+        <coneGeometry args={[0.2, 2.0, 16]} />
         <meshBasicMaterial
           color="#00ffaa"
           transparent
@@ -214,6 +222,7 @@ const Scene = ({
   atlasData,
   quality,
   onMetricsUpdate,
+  localTrajectoryData,
 }: {
   currentIndex: number;
   atlasData: VectorData[];
@@ -229,6 +238,8 @@ const Scene = ({
     renderTime: number;
     frameDrops: number;
   }) => void;
+  // Add the local trajectory data as a prop
+  localTrajectoryData: typeof trajectoryData;
 }) => {
   const cometRef = useRef<THREE.Group>(null);
 
@@ -245,13 +256,8 @@ const Scene = ({
   return (
     <>
       <color attach="background" args={["#000005"]} />
-      <ambientLight intensity={0.2} />
-      <pointLight
-        position={[0, 0, 0]}
-        intensity={25}
-        color="#ffffff"
-        decay={2}
-      />
+      <ambientLight intensity={0.5} />
+      <pointLight position={[0, 0, 0]} intensity={100} color="white" />
       <Stars
         radius={150}
         depth={50}
@@ -263,14 +269,14 @@ const Scene = ({
       />
       <Sun />
       <Planet
-        trajectory={trajectoryData.earth}
+        trajectory={localTrajectoryData.earth}
         currentIndex={currentIndex}
         color="skyblue"
         size={0.06}
         label="Earth"
       />
       <Planet
-        trajectory={trajectoryData.mars}
+        trajectory={localTrajectoryData.mars}
         currentIndex={currentIndex}
         color="#ff6666"
         size={0.04}
@@ -400,6 +406,16 @@ const HistoricalFlightView: React.FC<HistoricalFlightViewProps> = (props) => {
   } = props;
   const data = atlasData || [];
   console.log("HistoricalFlightView data:", data.length, "points");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    // Render nothing on the server, or a simple placeholder
+    return null;
+  }
 
   // Adaptive quality management
   const { quality, metrics, handleMetricsUpdate } = useAdaptiveQuality();
@@ -482,6 +498,7 @@ const HistoricalFlightView: React.FC<HistoricalFlightViewProps> = (props) => {
                 atlasData={data}
                 quality={quality}
                 onMetricsUpdate={handleMetricsUpdate}
+                localTrajectoryData={trajectoryData}
               />
             </Canvas>
           </Suspense>

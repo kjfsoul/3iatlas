@@ -150,7 +150,9 @@ export async function getEphemerisVectors(
   const url = `${HORIZONS_MAIN_ENDPOINT}?${queryParams.toString()}`;
 
   try {
+    console.log("[getEphemerisVectors] Fetching URL:", url);
     const response = await fetch(url);
+    console.log("[getEphemerisVectors] Response status:", response.status);
 
     if (!response.ok) {
       throw new HorizonsAPIError(
@@ -160,13 +162,19 @@ export async function getEphemerisVectors(
     }
 
     const data: HorizonsResponse = await response.json();
+    console.log(
+      "[getEphemerisVectors] Response data type:",
+      typeof data.result
+    );
     return data;
   } catch (error) {
     if (error instanceof HorizonsAPIError) {
       throw error;
     }
     throw new HorizonsAPIError(
-      `Failed to fetch ephemeris data: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to fetch ephemeris data: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
     );
   }
 }
@@ -179,25 +187,36 @@ export async function getEphemerisVectors(
  * Parse Horizons vector output into structured data
  * Handles both VEC_TABLE=2 (position + velocity) format
  */
-export function parseVectorData(horizonsResult: string[]): VectorData[] {
+export function parseVectorData(
+  horizonsResult: string | string[]
+): VectorData[] {
+  console.log(
+    "[parseVectorData] Starting parse, input type:",
+    typeof horizonsResult
+  );
   const vectors: VectorData[] = [];
-  const resultText = horizonsResult.join('\n');
-  const lines = resultText.split('\n');
+  const resultText = Array.isArray(horizonsResult)
+    ? horizonsResult.join("\n")
+    : horizonsResult;
+  const lines = resultText.split("\n");
+  console.log("[parseVectorData] Total lines:", lines.length);
+  console.log("[parseVectorData] First 10 lines:", lines.slice(0, 10));
 
   let inDataSection = false;
   let currentJD = 0;
-  let currentDate = '';
+  let currentDate = "";
   let currentPosition: { x: number; y: number; z: number } | null = null;
 
   for (const line of lines) {
     // Start of data section
-    if (line.includes('$$SOE')) {
+    if (line.includes("$$SOE")) {
+      console.log("[parseVectorData] Found start of data section");
       inDataSection = true;
       continue;
     }
 
     // End of data section
-    if (line.includes('$$EOE')) {
+    if (line.includes("$$EOE")) {
       break;
     }
 
@@ -207,6 +226,7 @@ export function parseVectorData(horizonsResult: string[]): VectorData[] {
     // Format: "2459854.500000000 = A.D. 2025-Oct-01 00:00:00.0000 TDB"
     const jdMatch = line.match(/^(\d+\.\d+)\s*=\s*A\.D\.\s*(.+?)\s+TDB/);
     if (jdMatch) {
+      console.log("[parseVectorData] Found JD line:", line);
       currentJD = parseFloat(jdMatch[1]);
       currentDate = jdMatch[2].trim();
       continue;
@@ -214,8 +234,11 @@ export function parseVectorData(horizonsResult: string[]): VectorData[] {
 
     // Parse position line
     // Format: " X = 1.234567890123456E+00 Y = -2.345678901234567E+00 Z = 3.456789012345678E-01"
-    const posMatch = line.match(/^\s*X\s*=\s*([\-\d.E+]+)\s+Y\s*=\s*([\-\d.E+]+)\s+Z\s*=\s*([\-\d.E+]+)/);
+    const posMatch = line.match(
+      /^\s*X\s*=\s*([\-\d.E+]+)\s+Y\s*=\s*([\-\d.E+]+)\s+Z\s*=\s*([\-\d.E+]+)/
+    );
     if (posMatch) {
+      console.log("[parseVectorData] Found position line:", line);
       currentPosition = {
         x: parseFloat(posMatch[1]),
         y: parseFloat(posMatch[2]),
@@ -225,9 +248,18 @@ export function parseVectorData(horizonsResult: string[]): VectorData[] {
     }
 
     // Parse velocity line
-    // Format: " VX= 1.234567890123E-02 VY= 2.345678901234E-02 VZ= 3.456789012345E-03"
-    const velMatch = line.match(/^\s*VX\s*=\s*([\-\d.E+]+)\s+VY\s*=\s*([\-\d.E+]+)\s+VZ\s*=\s*([\-\d.E+]+)/);
+    // Format: "VX=-1.384863382590469E-02 VY= 3.253037007037968E-02 VZ=-1.469837434711640E-03"
+    const velMatch = line.match(
+      /^\s*VX\s*=\s*([\-\d.E+]+)\s+VY\s*=\s*([\-\d.E+]+)\s+VZ\s*=\s*([\-\d.E+]+)/
+    );
     if (velMatch && currentPosition) {
+      console.log("[parseVectorData] Found velocity line:", line);
+      console.log(
+        "[parseVectorData] Adding vector with JD:",
+        currentJD,
+        "Date:",
+        currentDate
+      );
       vectors.push({
         jd: currentJD,
         date: convertHorizonsDateToISO(currentDate),
@@ -242,6 +274,7 @@ export function parseVectorData(horizonsResult: string[]): VectorData[] {
     }
   }
 
+  console.log("[parseVectorData] Parsed", vectors.length, "vectors");
   return vectors;
 }
 
@@ -252,19 +285,30 @@ export function parseVectorData(horizonsResult: string[]): VectorData[] {
  */
 function convertHorizonsDateToISO(horizonsDate: string): string {
   const months: Record<string, string> = {
-    Jan: '01', Feb: '02', Mar: '03', Apr: '04',
-    May: '05', Jun: '06', Jul: '07', Aug: '08',
-    Sep: '09', Oct: '10', Nov: '11', Dec: '12',
+    Jan: "01",
+    Feb: "02",
+    Mar: "03",
+    Apr: "04",
+    May: "05",
+    Jun: "06",
+    Jul: "07",
+    Aug: "08",
+    Sep: "09",
+    Oct: "10",
+    Nov: "11",
+    Dec: "12",
   };
 
   // Parse "2025-Oct-01 00:00:00.0000"
-  const match = horizonsDate.match(/^(\d{4})-(\w{3})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+  const match = horizonsDate.match(
+    /^(\d{4})-(\w{3})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/
+  );
   if (!match) {
     return new Date().toISOString(); // Fallback
   }
 
   const [, year, monthName, day, hours, minutes, seconds] = match;
-  const month = months[monthName] || '01';
+  const month = months[monthName] || "01";
 
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
 }
@@ -278,7 +322,7 @@ function convertHorizonsDateToISO(horizonsDate: string): string {
  * 1. Look up object to get SPK-ID
  * 2. Fetch ephemeris vectors
  * 3. Parse and return structured data
- * 
+ *
  * 3I/ATLAS (C/2025 N1) - Third confirmed interstellar object
  * Discovered: July 1, 2025 by ATLAS telescope, Chile
  * Perihelion: Late October 2025
@@ -287,72 +331,23 @@ function convertHorizonsDateToISO(horizonsDate: string): string {
 export async function get3IAtlasVectors(
   startDate: string,
   endDate: string,
-  stepSize: string = '6h'
+  stepSize: string = "6h"
 ): Promise<VectorData[]> {
-  // Step 1 (hardened): Use confirmed SPK-ID first to avoid flaky name lookups
-  // SPK-ID reference: docs/HORIZONS_ENHANCEMENT_PLAN.md
-  const preferredSpkId = "1004083";
-  let spkid = preferredSpkId;
+  console.log(
+    "[get3IAtlasVectors] Starting with dates:",
+    startDate,
+    "to",
+    endDate
+  );
+  // Step 1: Use confirmed DES format for 3I/ATLAS
+  // DES format reference: docs/LIVE_API_TEST_RESULTS.md
+  const preferredDesCommand = "'DES=1004083;'";
+  let spkid = preferredDesCommand;
 
-  // If SPK-ID path fails for any reason, fall back to designation lookup
-  let needLookup = false;
-  try {
-    const sanityParams: HorizonsQueryParams = {
-      COMMAND: preferredSpkId,
-      EPHEM_TYPE: "VECTOR",
-      CENTER: "@sun",
-      START_TIME: startDate,
-      STOP_TIME: endDate,
-      STEP_SIZE: stepSize,
-      format: "json",
-      OUT_UNITS: "AU-D",
-      REF_SYSTEM: "ICRF",
-      VEC_TABLE: "2",
-      OBJ_DATA: "YES",
-    };
-    // Quick probe (no parse here; the real fetch happens below). If this throws we will do lookup.
-    await getEphemerisVectors(sanityParams);
-    console.log("[Horizons] Using direct SPK-ID 1004083 for 3I/ATLAS");
-  } catch {
-    needLookup = true;
-  }
+  // Skip sanity check - we know DES format works from live testing
+  console.log("[Horizons] Using DES format 'DES=1004083;' for 3I/ATLAS");
 
-  if (needLookup) {
-    // Official designations for the third interstellar object (ordered by reliability)
-    const possibleNames = [
-      "C/2025 N1", // Provisional comet designation (most reliable in practice)
-      "3I/ATLAS", // Interstellar designation
-      "3I", // Short interstellar designation
-      "2025 N1", // Short provisional designation
-    ];
-
-    let lookupResult: HorizonsLookupResult | null = null;
-    for (const name of possibleNames) {
-      try {
-        const result = await lookupObject(name, "com");
-        if (result.count > 0) {
-          lookupResult = result;
-          console.log(`[Horizons] Found 3I/ATLAS using designation: "${name}"`);
-          console.log(`[Horizons] Object name: ${result.result?.[0]?.name}`);
-          break;
-        }
-      } catch (error) {
-        console.warn(`[Horizons] Failed to lookup "${name}":`, error);
-      }
-    }
-
-    if (
-      !lookupResult ||
-      !lookupResult.result ||
-      lookupResult.result.length === 0
-    ) {
-      throw new HorizonsAPIError(
-        "3I/ATLAS (C/2025 N1) not found in Horizons database. Tried: C/2025 N1, 3I/ATLAS, 3I, 2025 N1"
-      );
-    }
-    spkid = lookupResult.result[0].spkid;
-    console.log(`[Horizons] Using SPK-ID from lookup: ${spkid}`);
-  }
+  // No lookup needed - using DES format directly
 
   // Step 2: Fetch ephemeris vectors
   const ephemerisParams: HorizonsQueryParams = {
@@ -369,9 +364,15 @@ export async function get3IAtlasVectors(
     OBJ_DATA: "YES", // Include object metadata
   };
 
+  console.log("[get3IAtlasVectors] Calling getEphemerisVectors...");
   const ephemerisResponse = await getEphemerisVectors(ephemerisParams);
+  console.log(
+    "[get3IAtlasVectors] Got response, result type:",
+    typeof ephemerisResponse.result
+  );
 
   // Step 3: Parse and return
+  console.log("[get3IAtlasVectors] Calling parseVectorData...");
   const vectors = parseVectorData(ephemerisResponse.result);
 
   console.log(`[Horizons] Parsed ${vectors.length} vector data points`);
