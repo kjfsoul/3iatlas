@@ -11,3 +11,9 @@ node_modules
 .qoder/rules/byterover-rules.md
 .augment/rules/byterover-rules.md
 .vercel
+
+# Local development logs and artifacts
+jules-scratch/
+horizons_results.txt
+dev_server.log
+tsconfig.tsbuildinfo

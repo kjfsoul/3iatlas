@@ -328,7 +328,7 @@ export async function get3IAtlasVectors(
 
   // Step 2: Fetch ephemeris vectors
   const ephemerisParams: HorizonsQueryParams = {
-    COMMAND: spkid,
+    COMMAND: `DES=${spkid};`,
     EPHEM_TYPE: 'VECTOR',
     CENTER: '@sun',           // Heliocentric (Sun-centered)
     START_TIME: startDate,
