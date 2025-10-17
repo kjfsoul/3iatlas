@@ -17,3 +17,20 @@ jules-scratch/
 horizons_results.txt
 dev_server.log
 tsconfig.tsbuildinfo
+# Ignore development artifacts
+
+# Aider AI files
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v4/
+
+# Python virtual environment
+.venv/
+
+# Documentation drafts
+docs/Cursor3iatlaschat.md
+project_prompts.md
+
+# Test results and reports
+playwright-report/
+test-results/
