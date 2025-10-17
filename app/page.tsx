@@ -4,7 +4,6 @@ export const revalidate = 0;
 import Atlas3DTrackerWrapper from "@/components/Atlas3DTrackerWrapper";
 import FeaturedRow from "@/components/FeaturedRow";
 import FlightpathSimulator from "@/components/FlightpathSimulator";
-import Oracle from "@/components/Oracle";
 import SocialLinks from "@/components/SocialLinks";
 
 const BASES = {
@@ -21,9 +20,16 @@ export default async function Page() {
       <section className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-black/20 p-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">3I/ATLAS FLIGHTPATH</h1>
-          <a className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20" href="#brands">Explore brands</a>
+          <a
+            className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20"
+            href="#brands"
+          >
+            Explore brands
+          </a>
         </div>
-        <p className="mt-2 text-white/80">Live drops from four Printify outposts.</p>
+        <p className="mt-2 text-white/80">
+          Live drops from four Printify outposts.
+        </p>
         <div className="mt-6">
           <FlightpathSimulator seed="3iatlas" />
         </div>
@@ -61,9 +67,18 @@ export default async function Page() {
 
         {/* 3I Atlas — no socials */}
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-4">
-          <a href={BASES.atlas} target="_blank" rel="noopener" className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit">
+          <a
+            href={BASES.atlas}
+            target="_blank"
+            rel="noopener"
+            className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/3iAtlas_Logo.png" alt="3I/Atlas Logo" className="h-8 w-8 rounded-md object-contain" />
+            <img
+              src="/images/3iAtlas_Logo.png"
+              alt="3I/Atlas Logo"
+              className="h-8 w-8 rounded-md object-contain"
+            />
             3I/Atlas
           </a>
           <FeaturedRow storeBase={BASES.atlas} />
@@ -71,15 +86,28 @@ export default async function Page() {
 
         {/* Mystic Arcana */}
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-4">
-          <a href="https://mysticarcana.com" target="_blank" rel="noopener" className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit">
+          <a
+            href="https://mysticarcana.com"
+            target="_blank"
+            rel="noopener"
+            className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/Mystic_Arcana_Logo.png" alt="Mystic Arcana Logo" className="h-8 w-8 rounded-md object-contain" />
+            <img
+              src="/images/Mystic_Arcana_Logo.png"
+              alt="Mystic Arcana Logo"
+              className="h-8 w-8 rounded-md object-contain"
+            />
             Mystic Arcana
           </a>
           <div className="flex items-center gap-2 mt-1">
             <SocialLinks brand="mysticArcana" />
-            <a href={BASES.arcana} target="_blank" rel="noopener" 
-              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap">
+            <a
+              href={BASES.arcana}
+              target="_blank"
+              rel="noopener"
+              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap"
+            >
               Mystic Marketplace
             </a>
           </div>
@@ -88,15 +116,28 @@ export default async function Page() {
 
         {/* EDM Shuffle */}
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-4">
-          <a href="https://edmshuffle.com" target="_blank" rel="noopener" className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit">
+          <a
+            href="https://edmshuffle.com"
+            target="_blank"
+            rel="noopener"
+            className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/EDM_Shuffle_Logo.png" alt="EDM Shuffle Logo" className="h-8 w-8 rounded-md object-contain" />
+            <img
+              src="/images/EDM_Shuffle_Logo.png"
+              alt="EDM Shuffle Logo"
+              className="h-8 w-8 rounded-md object-contain"
+            />
             EDM Shuffle
           </a>
           <div className="flex items-center gap-2 mt-1">
             <SocialLinks brand="edmShuffle" />
-            <a href={BASES.edm} target="_blank" rel="noopener" 
-              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap">
+            <a
+              href={BASES.edm}
+              target="_blank"
+              rel="noopener"
+              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap"
+            >
               Shuffle Shop
             </a>
           </div>
@@ -105,15 +146,28 @@ export default async function Page() {
 
         {/* BirthdayGen */}
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-4">
-          <a href="https://birthdaygen.com" target="_blank" rel="noopener" className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit">
+          <a
+            href="https://birthdaygen.com"
+            target="_blank"
+            rel="noopener"
+            className="flex items-center gap-3 text-lg font-semibold hover:text-white/80 transition-colors w-fit"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/birthday-gen-logo.png" alt="BirthdayGen Logo" className="h-8 w-8 rounded-md object-contain" />
+            <img
+              src="/images/birthday-gen-logo.png"
+              alt="BirthdayGen Logo"
+              className="h-8 w-8 rounded-md object-contain"
+            />
             BirthdayGen
           </a>
           <div className="flex items-center gap-2 mt-1">
             <SocialLinks brand="birthdayGen" />
-            <a href={BASES.bday} target="_blank" rel="noopener" 
-              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap">
+            <a
+              href={BASES.bday}
+              target="_blank"
+              rel="noopener"
+              className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20 transition-colors whitespace-nowrap"
+            >
               Gift Shop
             </a>
           </div>
@@ -121,16 +175,39 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* ORACLE — survey gates reveal */}
+      {/* ATLAS DIRECTIVE — narrative game teaser */}
       <section className="mt-10">
-        <Oracle />
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-black/20 p-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">ATLAS DIRECTIVE</h2>
+            <p className="text-white/80 mb-6">
+              Experience the narrative game that follows 3I/ATLAS's journey
+              through our solar system.
+            </p>
+            <a
+              href="#"
+              className="inline-block rounded-md bg-white/10 px-6 py-3 text-sm hover:bg-white/20 transition-colors"
+            >
+              Coming Soon - Play the Game
+            </a>
+          </div>
+        </div>
       </section>
 
       {/* BOTTOM STORE BAND with EYE image */}
       <section className="mt-12 rounded-2xl border border-white/10 bg-white/5 p-6">
-        <a href={BASES.atlas} target="_blank" rel="noopener" className="mb-3 flex items-center gap-3 hover:opacity-80 transition-opacity w-fit">
+        <a
+          href={BASES.atlas}
+          target="_blank"
+          rel="noopener"
+          className="mb-3 flex items-center gap-3 hover:opacity-80 transition-opacity w-fit"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/3iAtlas_Logo.png" alt="3I/Atlas Logo" className="h-8 w-8 rounded-md object-contain" />
+          <img
+            src="/images/3iAtlas_Logo.png"
+            alt="3I/Atlas Logo"
+            className="h-8 w-8 rounded-md object-contain"
+          />
           <h3 className="text-lg font-semibold">3I/Atlas Store</h3>
         </a>
         <FeaturedRow storeBase={BASES.atlas} />
