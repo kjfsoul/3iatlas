@@ -2,12 +2,14 @@
 
 import dynamic from 'next/dynamic';
 
-// Dynamically import enhanced 3D tracker (client-side only)
-const Atlas3DTrackerEnhanced = dynamic(() => import('./Atlas3DTrackerEnhanced'), {
+// Dynamically import BASE 3D tracker (client-side only) - Simple working version
+const Atlas3DTracker = dynamic(() => import("./Atlas3DTracker"), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-[600px] bg-black rounded-xl">
-      <div className="animate-pulse text-green-400 text-lg">Loading Solar System...</div>
+      <div className="animate-pulse text-cyan-400 text-lg">
+        Loading Solar System...
+      </div>
     </div>
   ),
 });
@@ -21,5 +23,5 @@ interface Atlas3DTrackerWrapperProps {
 }
 
 export default function Atlas3DTrackerWrapper(props: Atlas3DTrackerWrapperProps) {
-  return <Atlas3DTrackerEnhanced {...props} />;
+  return <Atlas3DTracker {...props} />;
 }
