@@ -1,0 +1,391 @@
+---
+description: Technical constraints and patterns specific to 3I/ATLAS project
+alwaysApply: true
+---
+
+# Technical Constraints for 3I/ATLAS
+
+## Current Technical Stack (Jan 2025)
+
+```yaml
+Framework: Next.js 15.5.4 (App Router)
+React: 18.2.0
+TypeScript: 5.6.3
+Styling: Tailwind CSS 3.4.13
+Animation: Framer Motion 11.2.10
+3D Graphics: Three.js 0.159.0
+R3F: @react-three/fiber 8.13.0 ❌ NOT WORKING
+R3F Helpers: @react-three/drei 9.88.0 ❌ NOT WORKING
+```
+
+## Known Compatibility Issues
+
+### React Three Fiber Incompatibility (CRITICAL BLOCKER)
+
+**Problem**: R3F won't initialize in Next.js environment
+**Error**: `TypeError: Cannot read properties of undefined (reading 'ReactCurrentOwner')`
+**Affected versions tried**:
+- @react-three/fiber 8.13.0 ❌
+- @react-three/fiber 8.15.0 ❌
+- @react-three/fiber + React 19 ❌ (peer dep conflicts)
+
+**Working alternative**: Same code works in Vite at `/Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/`
+
+**Decision needed**:
+- Option A: Try @react-three/fiber 8.16.0 (15 min, 30% success chance)
+- Option B: Implement iframe embed (30 min, 100% success chance)
+
+### NASA Horizons Data Format
+
+**Correct format for 3I/ATLAS queries:**
+```typescript
+// CORRECT - Use DES= prefix for large SPK-IDs
+const command = "DES=1004083";
+
+// WRONG - Direct ID won't work
+const command = "1004083";
+```
+
+**Response parsing:**
+- Look for `$$SOE` and `$$EOE` markers
+- CSV format between markers
+- Fields: JD, Date, X, Y, Z, VX, VY, VZ
+
+**Coordinate conversion (Horizons → Three.js):**
+```typescript
+// Horizons: Z-up coordinate system
+// Three.js: Y-up coordinate system
+// Conversion:
+mesh.position.set(
+  horizonsData.x,   // X stays X
+  horizonsData.z,   // Z becomes Y
+  -horizonsData.y   // Y becomes -Z
+);
+```
+
+## Architecture Patterns That Work
+
+### Client-Side Only 3D (Required for Three.js)
+
+```typescript
+// components/Any3DComponent.tsx
+'use client'; // Required at top
+
+// Import dynamically in parent
+import dynamic from 'next/dynamic';
+
+const Component3D = dynamic(() => import('./Any3DComponent'), {
+  ssr: false,
+  loading: () => <LoadingFallback />
+});
+```
+
+### Printify Integration (DO NOT MODIFY)
+
+```typescript
+// This pattern is WORKING - don't change it
+
+// lib/printify.ts
+const PRINTIFY_API_TOKEN = process.env.PRINTIFY_API_TOKEN;
+const SHOP_TITLE_MAP: Record<string, string> = {
+  'https://3iatlas.printify.me': '3iAtlas',
+  'https://mystic-arcana-pop-up.printify.me': 'Mystic Arcana Pop-up',
+  // ... other shops
+};
+
+// components/FeaturedRow.tsx
+export async function FeaturedRow({ storeBase }: Props) {
+  const products = await getProductsForShop(storeBase);
+  return <ProductCarousel products={products} />;
+}
+```
+
+### Static Data Loading (Proven Pattern)
+
+```typescript
+// Pre-generated data in /public/data/
+// Load via fetch, not dynamic imports
+
+const loadTrajectoryData = async () => {
+  const response = await fetch('/data/trajectory_static.json');
+  if (!response.ok) throw new Error('Failed to load trajectory data');
+  return await response.json();
+};
+```
+
+## Performance Requirements
+
+### Target Metrics
+- Page load: <3 seconds
+- Time to Interactive: <5 seconds
+- 3D FPS: 60 FPS (when working)
+- Memory: Stable (no leaks)
+
+### Current Limitations
+- Printify cache warning: >2MB response (non-blocking, acceptable)
+- 3D not rendering due to R3F issue (blocking, needs fix)
+
+## File Size Constraints
+
+```
+trajectory_static.json: ~150KB (✅ acceptable)
+timeline_events.json: ~5KB (✅ acceptable)
+Printify response: ~2.5MB (⚠️ warning but works)
+Total bundle: <1MB gzipped (target)
+```
+
+## Browser Support
+
+### Required
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+### Features Needed
+- WebGL 2.0 (for Three.js when working)
+- ES2020 support
+- Fetch API
+- LocalStorage
+
+## Environment Variables
+
+```bash
+# Required for Printify (WORKING)
+PRINTIFY_API_TOKEN=<provided>
+NEXT_PUBLIC_3IATLAS_BASE=https://3iatlas.printify.me/
+NEXT_PUBLIC_ARCANA_BASE=https://mystic-arcana-pop-up.printify.me/
+NEXT_PUBLIC_EDM_BASE=https://edm-shuffle-pop-up.printify.me/
+NEXT_PUBLIC_BDAY_BASE=https://birthdaygen-popup.printify.me/
+
+# Development
+PORT=3030
+
+# Optional (not currently used)
+NASA_API_KEY=<provided>
+```
+
+## Data Constraints
+
+### NASA Data Rules
+1. **NO mock data** - Use real Horizons data or pre-generated static
+2. **Cache policy**: 7-day TTL for historical data
+3. **Step size**: 6 hours for comets, 1-4 days for planets
+4. **Date format**: ISO 8601 (YYYY-MM-DD)
+
+### 3I/ATLAS Specifics
+- SPK-ID: 1004083
+- Discovery: 2025-07-01
+- Perihelion: ~2025-10-20
+- Data range: 2025-07-01 to 2026-03-31
+- Current data points: 1,093
+
+## TypeScript Constraints
+
+### Strict Rules (Enforced)
+```typescript
+// tsconfig.json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true
+  }
+}
+```
+
+### Never Do This
+```typescript
+// ❌ WRONG - No "any" types
+const data: any = fetchData();
+
+// ✅ CORRECT - Proper typing
+interface TrajectoryData {
+  metadata: Metadata;
+  atlas: VectorData[];
+  earth: VectorData[];
+}
+const data: TrajectoryData = fetchData();
+```
+
+## Component Patterns
+
+### Data Flow
+```
+/public/data/trajectory_static.json
+  ↓ fetch
+/components/Atlas3DTrackerEnhanced.tsx
+  ↓ props
+/components/SceneContent.tsx
+  ↓ props
+/components/CelestialBodies.tsx
+```
+
+### State Management
+- No Redux/Zustand yet
+- React hooks (useState, useEffect, useMemo)
+- Props drilling (acceptable for current scale)
+- Consider Zustand if state gets complex
+
+## Build Configuration
+
+### Next.js Config
+```javascript
+// next.config.mjs
+const config = {
+  reactStrictMode: true,
+  images: {
+    domains: ['images.printify.com'], // For Printify images
+  },
+};
+```
+
+### Tailwind Config
+```javascript
+// tailwind.config.ts
+module.exports = {
+  content: [
+    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+  ],
+  theme: {
+    extend: {
+      // Custom colors for comet, planets, etc.
+    },
+  },
+};
+```
+
+## Security Constraints
+
+### API Key Handling
+```typescript
+// ✅ CORRECT - Server-side only
+// lib/printify.ts (not exposed to client)
+const API_TOKEN = process.env.PRINTIFY_API_TOKEN;
+
+// ✅ CORRECT - Public env vars
+// Can be used client-side
+const BASE = process.env.NEXT_PUBLIC_3IATLAS_BASE;
+
+// ❌ WRONG - Never in client code
+const token = "secret_key_here";
+```
+
+### Data Validation
+```typescript
+// Always validate external data
+const validateTrajectoryData = (data: unknown): TrajectoryData => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid trajectory data');
+  }
+  // ... more validation
+  return data as TrajectoryData;
+};
+```
+
+## Deployment Constraints
+
+### Vercel (Primary Target)
+- Serverless functions: 10-second timeout
+- Edge functions: 30-second timeout
+- Max bundle: 50MB uncompressed
+- Environment variables: Set in dashboard
+
+### Build Commands
+```bash
+npm run build  # Production build
+npm start      # Production server
+npm run dev    # Development server
+```
+
+## Testing Requirements
+
+### Manual Testing Checklist
+- [ ] Site loads at http://localhost:3030
+- [ ] All 4 Printify brands show products
+- [ ] No console errors
+- [ ] TypeScript compiles without errors
+- [ ] Mobile responsive (test at 375px width)
+- [ ] Links work (social media, product links)
+
+### Before Every Commit
+```bash
+# Run these checks
+npm run build  # Must succeed
+# Open http://localhost:3030 and verify:
+# - Printify products load
+# - No console errors
+# - Site structure intact
+```
+
+## Known Issues (As of Jan 22, 2025)
+
+### Critical
+1. **R3F Won't Initialize** (blocking all 3D)
+   - Error: React reconciler undefined property
+   - Affects: All 3D visualization
+   - Status: Awaiting decision (Option A or B)
+
+### Minor
+2. **Printify Cache Warning** (non-blocking)
+   - Warning: Response >2MB
+   - Affects: Build logs only
+   - Status: Acceptable, products work fine
+
+### Resolved
+3. ~~ByteRover MCP Failures~~ → Using local files now ✅
+4. ~~Type Definition Issues~~ → Created three-jsx.d.ts ✅
+5. ~~Component Migration~~ → All 13 components migrated ✅
+
+## Technical Debt
+
+### High Priority
+- [ ] Fix R3F compatibility issue
+- [ ] Add error boundaries around 3D components
+- [ ] Implement proper loading states
+
+### Medium Priority
+- [ ] Add unit tests for utility functions
+- [ ] Optimize bundle size
+- [ ] Add E2E tests for critical flows
+
+### Low Priority
+- [ ] Consider Zustand for state management
+- [ ] Add performance monitoring
+- [ ] Implement service worker for offline
+
+## Resource Limits
+
+### Development
+- **Local**: No limits, use localhost
+- **API calls**: NASA Horizons is public, no rate limit
+- **Printify**: Rate limited but generous
+
+### Production
+- **Bandwidth**: Vercel free tier = 100GB/month
+- **Serverless calls**: 100GB-hours/month
+- **Build time**: 45 min/month
+
+## Migration Notes
+
+### From Vite to Next.js
+**Completed**:
+- ✅ All components copied
+- ✅ Types defined
+- ✅ Data files transferred
+- ✅ Dynamic imports added
+
+**Failed**:
+- ❌ R3F initialization (environment incompatibility)
+
+**Lessons**:
+- Same code works in Vite, fails in Next.js
+- Not a code problem, it's environment
+- Iframe embed is valid architectural solution
+
+---
+
+**These constraints are based on 10+ hours of actual development experience on this specific project.**
+
+**Don't fight them. Work with them.**

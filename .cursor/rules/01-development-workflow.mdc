@@ -1,0 +1,409 @@
+---
+description: Proven development workflow based on actual 3I/ATLAS project experience
+alwaysApply: true
+---
+
+# Development Workflow (Battle-Tested on 3I/ATLAS)
+
+## The Process That Actually Worked
+
+### Step 1: Context Loading (First 10 minutes - NON-NEGOTIABLE)
+
+```bash
+cd /Users/kfitz/3iatlas
+
+# Read in this exact order:
+cat docs/PROJECT_MEMORY.md        # 5 min - source of truth
+cat docs/CURRENT_STATE.md          # 2 min - what's broken
+cat docs/MIGRATION_TASKS.md        # 2 min - how to fix (if exists)
+git log --oneline -10              # 1 min - recent work
+```
+
+**State your understanding** in first reply:
+```
+Context:
+- Working: [list ✅ features]
+- Broken: [list ❌ issues]
+- Current blocker: [specific issue]
+- Files I'll modify: [list]
+```
+
+### Step 2: Incremental Development
+
+**DO THIS:**
+```bash
+# Make ONE small change
+vim components/SomeComponent.tsx
+
+# Test immediately
+npm run dev
+# Open http://localhost:3030
+# Check browser console
+# Verify the specific feature
+
+# If works → commit
+git add components/SomeComponent.tsx
+git commit -m "feat: specific thing that now works"
+
+# Repeat for next change
+```
+
+**DON'T DO THIS:**
+```bash
+# WRONG: Make 10 changes
+# WRONG: Test at the end
+# WRONG: Commit everything together
+# WRONG: Hope it all works
+```
+
+### Step 3: Testing After Every Change
+
+**Required checks (in order):**
+1. ✅ TypeScript compiles (check IDE)
+2. ✅ Build succeeds (check terminal)
+3. ✅ Page loads (http://localhost:3030)
+4. ✅ No console errors (browser dev tools)
+5. ✅ Feature works as expected
+6. ✅ Didn't break other features
+
+**Red flags (stop immediately):**
+- TypeScript errors
+- Build failures
+- Console spam
+- Working features now broken
+- Printify products not loading
+
+### Step 4: The 30-Minute Stuck Rule
+
+**If stuck on same issue for 30 minutes:**
+
+```bash
+# 1. Stop trying random approaches
+
+# 2. Document current state
+cat > docs/STUCK_$(date +%Y%m%d_%H%M).md << 'EOF'
+# Stuck on [Issue Name]
+
+## Goal
+[What I'm trying to accomplish]
+
+## Current Error
+```
+[Exact error message with file:line]
+```
+
+## What I've Tried
+1. [Approach 1] - Failed because [reason]
+2. [Approach 2] - Failed because [reason]
+3. [Approach 3] - Failed because [reason]
+
+## Time Spent
+30+ minutes
+
+## Possible Next Steps
+1. [Idea 1 - not yet tried]
+2. [Idea 2 - not yet tried]
+
+## Request
+Need fresh perspective or architectural decision
+EOF
+
+# 3. Commit what you have
+git add -A
+git commit -m "wip: blocked on [issue] - see STUCK_*.md for details"
+
+# 4. Request handoff
+echo "I'm stuck. Created STUCK document with full context."
+```
+
+### Step 5: Protecting Working Features
+
+**CRITICAL: Current working features (DO NOT BREAK)**
+
+```typescript
+// These are REVENUE-GENERATING - test after ANY change:
+components/ProductCarousel.tsx      // Printify products
+components/FeaturedRow.tsx          // Product rows
+components/SocialLinks.tsx          // Social media links
+lib/printify.ts                     // API integration
+app/page.tsx                        // Site structure
+```
+
+**Protection protocol:**
+```bash
+# Before editing a working file:
+cp file.tsx file.tsx.BACKUP_$(date +%s)
+
+# Test the feature BEFORE your change
+npm run dev
+# Verify it works
+
+# Make your change
+# ...
+
+# Test the feature AFTER your change
+# Verify it still works
+
+# If broken:
+mv file.tsx.BACKUP_* file.tsx
+echo "Reverted - preserved working feature"
+```
+
+### Step 6: Commit Discipline
+
+**Good commits (do this):**
+```bash
+git commit -m "feat: add comet glow effect to visualization"
+git commit -m "fix: correct Sun origin drift in animation loop"
+git commit -m "docs: update CURRENT_STATE with R3F error details"
+git commit -m "refactor: extract camera logic to separate hook"
+```
+
+**Bad commits (don't do this):**
+```bash
+git commit -m "updates"           # Vague
+git commit -m "wip"                # No info
+git commit -m "trying stuff"       # Unclear
+git commit -m "fixes"              # What fixes?
+```
+
+**Commit frequency:**
+- Every 15-30 minutes if making progress
+- Every working change (no matter how small)
+- Before trying risky changes
+- Before requesting handoff
+
+### Step 7: Documentation in Real-Time
+
+**Update docs AS YOU WORK, not "later":**
+
+```bash
+# After fixing something:
+vim docs/PROJECT_MEMORY.md
+# Add to "What Works Now ✅" section
+# Remove from "What's Broken ❌" section
+# Add to "Hard-Learned Lessons"
+git add docs/PROJECT_MEMORY.md
+git commit -m "docs: mark [feature] as working"
+
+# After discovering a blocker:
+vim docs/CURRENT_STATE.md
+# Document exact error
+# Document what was tried
+# Document time spent
+git add docs/CURRENT_STATE.md
+git commit -m "docs: document [blocker] - needs decision"
+```
+
+### Step 8: Pre-Handoff Checklist
+
+**Before requesting help, verify you've done:**
+
+- [ ] Read PROJECT_MEMORY.md before starting
+- [ ] Tried at least 2-3 different approaches
+- [ ] Documented exactly what was tried
+- [ ] Included exact error messages (full stack trace)
+- [ ] Documented time spent (be honest)
+- [ ] Committed all work to git
+- [ ] Updated CURRENT_STATE.md
+- [ ] Listed specific next steps to try
+- [ ] Confirmed working features still work
+- [ ] Created clear handoff document
+
+## Common Patterns for 3I/ATLAS
+
+### Pattern: Adding a New 3D Feature
+
+```bash
+# 1. Start with minimal version
+# Create component that just renders a cube
+# Test it works
+
+# 2. Add one feature at a time
+# Add data loading
+# Test it works
+# Add animation
+# Test it works
+# Add controls
+# Test it works
+
+# 3. Commit at each working step
+git commit -m "feat: add basic [feature]"
+git commit -m "feat: add data to [feature]"
+git commit -m "feat: add animation to [feature]"
+```
+
+### Pattern: Fixing React Three Fiber Issues
+
+```bash
+# 1. Isolate the problem
+# Create minimal test component
+# Does basic R3F work? (just a cube)
+
+# 2. Add complexity incrementally
+# Add OrbitControls
+# Does it work?
+# Add data loading
+# Does it work?
+
+# 3. Find exact breaking point
+# Document which addition breaks it
+# That's your real problem
+```
+
+### Pattern: Debugging "It Works in Vite but Not Next.js"
+
+```bash
+# 1. Verify it actually works in Vite
+cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend
+npm run dev
+# Test at http://localhost:5173
+# Confirm it works
+
+# 2. Check for environment differences
+# - SSR issues? (use dynamic import with ssr: false)
+# - Version mismatches? (check package.json)
+# - Build tool differences? (Vite vs Webpack)
+
+# 3. Consider iframe if fundamental incompatibility
+# Sometimes the right answer is architectural separation
+```
+
+## Anti-Patterns (Learn from Our Failures)
+
+### ❌ "Just Try More Versions"
+**What happened**: Spent 6 hours trying different R3F versions
+**Result**: All failed with same error
+**Lesson**: After 2-3 version attempts, it's an architectural problem
+
+### ❌ "External Memory Will Track This"
+**What happened**: Used ByteRover MCP tools
+**Result**: Knowledge not retrievable, had to re-explain everything
+**Lesson**: Local files are more reliable than external MCPs
+
+### ❌ "I'll Document It When Done"
+**What happened**: Finished work, forgot details, handoff was unclear
+**Result**: Next session wasted time figuring out context
+**Lesson**: Document as you go, update memory in real-time
+
+### ❌ "One More Quick Fix"
+**What happened**: Broke working Printify integration trying to fix tracker
+**Result**: Lost working features, had to revert
+**Lesson**: Protect working features above all else
+
+## Pro-Patterns (What Actually Works)
+
+### ✅ Read Before Code
+**Time spent**: 10 minutes reading docs
+**Time saved**: 2+ hours of wrong direction
+**ROI**: 12:1
+
+### ✅ Test Immediately
+**Pattern**: Change → Test → Commit → Repeat
+**Result**: Always know what works, easy to revert
+**Benefit**: Confidence and speed
+
+### ✅ Preserve Working Features
+**Rule**: Working code > New features
+**Result**: Revenue source (Printify) never broken
+**Benefit**: Business continuity
+
+### ✅ Document Failures
+**Pattern**: Failed attempts documented as thoroughly as successes
+**Result**: Next developer doesn't repeat same failures
+**Benefit**: Team efficiency
+
+### ✅ Request Handoff at 30 Min
+**Rule**: After 30 min stuck, document and ask for help
+**Result**: Fresh perspective solves it faster
+**Benefit**: Time efficiency, better solutions
+
+## Time Budgets (Be Realistic)
+
+**Reasonable allocations:**
+- Simple fix (typo, minor tweak): 5-15 min
+- Component update: 30-60 min
+- New feature: 2-4 hours
+- Integration work: 4-8 hours
+- Unknown debugging: 30 min then handoff
+
+**Warning signs you're over budget:**
+- Same error for >30 min
+- No progress in >1 hour
+- Trying things you've already tried
+- Breaking working features
+- Feeling frustrated/desperate
+
+## Emergency Procedures
+
+### If You Broke Printify Integration
+
+```bash
+# This is REVENUE - fix immediately
+
+# 1. Check what changed
+git diff
+
+# 2. Revert the breaking change
+git checkout -- [file-that-broke-it]
+
+# 3. Test Printify
+npm run dev
+# Visit http://localhost:3030
+# Verify all 4 brands show products
+
+# 4. Document what happened
+echo "Breaking change reverted: [description]" >> docs/EMERGENCY_LOG.md
+
+# 5. Try a different approach
+# Smaller change, better testing
+```
+
+### If Build Is Completely Broken
+
+```bash
+# 1. Clean build artifacts
+rm -rf .next node_modules
+
+# 2. Fresh install
+npm install
+
+# 3. Try build
+npm run dev
+
+# 4. If still broken, check git
+git status
+git diff
+
+# 5. If needed, revert to last working commit
+git log --oneline -5
+git reset --hard [last-working-commit]
+```
+
+## Final Wisdom
+
+**The best code is:**
+1. ✅ Works
+2. ✅ Doesn't break other code
+3. ✅ Is documented
+4. ✅ Is committed to git
+5. ✅ Has clear next steps
+
+**The worst code is:**
+1. ❌ "Almost works"
+2. ❌ Breaks other code
+3. ❌ Undocumented
+4. ❌ Uncommitted or unclear commits
+5. ❌ No idea what to do next
+
+**Golden rule:**
+Progress = Working features + Good documentation + Clear commits
+
+Not:
+Progress = Hours spent + Lines changed + Complexity added
+
+---
+
+**Remember**: Read docs → Small changes → Test immediately → Commit when working → Document failures → Request help at 30 min
+
+**This workflow saved the project. Use it.**

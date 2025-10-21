@@ -1,0 +1,204 @@
+---
+description: Core project rules and memory protocol for 3I/ATLAS
+alwaysApply: true
+---
+
+# 3I/ATLAS Project - Core Rules
+
+## Memory System (LOCAL FILES ONLY)
+
+**CRITICAL: DO NOT USE ByteRover MCP or any external memory tools.**
+
+**Why**: External memory tools (ByteRover MCP) failed repeatedly during development:
+- Failed to persist knowledge reliably
+- Failed to retrieve stored context
+- Required re-explaining same concepts multiple times
+- Added overhead without any demonstrated benefit
+
+**What Works**: Local markdown files in `/docs/` directory
+
+## BEFORE ANY WORK (MANDATORY - 10 minutes)
+
+**Read these files in order:**
+1. `/Users/kfitz/3iatlas/docs/PROJECT_MEMORY.md` - Source of truth
+2. `/Users/kfitz/3iatlas/docs/CURRENT_STATE.md` - What's broken NOW
+3. `/Users/kfitz/3iatlas/docs/MIGRATION_TASKS.md` - Step-by-step fixes (if exists)
+4. Check git log: `git log --oneline -10`
+
+**Extract 3-7 key facts and state them in your first reply as "Context"**
+
+## ABSOLUTE RULES (NEVER VIOLATE)
+
+1. **NO mock/stub/hardcoded data** - Real NASA data or pre-generated static data only
+2. **NO breaking Printify integration** - It's the revenue source (✅ currently working)
+3. **NO TypeScript errors** - Clean code always
+4. **NO "any" types** - Type everything properly
+5. **NO changes without testing** - Change → Test → Commit
+6. **NO reliance on external MCPs** - Use local files
+7. **NO continuing stuck work >30 min** - Document and request handoff
+
+## Project-Specific Facts (MEMORIZE)
+
+**3I/ATLAS Details:**
+- Discovery: July 1, 2025 by ATLAS telescope, Chile
+- Designation: 3I/ATLAS or C/2025 N1
+- NASA Horizons SPK-ID: 1004083 (use `DES=1004083` format)
+- Current timeframe: October 2025 (perihelion approach)
+- THIS IS REAL - Not hypothetical
+
+**Project Location:** `/Users/kfitz/3iatlas/`
+**Dev Server:** http://localhost:3030
+**Working Vite Reference:** `/Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/`
+
+## Current Status (As of Jan 22, 2025)
+
+### ✅ WORKING (DO NOT BREAK)
+- Next.js site on port 3030
+- All Printify products (4 brands: 3I/Atlas, Mystic Arcana, EDM Shuffle, BirthdayGen)
+- Site structure and layout
+- Data files loading (trajectory_static.json, timeline_events.json)
+- All component code migrated
+
+### ❌ BROKEN (NEEDS FIX)
+- React Three Fiber initialization (reconciler error)
+- All 3D visualization (depends on R3F)
+- Shows "Loading Enhanced Solar System..." indefinitely
+
+### 🎯 BLOCKER
+**React reconciler error**: `Cannot read properties of undefined (reading 'ReactCurrentOwner')`
+**Root cause**: React 18.2 + Next.js 15.5.4 + R3F 8.x incompatibility
+**Time invested**: 6+ hours, multiple version attempts failed
+**Decision needed**: Try R3F 8.16.0 OR implement iframe fallback
+
+## Development Workflow
+
+### While Working
+1. Make ONE small change
+2. Test immediately
+3. If it works → commit
+4. If it breaks → revert
+5. Update docs in real-time
+6. Repeat
+
+### When Stuck (30-Minute Rule)
+**If blocked for >30 minutes on same issue:**
+1. STOP trying random fixes
+2. Document exactly what was tried
+3. Update `/docs/CURRENT_STATE.md` with:
+   - Exact error messages
+   - What was attempted
+   - Why it failed
+   - Time spent
+4. Request handoff with full context
+
+### After Completing Work (MANDATORY)
+Update `/docs/PROJECT_MEMORY.md` with:
+```markdown
+## Update: [Date/Time]
+
+### Files Changed
+- [list with what changed]
+
+### Status
+✅ Working: [what works now]
+❌ Broken: [what's still broken]
+
+### Learned
+- [key lessons]
+
+### Next Steps
+1. [specific actionable tasks]
+```
+
+## File Preservation Rules
+
+**NEVER MODIFY without explicit approval:**
+- `/components/ProductCarousel.tsx`
+- `/components/FeaturedRow.tsx`
+- `/components/SocialLinks.tsx`
+- `/lib/printify.ts`
+- Anything marked "✅ WORKING" in CURRENT_STATE.md
+
+**Before editing ANY file:**
+1. Check if it's marked as working in docs
+2. Test the feature BEFORE your changes
+3. Make your change
+4. Test the feature AFTER your changes
+5. If broken → revert immediately
+
+## Testing Protocol
+
+**After EVERY change:**
+```bash
+# 1. Save file
+# 2. Check TypeScript (IDE will show errors)
+# 3. Check terminal for build errors
+# 4. Refresh browser at http://localhost:3030
+# 5. Check browser console for errors
+# 6. Test the specific feature you changed
+```
+
+**Don't proceed until current change works.**
+
+## Communication Style
+
+**With User:**
+- Be honest about what's working vs broken
+- Don't sugarcoat failures
+- Provide clear options with success probabilities
+- Request decisions when blocked
+
+**In Documentation:**
+- Use ✅ for working features
+- Use ❌ for broken features
+- Use ⚠️ for warnings
+- Include exact file paths
+- Include exact error messages
+- Document time spent
+
+## Success Metrics
+
+**Good development session:**
+- Read docs before starting ✅
+- Made incremental commits ✅
+- Preserved working features ✅
+- Updated documentation ✅
+- Clear next steps ✅
+
+**Bad development session:**
+- Didn't read docs ❌
+- Broke working features ❌
+- No commits or unclear commits ❌
+- Undocumented changes ❌
+- Unclear what to do next ❌
+
+## Quick Reference
+
+```bash
+# Start work
+cd /Users/kfitz/3iatlas
+cat docs/PROJECT_MEMORY.md
+cat docs/CURRENT_STATE.md
+git log --oneline -10
+
+# During work
+npm run dev  # Port 3030
+# Make change → Test → Commit
+
+# End work
+# Update docs/PROJECT_MEMORY.md
+git add docs/PROJECT_MEMORY.md
+git commit -m "docs: update memory with [what changed]"
+```
+
+## Final Rule
+
+**If you're not sure what the current state is, READ THE DOCS.**
+
+Never assume. Never guess. Never rely on external tools. Always verify.
+
+---
+
+**Last Updated**: January 22, 2025, 5:00 PM PST
+**Current Blocker**: R3F compatibility - decision needed
+**Documentation Status**: Complete and accurate

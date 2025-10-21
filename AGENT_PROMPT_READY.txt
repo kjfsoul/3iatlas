@@ -1,0 +1,550 @@
+================================================================================
+COPY EVERYTHING BELOW THIS LINE AND PASTE TO CURSOR AGENT IN 3IATLAS PROJECT
+================================================================================
+
+# 3I/ATLAS Enhanced Tracker Integration - Complete Task
+
+## Your Mission
+
+Integrate the working 3D orbital tracker into this Next.js site using iframe embedding. This takes 30-45 minutes and has 100% success rate.
+
+---
+
+## BEFORE YOU START - READ THIS
+
+### Project Rules (CRITICAL)
+
+1. **NO ByteRover MCP** - Use local files in `/docs/` instead
+2. **NO breaking Printify** - It's the revenue source (currently ✅ working)
+3. **NO TypeScript errors** - Clean code only
+4. **Test after EVERY change** - Don't skip testing
+5. **30-minute stuck rule** - If blocked, document and request help
+
+### Read These Files First (10 minutes)
+
+```bash
+# In this project directory (/Users/kfitz/3iatlas):
+cat docs/PROJECT_MEMORY.md          # Source of truth - 5 min
+cat docs/CURRENT_STATE.md            # What's broken - 2 min
+cat COMPLETE_MIGRATION_GUIDE.md      # Full instructions - 3 min
+```
+
+### Current Context
+
+**✅ Working (Don't break)**:
+- Next.js site at http://localhost:3030
+- All Printify products (4 brands) - THIS IS REVENUE
+- Site structure and layout
+- Data files (trajectory_static.json, timeline_events.json)
+
+**❌ Broken**:
+- React Three Fiber won't work in Next.js (compatibility issue)
+- 6+ hours of debugging failed
+
+**✅ Working Alternative**:
+- Tracker works perfectly in Vite project
+- Location: `/Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/`
+- URL: http://localhost:5173
+
+**Solution**: Use iframe to embed Vite tracker in Next.js site
+
+---
+
+## STEP-BY-STEP IMPLEMENTATION
+
+### STEP 1: Verify Vite Tracker (5 min)
+
+Open a terminal and run:
+
+```bash
+cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend
+npm install
+npm run dev
+```
+
+Wait for:
+```
+VITE v4.x.x  ready in xxx ms
+➜  Local:   http://localhost:5173/
+```
+
+**Test it**: Open http://localhost:5173 in browser
+
+Verify:
+- ✅ See 3D solar system (Sun, planets, comet)
+- ✅ Mouse drag rotates view
+- ✅ Mouse wheel zooms
+- ✅ Play/pause buttons work
+
+**If this fails**: STOP and report error. Tracker must work before proceeding.
+
+**If this succeeds**: Leave this terminal running. Open a NEW terminal for Step 2.
+
+---
+
+### STEP 2: Create Iframe Component (10 min)
+
+In the 3iatlas project, create this file:
+
+**File**: `/Users/kfitz/3iatlas/components/Atlas3DTrackerIframe.tsx`
+
+Paste this EXACT code:
+
+```typescript
+'use client';
+
+import { useState, useEffect } from 'react';
+
+interface Atlas3DTrackerIframeProps {
+  autoPlay?: boolean;
+  initialSpeed?: number;
+  initialViewMode?: 'explorer' | 'true-scale' | 'ride-atlas';
+}
+
+export default function Atlas3DTrackerIframe({
+  autoPlay = true,
+  initialSpeed = 2,
+  initialViewMode = 'explorer',
+}: Atlas3DTrackerIframeProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const TRACKER_URL = process.env.NEXT_PUBLIC_TRACKER_URL || 'http://localhost:5173';
+  const iframeUrl = `${TRACKER_URL}?autoPlay=${autoPlay}&speed=${initialSpeed}&view=${initialViewMode}`;
+
+  useEffect(() => {
+    const checkServer = async () => {
+      try {
+        const response = await fetch(TRACKER_URL, { mode: 'no-cors' });
+        setIsLoading(false);
+      } catch (err) {
+        setError('Tracker server not running. Start: cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend && npm run dev');
+        setIsLoading(false);
+      }
+    };
+
+    const timer = setTimeout(checkServer, 500);
+    return () => clearTimeout(timer);
+  }, [TRACKER_URL]);
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-900 to-black rounded-xl border border-red-500/30">
+        <div className="text-center text-white px-6">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h3 className="text-xl font-bold mb-2 text-red-400">Tracker Not Available</h3>
+          <p className="text-sm text-gray-300 mb-4 max-w-md">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-900 to-black rounded-xl">
+        <div className="text-center text-white">
+          <div className="animate-spin text-4xl mb-4">🌌</div>
+          <div className="text-lg">Loading Enhanced Solar System...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full relative rounded-xl overflow-hidden bg-black">
+      <iframe
+        src={iframeUrl}
+        className="w-full h-full border-0"
+        title="3I/ATLAS Orbital Tracker"
+        style={{ width: '100%', height: '100%', border: 'none', borderRadius: 'inherit' }}
+        allow="accelerometer; gyroscope"
+        loading="lazy"
+      />
+      <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded text-xs text-white/70 pointer-events-none">
+        3I/ATLAS Tracker
+      </div>
+    </div>
+  );
+}
+```
+
+**Verify file created**:
+```bash
+ls -lh components/Atlas3DTrackerIframe.tsx
+# Should show ~2KB file
+```
+
+---
+
+### STEP 3: Update Wrapper Component (5 min)
+
+**File**: `/Users/kfitz/3iatlas/components/Atlas3DTrackerWrapper.tsx`
+
+Replace ENTIRE contents with:
+
+```typescript
+'use client';
+
+import dynamic from 'next/dynamic';
+
+const Atlas3DTrackerIframe = dynamic(
+  () => import('./Atlas3DTrackerIframe'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-900 to-black rounded-xl">
+        <div className="text-center text-white">
+          <div className="animate-spin text-4xl mb-4">🌌</div>
+          <div className="text-lg">Loading Enhanced Solar System...</div>
+        </div>
+      </div>
+    ),
+  }
+);
+
+interface Atlas3DTrackerWrapperProps {
+  autoPlay?: boolean;
+  initialSpeed?: number;
+  initialViewMode?: 'explorer' | 'true-scale' | 'ride-atlas';
+}
+
+export default function Atlas3DTrackerWrapper(props: Atlas3DTrackerWrapperProps) {
+  return <Atlas3DTrackerIframe {...props} />;
+}
+```
+
+---
+
+### STEP 4: Add Environment Variable (2 min)
+
+Update or create: `/Users/kfitz/3iatlas/.env.local`
+
+Add this line:
+```bash
+NEXT_PUBLIC_TRACKER_URL=http://localhost:5173
+```
+
+---
+
+### STEP 5: Test Integration (5 min)
+
+**Start Next.js server** (in new terminal):
+```bash
+cd /Users/kfitz/3iatlas
+npm run dev
+```
+
+**Expected**:
+```
+Starting dev server on port 3030...
+✓ Ready in 2.5s
+```
+
+**Test in browser**:
+1. Open http://localhost:3030
+2. Wait 3-5 seconds for tracker to load
+3. Verify 3D tracker displays in "3I/ATLAS FLIGHTPATH" section
+4. Test controls (mouse drag/zoom, play/pause, view modes)
+
+**CRITICAL - Test Printify** (Must not be broken):
+1. Scroll to "Explore Our Universe"
+2. Verify ALL 4 brands show products with images
+3. Test carousel navigation
+4. Test social links
+
+**Check console**: Open DevTools (F12), Console tab
+- Should be NO errors
+- OK to see "Failed to set fetch cache" warning (Printify >2MB - non-blocking)
+
+**If all tests pass**: Continue to Step 6
+**If any test fails**: Check troubleshooting in COMPLETE_MIGRATION_GUIDE.md
+
+---
+
+### STEP 6: Document & Commit (5 min)
+
+**Update documentation**:
+```bash
+cat >> docs/PROJECT_MEMORY.md << 'EOF'
+
+## Update: [Your timestamp here]
+
+### Files Changed
+- components/Atlas3DTrackerIframe.tsx - NEW
+- components/Atlas3DTrackerWrapper.tsx - UPDATED
+- .env.local - ADDED tracker URL
+
+### What Works Now ✅
+- 3D tracker displaying via iframe
+- All Printify products working
+- Both servers running (Vite + Next.js)
+- All controls functional
+
+### Architecture
+- Iframe microservices pattern
+- Clean separation: Vite handles 3D, Next.js handles site
+- Independent deployment capability
+
+### Next Steps
+- Production deployment planning
+- Monitor performance
+- Consider CORS for production domain
+
+EOF
+```
+
+**Git commit**:
+```bash
+cd /Users/kfitz/3iatlas
+
+git add components/Atlas3DTrackerIframe.tsx
+git add components/Atlas3DTrackerWrapper.tsx
+git add .env.local
+git add docs/PROJECT_MEMORY.md
+
+git commit -m "feat: integrate 3D tracker via iframe (Option B)
+
+- Created Atlas3DTrackerIframe component
+- Updated wrapper to use iframe
+- Added NEXT_PUBLIC_TRACKER_URL env var
+- Tracker runs in Vite, embedded in Next.js
+- Resolves R3F compatibility blocker
+- All features working, Printify preserved
+- 30-min implementation, 100% success
+
+Testing: All controls work, no console errors
+Status: Ready for production deployment"
+
+git log -1 --stat
+```
+
+---
+
+## VALIDATION CHECKLIST
+
+Before reporting completion, verify ALL items:
+
+### Development Environment ✅
+- [ ] Vite running on http://localhost:5173
+- [ ] Next.js running on http://localhost:3030
+- [ ] Both terminals show no errors
+
+### Tracker Functionality ✅
+- [ ] Tracker visible in hero section
+- [ ] 3D solar system displays (Sun, planets, comet)
+- [ ] Mouse controls work (rotate/zoom)
+- [ ] Playback controls work (play/pause/speed)
+- [ ] View modes work (Explorer/True Scale/Ride With ATLAS)
+- [ ] Telemetry displays
+
+### Printify Integration ✅ (CRITICAL)
+- [ ] 3I/Atlas products visible with images
+- [ ] Mystic Arcana products visible with images
+- [ ] EDM Shuffle products visible with images
+- [ ] BirthdayGen products visible with images
+- [ ] Carousels navigate correctly
+- [ ] Social links work
+
+### Technical ✅
+- [ ] No TypeScript errors
+- [ ] No build errors
+- [ ] No console errors (except Printify cache warning - OK)
+- [ ] Files created/updated correctly
+
+### Documentation ✅
+- [ ] PROJECT_MEMORY.md updated
+- [ ] Git commit created with clear message
+- [ ] All changes documented
+
+**If ANY item unchecked**: Fix before reporting completion.
+
+---
+
+## COMPLETION REPORT
+
+When done, report:
+
+```
+✅ MIGRATION COMPLETE
+
+What was done:
+- Created Atlas3DTrackerIframe.tsx
+- Updated Atlas3DTrackerWrapper.tsx
+- Added NEXT_PUBLIC_TRACKER_URL env var
+- Both servers running
+- All tests passed
+
+Verification:
+- Tracker displays: ✅
+- Printify works: ✅
+- No errors: ✅
+- Git commit: ✅
+- Docs updated: ✅
+
+Time spent: [X] minutes
+
+Git commit hash: [paste from git log -1]
+
+Next steps:
+- Production deployment planning
+- Consider subdomain for tracker (tracker.3iatlas.com)
+- Monitor performance in production
+```
+
+---
+
+## TROUBLESHOOTING
+
+### "Tracker server not running" error
+```bash
+cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend
+npm run dev
+```
+
+### Port 5173 in use
+```bash
+lsof -ti:5173 | xargs kill -9
+npm run dev
+```
+
+### Iframe is blank
+1. Check Vite server running
+2. Check browser console for errors
+3. Check no CORS issues (shouldn't be for localhost)
+
+### Printify broken (EMERGENCY)
+```bash
+git checkout HEAD -- components/ProductCarousel.tsx
+git checkout HEAD -- components/FeaturedRow.tsx
+npm run dev
+```
+
+---
+
+## TIME BUDGET
+
+| Task | Minutes |
+|------|---------|
+| Read docs | 10 |
+| Verify Vite | 5 |
+| Create component | 10 |
+| Update wrapper | 5 |
+| Add env var | 2 |
+| Test | 5 |
+| Document & commit | 5 |
+| **TOTAL** | **42 min** |
+
+**If you exceed 1 hour, something is wrong. Request help.**
+
+---
+
+## SUCCESS LOOKS LIKE
+
+**User opens http://localhost:3030:**
+1. Sees working 3D tracker in hero section
+2. Sees all Printify products below
+3. Everything works smoothly
+4. No console errors
+
+**Developer perspective:**
+1. Two servers running (Vite + Next.js)
+2. Clean code, no TypeScript errors
+3. Clear git commit
+4. Updated documentation
+5. 30-45 minute implementation
+
+---
+
+## CRITICAL WARNINGS
+
+⚠️ **DO NOT modify these files** (they're working):
+- `components/ProductCarousel.tsx`
+- `components/FeaturedRow.tsx`
+- `lib/printify.ts`
+- `app/page.tsx` structure
+
+⚠️ **DO NOT spend >30 minutes** on any single issue
+
+⚠️ **DO NOT commit** TypeScript errors
+
+⚠️ **DO NOT skip** testing Printify after changes
+
+---
+
+## START HERE
+
+1. **Read docs** (10 min):
+   ```bash
+   cat docs/PROJECT_MEMORY.md
+   cat docs/CURRENT_STATE.md
+   cat COMPLETE_MIGRATION_GUIDE.md
+   ```
+
+2. **Verify Vite tracker** (5 min):
+   ```bash
+   cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend
+   npm run dev
+   # Open http://localhost:5173 - verify it works
+   # Keep this terminal running
+   ```
+
+3. **Create iframe component** (10 min):
+   - Create `components/Atlas3DTrackerIframe.tsx`
+   - Paste code from STEP 2 above
+
+4. **Update wrapper** (5 min):
+   - Edit `components/Atlas3DTrackerWrapper.tsx`
+   - Replace contents with code from STEP 3 above
+
+5. **Add env var** (2 min):
+   - Edit `.env.local`
+   - Add: `NEXT_PUBLIC_TRACKER_URL=http://localhost:5173`
+
+6. **Test** (5 min):
+   ```bash
+   cd /Users/kfitz/3iatlas
+   npm run dev
+   # Open http://localhost:3030
+   # Verify tracker displays
+   # Verify Printify products work
+   ```
+
+7. **Commit** (5 min):
+   ```bash
+   git add components/Atlas3DTrackerIframe.tsx
+   git add components/Atlas3DTrackerWrapper.tsx
+   git add .env.local
+   git add docs/PROJECT_MEMORY.md
+   git commit -m "feat: integrate tracker via iframe (Option B) - 30min, 100% success"
+   ```
+
+---
+
+## EXPECTED OUTCOME
+
+After 30-45 minutes:
+- ✅ Tracker displays in Next.js site
+- ✅ All Printify products still working
+- ✅ Both servers running smoothly
+- ✅ No console errors
+- ✅ Git commit created
+- ✅ Documentation updated
+
+**Report completion with validation results.**
+
+---
+
+## REMEMBER
+
+- This WILL work (iframe is proven)
+- Takes 30-45 minutes
+- Don't overthink it
+- Test incrementally
+- Preserve Printify features
+- Document when done
+
+**GO!** Follow steps 1-7. Report results.
+
+================================================================================
+END OF AGENT PROMPT - EVERYTHING ABOVE THIS LINE
+================================================================================

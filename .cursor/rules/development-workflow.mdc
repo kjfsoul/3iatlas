@@ -1,0 +1,342 @@
+---
+description: Proven development workflow based on actual experience
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Development Workflow (Battle-Tested)
+
+## The Process That Actually Works
+
+### 1. Context Loading (First 10 minutes)
+
+**READ THESE IN ORDER:**
+1. `/docs/PROJECT_MEMORY.md` - Source of truth
+2. `/docs/CURRENT_STATE.md` - What's broken
+3. `/docs/MIGRATION_TASKS.md` - How to fix it (if exists)
+4. Recent git log: `git log --oneline -10`
+
+**DON'T:**
+- Start coding immediately
+- Assume you know the context
+- Rely on external memory tools (they failed us)
+
+### 2. Change Implementation (Incremental)
+
+**DO:**
+```bash
+# Make ONE small change
+# Test immediately
+git add -p  # Stage specific changes
+git commit -m "feat: specific change that works"
+# Repeat
+```
+
+**DON'T:**
+```bash
+# Make 10 changes at once
+# Test at the end
+# Commit everything together
+# Hope it works
+```
+
+### 3. Testing Protocol
+
+**After EVERY change:**
+1. Save file
+2. Check for TypeScript errors (IDE)
+3. Check terminal for build errors
+4. Refresh browser (if applicable)
+5. Check browser console for errors
+6. Test the specific feature changed
+
+**Don't proceed to next change until current change works.**
+
+### 4. When Something Breaks
+
+**Immediate Actions:**
+1. Read the FULL error message
+2. Note the EXACT file and line number
+3. Check what you just changed
+4. Revert if needed: `git checkout -- file.ts`
+5. Try again with smaller change
+
+**Document the Error:**
+```markdown
+## Error: [Brief description]
+
+**File**: /path/to/file.ts:123
+**Time**: 2025-01-22 16:45 PST
+**What I did**: Changed X to Y
+**Error message**:
+```
+[full error]
+```
+
+**What I tried**:
+1. Approach A - didn't work because...
+2. Approach B - didn't work because...
+
+**Still broken**: Yes/No
+```
+
+### 5. The 30-Minute Rule
+
+**If stuck on same issue for 30 minutes:**
+
+```bash
+# Stop trying random fixes
+# Document current state
+cat > /docs/STUCK_$(date +%Y%m%d_%H%M).md << EOF
+# Stuck on [Issue]
+
+## What I'm trying to do
+[Goal]
+
+## What's not working
+[Exact error]
+
+## What I've tried
+1. [Attempt 1] - [Outcome]
+2. [Attempt 2] - [Outcome]
+
+## Next ideas to try
+1. [Idea 1]
+2. [Idea 2]
+
+## Time spent: 30+ minutes
+## Request: Need fresh perspective / handoff
+EOF
+
+# Commit what you have
+git add -A
+git commit -m "wip: stuck on [issue] - see STUCK_*.md"
+
+# Request help
+```
+
+### 6. Protecting Working Features
+
+**CRITICAL RULE**: Never break what already works.
+
+**Before editing any file:**
+1. Check if it's marked as "WORKING" in CURRENT_STATE.md
+2. If yes, make a backup: `cp file.ts file.ts.backup`
+3. Test working feature BEFORE your changes
+4. Test working feature AFTER your changes
+5. If broken, revert immediately
+
+**Files marked "DO NOT MODIFY":**
+- Anything related to Printify integration
+- Anything marked ✅ WORKING in docs
+- Core layout and routing (unless specifically tasked)
+
+### 7. Version Control Discipline
+
+**Commit early, commit often:**
+
+```bash
+# Good commits (specific, testable)
+git commit -m "feat: add comet glow effect to Comet3D"
+git commit -m "fix: correct Sun position drift in animation loop"
+git commit -m "docs: update CURRENT_STATE with R3F compatibility issue"
+
+# Bad commits (vague, untestable)
+git commit -m "updates"
+git commit -m "trying to fix things"
+git commit -m "wip"
+```
+
+**Branch strategy for major changes:**
+```bash
+git checkout -b fix/r3f-compatibility
+# Make changes
+# Test thoroughly
+git checkout main
+git merge fix/r3f-compatibility
+```
+
+### 8. Documentation Updates
+
+**Update docs in real-time, not "later":**
+
+**After every significant change:**
+```bash
+# Update relevant section in PROJECT_MEMORY.md
+# Mark completed items with ✅
+# Mark broken items with ❌
+# Update "Last Updated" timestamp
+git add docs/PROJECT_MEMORY.md
+git commit -m "docs: update memory with [what changed]"
+```
+
+**After fixing a blocker:**
+```bash
+# Document the solution in CURRENT_STATE.md
+# Add to "Hard-Learned Lessons" in PROJECT_MEMORY.md
+# Remove from blockers list
+```
+
+### 9. Performance Testing
+
+**For 3D visualization changes:**
+1. Open browser dev tools → Performance
+2. Record 10 seconds of animation
+3. Check FPS (should be ~60)
+4. Check memory usage (should be stable)
+5. Check for memory leaks (heap should not constantly grow)
+
+**Red flags:**
+- FPS < 30
+- Memory grows >100MB in 10 seconds
+- Console spam (>10 messages/second)
+
+### 10. Pre-Handoff Checklist
+
+**Before asking for handoff:**
+
+- [ ] Updated `/docs/CURRENT_STATE.md`
+- [ ] Created or updated `/docs/[TASK]_TASKS.md`
+- [ ] Listed exactly what was tried
+- [ ] Included exact error messages
+- [ ] Documented time spent
+- [ ] Committed all work to git
+- [ ] Listed recommended next steps
+- [ ] Identified what NOT to try again
+- [ ] Confirmed working features still work
+
+## Anti-Patterns (Learn from Failures)
+
+### Pattern: "Try Everything Until Something Works"
+**Why it fails**: Wastes time, creates confusion, breaks working code.
+
+**Instead**:
+- Make hypothesis
+- Test hypothesis with minimal change
+- Document result
+- Iterate
+
+### Pattern: "It Works On My Machine"
+**Why it fails**: Different environments, different bugs.
+
+**Instead**:
+- Test in target environment
+- Document environment details
+- Use consistent versions
+
+### Pattern: "I'll Document It Later"
+**Why it fails**: You forget details, handoff is incomplete.
+
+**Instead**:
+- Document as you go
+- Update memory in real-time
+- Commit docs with code
+
+### Pattern: "Just One More Try"
+**Why it fails**: Same approach, same result. Wasted time.
+
+**Instead**:
+- After 2-3 attempts with same approach, try different approach
+- After 30 minutes total, document and request help
+
+## Pro-Patterns (What Actually Works)
+
+### Pattern: "Read Before Coding"
+Spend 10 minutes reading docs → Save 2 hours of wrong direction.
+
+### Pattern: "Test Immediately"
+Change → Test → Commit → Repeat
+
+### Pattern: "Preserve Working Features"
+Working code is more valuable than new features.
+
+### Pattern: "Document Failures"
+Failed attempts teach as much as successes.
+
+### Pattern: "Request Handoff Early"
+30 minutes stuck > 3 hours struggling.
+
+## Time Budgets
+
+**Reasonable time allocations:**
+- Simple bug fix: 15-30 minutes
+- New component: 1-2 hours
+- Integration work: 2-4 hours
+- Debugging unknown issue: 30 min then handoff
+
+**Warning signs you're over budget:**
+- Same error for >30 minutes
+- No progress in >1 hour
+- Breaking other features trying to fix one
+- Trying approaches you already tried
+
+## Success Metrics
+
+**Good development session:**
+- 3-5 commits with working features
+- Updated documentation
+- No regression in working features
+- Clear next steps if incomplete
+
+**Bad development session:**
+- 0-1 commits
+- Many attempted fixes, nothing works
+- Broke something that was working
+- Unclear what to do next
+
+## Emergency Procedures
+
+**If you broke something critical:**
+
+```bash
+# 1. Stay calm
+# 2. Identify last working commit
+git log --oneline -20
+
+# 3. Revert to last working state
+git reset --hard [commit-hash]
+
+# 4. Document what happened
+# 5. Start over with smaller changes
+```
+
+**If build is completely broken:**
+
+```bash
+# 1. Delete generated files
+rm -rf .next node_modules
+
+# 2. Fresh install
+npm install
+
+# 3. Test clean build
+npm run dev
+
+# 4. If still broken, check git diff
+git diff
+
+# 5. Revert changes incrementally until it builds
+```
+
+## Final Wisdom
+
+**The best code is code that:**
+1. Works
+2. Doesn't break other code
+3. Is documented
+4. Can be understood by next developer
+
+**The worst code is code that:**
+1. Almost works
+2. Breaks other code
+3. Is undocumented
+4. Was written in desperation
+
+**When in doubt:**
+- Read docs first
+- Test incrementally
+- Document everything
+- Request help early
+- Preserve working features
+
+**Remember**: Progress is measured by working features, not hours spent.

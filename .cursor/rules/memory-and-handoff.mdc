@@ -1,0 +1,164 @@
+---
+description: Memory protocol and handoff procedures that ACTUALLY work
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Memory & Handoff Protocol (Proven Effective)
+
+## Source of Truth Hierarchy
+
+1. **PRIMARY**: `/docs/PROJECT_MEMORY.md` - Always read first
+2. **CURRENT STATE**: `/docs/CURRENT_STATE.md` - What's broken right now
+3. **TASKS**: `/docs/MIGRATION_TASKS.md` - How to fix it
+4. **CODE DOCS**: Inline comments in complex files
+5. **GIT HISTORY**: Commit messages for recent changes
+
+## ByteRover MCP Status
+
+**DO NOT DEPEND ON BYTEROVER MCP** for this project.
+
+**Why**: During intensive development sessions, ByteRover MCP:
+- Did not reliably persist knowledge
+- Did not successfully retrieve stored context
+- Required re-explaining same concepts multiple times
+- Added overhead without demonstrable benefit
+
+**Instead**:
+- Use local markdown files in `/docs/`
+- Update PROJECT_MEMORY.md after significant work
+- Write detailed commit messages
+- Create handoff docs when stuck
+
+**Future reconsideration**: Only if ByteRover proves reliable on isolated test task.
+
+## Before Starting Work
+
+1. Read `/docs/PROJECT_MEMORY.md` (5 min)
+2. Check `/docs/CURRENT_STATE.md` for latest status (2 min)
+3. Review recent git commits (1 min)
+4. Understand what's working vs broken
+
+## While Working
+
+1. Make incremental changes
+2. Test after each change
+3. Commit when something works
+4. Document blockers immediately
+
+## When Stuck (>30 minutes)
+
+1. Document exactly what was tried
+2. Document exact error messages
+3. Update `/docs/CURRENT_STATE.md`
+4. Create or update `/docs/[TASK]_TASKS.md` with next steps
+5. Request handoff with full context
+
+## After Completing Work
+
+1. Update `/docs/PROJECT_MEMORY.md` with:
+   - What was accomplished
+   - What was learned
+   - What's still broken
+   - Recommended next steps
+2. Update timestamp in PROJECT_MEMORY.md
+3. Commit with descriptive message
+
+## Handoff Document Template
+
+Create `/docs/HANDOFF_[DATE].md`:
+
+```markdown
+# Handoff - [Date]
+
+## What Was Done
+- [List of completed work]
+
+## What Works
+- [List of working features]
+
+## What's Broken
+- [List of issues with exact errors]
+
+## What Was Tried
+- [Attempts with outcomes]
+
+## Next Steps
+1. [Specific actionable tasks]
+2. [With validation criteria]
+
+## Time Spent
+- [Breakdown by task]
+
+## Critical Warnings
+- [Things not to break]
+- [Things not to try again]
+```
+
+## Anti-Patterns (Don't Do These)
+
+❌ Assume external MCPs work without verification
+❌ Make changes without testing immediately
+❌ Continue trying same approach for >1 hour
+❌ Break working features to fix broken ones
+❌ Fabricate data or mock implementations
+❌ Skip documentation "to save time"
+
+## Pro-Patterns (Do These)
+
+✅ Read docs before making changes
+✅ Test incrementally
+✅ Preserve working features
+✅ Document failures clearly
+✅ Request handoff when stuck
+✅ Update memory after progress
+
+## Memory Update Checklist
+
+When updating `/docs/PROJECT_MEMORY.md`:
+
+- [ ] Updated "Last Updated" timestamp
+- [ ] Updated "Current Implementation Status"
+- [ ] Added new "Hard-Learned Lessons" (if applicable)
+- [ ] Updated "Immediate Next Steps"
+- [ ] Marked completed items with ✅
+- [ ] Added new blockers to "Known Issues"
+- [ ] Committed changes to git
+
+## Communication Style
+
+**With User**:
+- Be honest about what's working and what isn't
+- Don't sugarcoat failures
+- Provide clear next steps
+- Request decisions when stuck
+
+**In Documentation**:
+- Use ✅ for working features
+- Use ❌ for broken features
+- Use ⚠️ for warnings
+- Be specific with error messages
+- Include file paths and line numbers
+- Document time spent
+
+## Success Metrics
+
+Good memory protocol means:
+- Next developer can start immediately
+- No repeated questions about same context
+- Clear understanding of what not to break
+- Specific, actionable next steps
+- Honest assessment of current state
+
+Bad memory protocol means:
+- "What's the current state?" needs asked
+- Same issues attempted multiple times
+- Unclear what's working vs broken
+- Vague next steps
+- Overly optimistic assessments
+
+## Final Rule
+
+**If you're not sure if something is documented, it's not documented well enough.**
+
+Document clearly. Test thoroughly. Handoff cleanly.
