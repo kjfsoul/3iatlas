@@ -3,7 +3,6 @@ export const revalidate = 0;
 
 import Atlas3DTrackerWrapper from "@/components/Atlas3DTrackerWrapper";
 import FeaturedRow from "@/components/FeaturedRow";
-import FlightpathSimulator from "@/components/FlightpathSimulator";
 import SocialLinks from "@/components/SocialLinks";
 
 const BASES = {
@@ -30,34 +29,12 @@ export default async function Page() {
         <p className="mt-2 text-white/80">
           Live drops from four Printify outposts.
         </p>
-        <div className="mt-6">
-          <FlightpathSimulator seed="3iatlas" />
-        </div>
-      </section>
-
-      {/* 3D ORBITAL TRACKER */}
-      <section className="mt-10">
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-black/20 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-bold">3D Orbital Tracker</h2>
-              <p className="text-white/60 text-sm mt-1">
-                Watch 3I/ATLAS approach perihelion in October 2025
-              </p>
-            </div>
-          </div>
-          <div className="h-[700px] rounded-xl relative">
-            <Atlas3DTrackerWrapper
-              startDate="2025-10-01"
-              endDate="2025-10-31"
-              stepSize="6h"
-              autoPlay={true}
-              playbackSpeed={2}
-            />
-          </div>
-          <div className="mt-4 text-center text-white/40 text-sm">
-            🌌 Orbital data provided by NASA Jet Propulsion Laboratory
-          </div>
+        <div className="mt-6 h-[700px] rounded-xl relative">
+          <Atlas3DTrackerWrapper
+            autoPlay={true}
+            initialSpeed={2}
+            initialViewMode="explorer"
+          />
         </div>
       </section>
 

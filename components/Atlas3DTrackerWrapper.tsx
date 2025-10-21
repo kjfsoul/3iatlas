@@ -1,34 +1,28 @@
 'use client';
 
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
-// Dynamically import enhanced 3D tracker (client-side only)
-const Atlas3DTrackerEnhanced = dynamic(() => import('./Atlas3DTrackerEnhanced'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-[600px] bg-black rounded-xl">
-      <div className="animate-pulse text-green-400 text-lg">Loading Solar System...</div>
-    </div>
-  ),
-});
+const Atlas3DTrackerIframe = dynamic(
+  () => import('./Atlas3DTrackerIframe'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-900 to-black rounded-xl">
+        <div className="text-center text-white">
+          <div className="animate-spin text-4xl mb-4">🌌</div>
+          <div className="text-lg">Loading Enhanced Solar System...</div>
+        </div>
+      </div>
+    ),
+  }
+);
 
 interface Atlas3DTrackerWrapperProps {
-  startDate?: string;
-  endDate?: string;
-  stepSize?: '1h' | '6h' | '12h' | '1d';
   autoPlay?: boolean;
-  playbackSpeed?: number;
+  initialSpeed?: number;
+  initialViewMode?: 'explorer' | 'true-scale' | 'ride-atlas';
 }
 
 export default function Atlas3DTrackerWrapper(props: Atlas3DTrackerWrapperProps) {
-  return (
-    <div className="relative w-full h-full">
-      <Atlas3DTrackerEnhanced {...props} />
-      {/* Temporarily disabled PerformanceMonitor to isolate React error */}
-      {/* <PerformanceMonitor
-        enabled={true}
-        className="absolute top-4 right-4 z-10"
-      /> */}
-    </div>
-  );
+  return <Atlas3DTrackerIframe {...props} />;
 }
