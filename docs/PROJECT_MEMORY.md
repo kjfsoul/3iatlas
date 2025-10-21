@@ -1,5 +1,5 @@
 # 3I/Atlas Project Memory & Quick Reference
-**Last Updated:** January 22, 2025, 9:55 PM PST
+**Last Updated:** January 22, 2025, 10:15 PM PST
 **Status:** ✅ PRODUCTION READY - All Features Working
 
 ---
@@ -534,24 +534,29 @@ npm start          # Start production server
 
 **Last Migration Attempt:** January 22, 2025, 4:30 PM PST
 **Status:** Blocked on R3F compatibility
-## Update: January 22, 2025, 9:55 PM PST - PRODUCTION READY
+## Update: January 22, 2025, 10:15 PM PST - PRODUCTION READY + TRACKER FIXES
 
 ### Files Changed (3iatlas project)
 - `components/Atlas3DTrackerIframe.tsx` - NEW - Iframe wrapper component
 - `components/Atlas3DTrackerWrapper.tsx` - UPDATED - Now uses iframe approach
 - `app/page.tsx` - FIXED - Resolved Git merge conflicts
 - `app/layout.tsx` - UPDATED - Added Vercel Analytics
-- `.env.local` - ADDED - `NEXT_PUBLIC_TRACKER_URL=http://localhost:5173`
+- `.env.local` - UPDATED - `NEXT_PUBLIC_3IATLAS_BASE=https://3iatlasshop.mysticarcana.com/`
 - `docs/PROJECT_MEMORY.md` - UPDATED - This file
 - `package.json` - UPDATED - Added @vercel/analytics
 
 ### Files Changed (Vite tracker project)
 - `../3iatlas-flight-tracker/frontend/src/components/PlaybackControls.tsx` - FIXED - z-index issues
+- `../3iatlas-flight-tracker/frontend/src/components/SceneContent.tsx` - FIXED - Camera controls enabled
+- `../3iatlas-flight-tracker/frontend/src/components/TelemetryHUD.tsx` - FIXED - Moved below Jupiter panel
+- `../3iatlas-flight-tracker/frontend/src/components/PlanetLocators.tsx` - FIXED - No duplicate Mars labels
+- `../3iatlas-flight-tracker/frontend/src/components/Atlas3DTrackerEnhanced.tsx` - FIXED - True-scale camera position
 
 ### Status
 ✅ **Working Now:**
 - Site builds successfully (3.6s compile time)
 - All Printify products displaying with Amber backgrounds (4 brands)
+- **3I/ATLAS products now route to 3iatlasshop.mysticarcana.com**
 - ATLAS DIRECTIVE section rendering with game teaser
 - Iframe integration complete (Option B chosen)
 - Git merge conflicts resolved
@@ -559,6 +564,10 @@ npm start          # Start production server
 - **UI Controls Fixed** - Speed/View dropdowns now clickable (z-index 1000/1001)
 - **Vercel Analytics** - Integrated for production tracking
 - **Git rebase resolved** - Clean main branch, pushed to GitHub
+- **Camera Controls Fixed** - Zoom/pan/rotate work in all view modes
+- **TelemetryHUD Repositioned** - No longer blocks 3D view
+- **Mars Label Duplication Fixed** - No more duplicate labels in Ride With ATLAS
+- **True-Scale View Fixed** - Proper zoom level shows full solar system
 
 ✅ **Browser Verified (User Confirmed):**
 - Tracker displays in browser after client-side hydration
