@@ -86,6 +86,20 @@ export async function getLatestPublishedProducts(shopId: number, limit = 3): Pro
   return published.slice(0, limit);
 }
 export function toPublicProductUrl(storeBase: string, product: Product): string {
+  // Special handling for 3I/ATLAS store - use new domain format
+  if (storeBase.includes('3iatlasshop.mysticarcana.com')) {
+    // Generate URL in format: 3iatlasstore.mysticarcana.com/product/{product_ID}/{Product_Title}
+    const productId = product.external?.id || product.id;
+    const productTitle = product.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim();
+    
+    return `https://3iatlasstore.mysticarcana.com/product/${productId}/${productTitle}`;
+  }
+  
   // If external.handle is a full URL, use it directly
   if (product.external?.handle) {
     // Check if it's already a full URL
