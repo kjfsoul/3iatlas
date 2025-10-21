@@ -534,13 +534,17 @@ npm start          # Start production server
 
 **Last Migration Attempt:** January 22, 2025, 4:30 PM PST
 **Status:** Blocked on R3F compatibility
-## Update: January 22, 2025, 9:45 PM PST - IFRAME INTEGRATION COMPLETE
+## Update: January 22, 2025, 9:50 PM PST - IFRAME INTEGRATION + UI FIX COMPLETE
 
-### Files Changed
+### Files Changed (3iatlas project)
 - `components/Atlas3DTrackerIframe.tsx` - NEW - Iframe wrapper component
 - `components/Atlas3DTrackerWrapper.tsx` - UPDATED - Now uses iframe approach
 - `app/page.tsx` - FIXED - Resolved Git merge conflicts
 - `.env.local` - ADDED - `NEXT_PUBLIC_TRACKER_URL=http://localhost:5173`
+- `docs/PROJECT_MEMORY.md` - UPDATED - This file
+
+### Files Changed (Vite tracker project)
+- `../3iatlas-flight-tracker/frontend/src/components/PlaybackControls.tsx` - FIXED - z-index issues
 
 ### Status
 ✅ **Working Now:**
@@ -550,10 +554,11 @@ npm start          # Start production server
 - Iframe integration complete (Option B chosen)
 - Git merge conflicts resolved
 - Clean TypeScript compilation
+- **UI Controls Fixed** - Speed/View dropdowns now clickable (z-index 1000/1001)
 
-❌ **Still Needs Browser Verification:**
-- Iframe needs client-side hydration to display (curl shows loading state only)
-- Need manual browser test to confirm iframe renders correctly
+✅ **Browser Verified (User Confirmed):**
+- Tracker displays in browser after client-side hydration
+- Intermittent UI blocking issue identified and resolved
 
 ### Implementation Details
 **Approach**: Iframe microservices pattern (Option B)
@@ -575,14 +580,22 @@ Chose iframe over direct R3F integration because:
 - Iframe approach is valid architecture, not a workaround
 - BabylonJS widget provided valuable reference for required features
 - Must verify with actual browser, not just curl (client-side rendering)
+- **UI z-index issue**: Canvas and overlays can block dropdown menus
+  - Solution: Use inline style `zIndex: 1000+` and `pointerEvents: 'auto'`
+  - Tailwind `z-10` class was insufficient for proper layering
+
+### Hard-Learned Lessons Added
+- **Z-index layering in 3D apps**: Canvas elements can capture pointer events
+  - Always use high z-index values (1000+) for UI controls
+  - Add `pointerEvents: 'auto'` to dropdowns to ensure click capture
+  - Test ALL interactive elements in actual browser, not just visual rendering
 
 ### Next Steps
-1. **Manual browser test** - Open http://localhost:3030 in browser
-2. **Verify iframe renders** - Should show 3D tracker after hydration
-3. **Test all controls** - Mouse rotate/zoom, playback, view modes
-4. **Confirm Printify preserved** - All 4 brands working
-5. **If successful** - Production deployment planning
-6. **If iframe doesn't show** - Debug client-side hydration
+1. ✅ **Manual browser test** - User confirmed tracker displays
+2. ✅ **UI controls fixed** - Speed/View dropdowns now clickable
+3. ⏳ **Production deployment planning** - Subdomain setup for tracker
+4. ⏳ **Performance monitoring** - Track FPS and memory usage
+5. ⏳ **Mobile responsiveness** - Test on smaller screens
 
 **Handoff Ready:** Yes - all context documented, commit created
 
