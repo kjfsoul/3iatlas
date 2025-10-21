@@ -34,3 +34,4 @@ project_prompts.md
 # Test results and reports
 playwright-report/
 test-results/
+.venv*
