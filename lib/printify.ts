@@ -1,24 +1,24 @@
 const API = "https://api.printify.com/v1";
-type Shop = { 
-  id: number; 
-  title: string; 
+type Shop = {
+  id: number;
+  title: string;
   sales_channel?: string;
 };
 
 type Product = {
-  id: string; 
+  id: string;
   title: string;
   description?: string;
   tags?: string[];
-  images?: { 
-    src: string; 
-    variant_ids?: number[]; 
-    position?: string; 
+  images?: {
+    src: string;
+    variant_ids?: number[];
+    position?: string;
     is_default?: boolean;
   }[];
-  visible?: boolean; 
+  visible?: boolean;
   published?: boolean;
-  created_at?: string; 
+  created_at?: string;
   updated_at?: string;
   variants?: {
     id: number;
@@ -32,7 +32,10 @@ type Product = {
 function auth() {
   const key = process.env.PRINTIFY_API_TOKEN;
   if (!key) return undefined;
-  return { headers: { Authorization: `Bearer ${key}` }, next: { revalidate: 60 } };
+  return {
+    headers: { Authorization: `Bearer ${key}` },
+    next: { revalidate: 60 },
+  };
 }
 export async function getShops(): Promise<Shop[]> {
   if (!auth()) return [];
@@ -43,74 +46,85 @@ export async function getShops(): Promise<Shop[]> {
 }
 // Map of store URLs to Printify shop titles
 const SHOP_TITLE_MAP: Record<string, string> = {
-  'https://3iatlas.printify.me': '3iAtlas',
-  'https://mystic-arcana-pop-up.printify.me': 'Mystic Arcana Pop-up',
-  'https://edm-shuffle-pop-up.printify.me': 'EDM Shuffle pop-up',
-  'https://birthdaygen-popup.printify.me': 'BirthdayGen Popup',
+  "https://3iatlas.printify.me": "3iAtlas",
+  "https://mystic-arcana-pop-up.printify.me": "Mystic Arcana Pop-up",
+  "https://edm-shuffle-pop-up.printify.me": "EDM Shuffle pop-up",
+  "https://birthdaygen-popup.printify.me": "BirthdayGen Popup",
 };
 
 export async function findShopIdByBase(base: string): Promise<number | null> {
   if (!base) return null;
-  
+
   const shops = await getShops();
-  const expectedTitle = SHOP_TITLE_MAP[base.toLowerCase().replace(/\/$/, '')];
-  
+  const expectedTitle = SHOP_TITLE_MAP[base.toLowerCase().replace(/\/$/, "")];
+
   if (!expectedTitle) {
-    console.warn('[Printify] No shop mapping for:', base);
+    console.warn("[Printify] No shop mapping for:", base);
     return null;
   }
-  
-  const match = shops.find(s => s.title === expectedTitle);
+
+  const match = shops.find((s) => s.title === expectedTitle);
   return match ? match.id : null;
 }
-export async function getLatestPublishedProducts(shopId: number, limit = 3): Promise<Product[]> {
+export async function getLatestPublishedProducts(
+  shopId: number,
+  limit = 3
+): Promise<Product[]> {
   if (!auth()) return [];
   const res = await fetch(`${API}/shops/${shopId}/products.json`, auth());
   if (!res.ok) return [];
-  
+
   const response = await res.json();
-  
+
   // Handle both array and object responses (Printify API returns object with 'data' property)
-  const all = Array.isArray(response) ? response : (response.data || []);
-  
+  const all = Array.isArray(response) ? response : response.data || [];
+
   if (!Array.isArray(all)) {
-    console.error('[Printify] Invalid product response format');
+    console.error("[Printify] Invalid product response format");
     return [];
   }
-  
+
   const published = all
-    .filter(p => p.published || p.visible)
-    .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime()
-                   - new Date(a.updated_at ?? a.created_at ?? 0).getTime());
-  
+    .filter((p) => p.published || p.visible)
+    .sort(
+      (a, b) =>
+        new Date(b.updated_at ?? b.created_at ?? 0).getTime() -
+        new Date(a.updated_at ?? a.created_at ?? 0).getTime()
+    );
+
   return published.slice(0, limit);
 }
-export function toPublicProductUrl(storeBase: string, product: Product): string {
+export function toPublicProductUrl(
+  storeBase: string,
+  product: Product
+): string {
   // Special handling for 3I/ATLAS store - use new domain format
-  if (storeBase.includes('3iatlasshop.mysticarcana.com')) {
+  if (storeBase.includes("3iatlasshop.mysticarcana.com")) {
     // Generate URL in format: 3iatlasstore.mysticarcana.com/product/{product_ID}/{Product_Title}
     const productId = product.external?.id || product.id;
     const productTitle = product.title
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/-+/g, "-") // Replace multiple hyphens with single
       .trim();
-    
+
     return `https://3iatlasstore.mysticarcana.com/product/${productId}/${productTitle}`;
   }
-  
+
   // If external.handle is a full URL, use it directly
   if (product.external?.handle) {
     // Check if it's already a full URL
-    if (product.external.handle.startsWith('http')) {
+    if (product.external.handle.startsWith("http")) {
       return product.external.handle;
     }
     // Otherwise append to base
     const base = storeBase.replace(/\/$/, "");
-    return `${base}${product.external.handle.startsWith('/') ? '' : '/'}${product.external.handle}`;
+    return `${base}${product.external.handle.startsWith("/") ? "" : "/"}${
+      product.external.handle
+    }`;
   }
-  
+
   // Fallback: construct URL from base + product ID
   const base = storeBase.replace(/\/$/, "");
   if (product.external?.id) {
@@ -121,38 +135,48 @@ export function toPublicProductUrl(storeBase: string, product: Product): string 
 
 export function productImage(p: Product): string {
   // Find default image or first image
-  const defaultImg = p.images?.find(img => img.is_default);
+  const defaultImg = p.images?.find((img) => img.is_default);
   const firstImg = p.images?.[0];
-  const imageUrl = defaultImg?.src || firstImg?.src || "/images/placeholder-product.png";
-  
+  const imageUrl =
+    defaultImg?.src || firstImg?.src || "/images/placeholder-product.png";
+
   // Log when we're using placeholder (for debugging)
   if (imageUrl === "/images/placeholder-product.png") {
-    console.warn('[Printify] No image found for product:', p.title, 'ID:', p.id);
+    console.warn(
+      "[Printify] No image found for product:",
+      p.title,
+      "ID:",
+      p.id
+    );
     if (p.images) {
-      console.log('[Printify] Product has', p.images.length, 'images but none found');
+      console.log(
+        "[Printify] Product has",
+        p.images.length,
+        "images but none found"
+      );
     }
   }
-  
+
   return imageUrl;
 }
 
 export function productPrice(p: Product): string {
   if (!p.variants || p.variants.length === 0) return "";
-  const minPrice = Math.min(...p.variants.map(v => v.price));
+  const minPrice = Math.min(...p.variants.map((v) => v.price));
   return `$${(minPrice / 100).toFixed(2)}`;
 }
 
 export function productDescription(p: Product): string {
   if (!p.description) return "";
   // Remove HTML tags if any
-  const text = p.description.replace(/<[^>]*>/g, '');
+  const text = p.description.replace(/<[^>]*>/g, "");
   // Get first 2 sentences or 25 words
   const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-  const firstTwo = sentences.slice(0, 2).join(' ').trim();
-  
+  const firstTwo = sentences.slice(0, 2).join(" ").trim();
+
   if (firstTwo) return firstTwo;
-  
+
   // Fallback to 25 words if no sentences found
-  const words = text.split(/\s+/).slice(0, 25).join(' ');
-  return words + (text.split(/\s+/).length > 25 ? '...' : '');
+  const words = text.split(/\s+/).slice(0, 25).join(" ");
+  return words + (text.split(/\s+/).length > 25 ? "..." : "");
 }
