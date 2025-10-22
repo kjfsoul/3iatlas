@@ -52,11 +52,24 @@ const SHOP_TITLE_MAP: Record<string, string> = {
   "https://birthdaygen-popup.printify.me": "BirthdayGen Popup",
 };
 
+// Map of custom domains to direct shop IDs
+const CUSTOM_DOMAIN_SHOP_MAP: Record<string, number> = {
+  "https://3iatlasstore.mysticarcana.com": 24436338, // 3I/ATLAS shop ID
+};
+
 export async function findShopIdByBase(base: string): Promise<number | null> {
   if (!base) return null;
 
+  // Check custom domain mapping first
+  const normalizedBase = base.toLowerCase().replace(/\/$/, "");
+  const customShopId = CUSTOM_DOMAIN_SHOP_MAP[normalizedBase];
+  if (customShopId) {
+    return customShopId;
+  }
+
+  // Fall back to title-based mapping for Printify domains
   const shops = await getShops();
-  const expectedTitle = SHOP_TITLE_MAP[base.toLowerCase().replace(/\/$/, "")];
+  const expectedTitle = SHOP_TITLE_MAP[normalizedBase];
 
   if (!expectedTitle) {
     console.warn("[Printify] No shop mapping for:", base);
@@ -100,16 +113,15 @@ export function toPublicProductUrl(
 ): string {
   // Special handling for 3I/ATLAS store - use new domain format
   if (storeBase.includes("3iatlasstore.mysticarcana.com")) {
-    // Generate URL in format: 3iatlasstore.mysticarcana.com/product/{product_ID}/{Product_Title}
-    const productId = product.external?.id || product.id;
+    // Generate URL in format: 3iatlasstore.mysticarcana.com/products/{Product_Title}
     const productTitle = product.title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
       .replace(/\s+/g, "-") // Replace spaces with hyphens
       .replace(/-+/g, "-") // Replace multiple hyphens with single
       .trim();
-
-    return `https://3iatlasstore.mysticarcana.com/product/${productId}/${productTitle}`;
+    
+    return `https://3iatlasstore.mysticarcana.com/products/${productTitle}`;
   }
 
   // If external.handle is a full URL, use it directly
