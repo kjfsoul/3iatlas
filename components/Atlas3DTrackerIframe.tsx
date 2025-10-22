@@ -15,24 +15,63 @@ export default function Atlas3DTrackerIframe({
 }: Atlas3DTrackerIframeProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const TRACKER_URL = process.env.NEXT_PUBLIC_TRACKER_URL || 'http://localhost:5173';
   const iframeUrl = `${TRACKER_URL}?autoPlay=${autoPlay}&speed=${initialSpeed}&view=${initialViewMode}`;
 
   useEffect(() => {
+    // Detect mobile devices
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const smallScreen = window.innerWidth < 768;
+      setIsMobile(mobile || smallScreen);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
     const checkServer = async () => {
+      // Skip server check on mobile
+      if (isMobile) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(TRACKER_URL, { mode: 'no-cors' });
         setIsLoading(false);
       } catch (err) {
-        setError('Tracker server not running. Start: cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend && npm run dev');
+        setError('Tracker not available. Please view on desktop for the full 3D experience.');
         setIsLoading(false);
       }
     };
 
     const timer = setTimeout(checkServer, 500);
-    return () => clearTimeout(timer);
-  }, [TRACKER_URL]);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, [TRACKER_URL, isMobile]);
+
+  // Mobile-friendly placeholder
+  if (isMobile) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-900 to-black rounded-xl border border-blue-500/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/images/3iAtlas_Logo.png')] bg-center bg-no-repeat bg-contain opacity-10" />
+        <div className="text-center text-white px-6 z-10">
+          <div className="text-5xl mb-4">🌌</div>
+          <h3 className="text-lg sm:text-xl font-bold mb-2 text-blue-400">Interactive 3D Tracker</h3>
+          <p className="text-sm text-gray-300 mb-4 max-w-md">
+            The full 3D orbital tracker with interactive controls is available on desktop devices.
+          </p>
+          <div className="text-xs text-white/60">
+            View on a larger screen for the complete experience
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
