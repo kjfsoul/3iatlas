@@ -109,6 +109,44 @@ cd /Users/kfitz/3iatlas
 npm run dev  # Port 3030
 ```
 
+### Deployment Workflow (MANDATORY)
+
+**After ANY changes, you MUST complete this full workflow:**
+
+```bash
+# 1. Commit changes to both repositories
+cd /Users/kfitz/3iatlas
+git add .
+git commit -m "feat: descriptive commit message"
+git push origin main
+
+cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend
+git add .
+git commit -m "feat: descriptive commit message"
+git push origin main
+
+# 2. Deploy both to production
+cd /Users/kfitz/3iatlas
+vercel --prod --yes
+
+cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend
+vercel --prod --yes
+```
+
+**CRITICAL RULES:**
+- ✅ **ALWAYS commit to both repos** - Changes affect both projects
+- ✅ **ALWAYS push to GitHub** - Triggers automatic deployments
+- ✅ **ALWAYS deploy to Vercel** - Ensures production is updated
+- ✅ **ALWAYS test after deployment** - Verify changes work in production
+- ❌ **NEVER skip deployment** - Local changes don't affect production
+- ❌ **NEVER assume auto-deploy** - Manual deployment required
+
+**Why Both Repos:**
+- `/Users/kfitz/3iatlas` - Main Next.js site
+- `/Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend` - Vite tracker
+- Changes to either affect the complete system
+- Both must be synced for full functionality
+
 ---
 
 ## Memory System (Local Files Only)
@@ -232,13 +270,20 @@ Make ONE change
   ↓
 Test immediately
   ↓
-Works? → Commit → Next change
+Works? → Commit → Push → Deploy → Next change
 Breaks? → Revert → Try different approach
   ↓
 After 30 min stuck? → Document → Request help
   ↓
-After completing? → Update docs → Commit
+After completing? → Update docs → Commit → Push → Deploy
 ```
+
+**MANDATORY DEPLOYMENT STEPS:**
+1. **Commit** changes to both repos
+2. **Push** to GitHub (triggers auto-deploy)
+3. **Deploy** to Vercel (ensures production)
+4. **Test** production site
+5. **Document** results in PROJECT_MEMORY.md
 
 ---
 
