@@ -20,15 +20,12 @@ export default async function Page() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">3I/ATLAS FLIGHTPATH</h1>
           <a
-            className="rounded-md bg-white/10 px-3 py-1 text-xs hover:bg-white/20"
+            className="rounded-md bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/20"
             href="#brands"
           >
-            Explore brands
+            Explore Brands
           </a>
         </div>
-        <p className="mt-2 text-white/80">
-          Live drops from four Printify outposts.
-        </p>
         <div className="mt-6 h-[700px] rounded-xl relative">
           <Atlas3DTrackerWrapper
             autoPlay={true}
