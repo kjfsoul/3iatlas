@@ -593,16 +593,58 @@ npm start          # Start production server
 **Last Migration Attempt:** January 22, 2025, 4:30 PM PST
 **Status:** Blocked on R3F compatibility
 
+## Update: January 23, 2025, 2:45 AM PST - CANVAS BORDER + DROPDOWN CLICKABILITY FIXED
+
+### Files Changed (UI Fixes)
+- **Atlas3DTrackerEnhanced.tsx**: Added blue border around 3D canvas
+- **PlaybackControls.tsx**: Fixed dropdown clickability and positioning
+
+### Status
+✅ **Canvas Border Added:**
+- Added `border-2 border-blue-500/30 rounded-lg` to Canvas
+- Creates clear visual separation between 3D scene and UI panels
+- Stars no longer appear behind text panels
+- Professional visual separation
+
+✅ **Dropdown Clickability Fixed:**
+- Moved dropdowns higher (bottom: 140px instead of 120px)
+- Added border to dropdowns for better visibility
+- Added click-outside handler to close dropdowns
+- Added `playback-controls` class for proper event handling
+- Enhanced z-index and pointer events
+
+### Technical Implementation
+- **Canvas Border**: `className="w-full h-full border-2 border-blue-500/30 rounded-lg"`
+- **Dropdown Positioning**: Moved from `bottom: "120px"` to `bottom: "140px"`
+- **Click Outside**: Added `useEffect` with `mousedown` event listener
+- **Visual Enhancement**: Added `border border-gray-600` to dropdowns
+
+### Issue Resolved
+- **Problem**: View dropdown not clickable despite being visible
+- **Root Cause**: Dropdowns positioned too low, potentially behind other elements
+- **Solution**: Higher positioning + click-outside handler + better z-index management
+
+### Deployment Status
+- **Committed**: Changes committed to tracker repo
+- **Pushed**: Changes pushed to GitHub
+- **Deployed**: Tracker deployed to Vercel with fixes
+- **Production**: Canvas border and clickable dropdowns now live
+
+---
+
 ## Update: January 23, 2025, 2:30 AM PST - PLANET TEXTURE SYSTEM IMPLEMENTED
 
 ### Files Changed (Planet Texture System)
+
 - **src/utils/planetTextures.ts**: Created safe texture loading utility with caching
 - **src/hooks/usePlanetTextures.ts**: Created React hook for easy texture management
 - **src/components/CelestialBodies.tsx**: Updated to use new texture system
 - **public/textures/**: Added all celestial body textures (13 files)
 
 ### Status
+
 ✅ **Production-Friendly Texture System:**
+
 - Safe texture loading that won't crash if files are missing
 - Cached texture loading for performance
 - Graceful fallback to solid colors if textures missing
@@ -610,6 +652,7 @@ npm start          # Start production server
 - Support for Earth clouds and Saturn rings
 
 ✅ **Celestial Bodies Enhanced:**
+
 - Sun: Realistic sun texture
 - Mercury, Venus, Earth, Mars: Surface textures
 - Jupiter, Saturn, Uranus, Neptune: Gas giant textures
@@ -618,6 +661,7 @@ npm start          # Start production server
 - Saturn: Ring system with alpha transparency
 
 ### Technical Implementation
+
 - **Texture Loading**: `fetchPlanetTextures(name)` with Promise-based loading
 - **React Hook**: `usePlanetTextures(name)` returns `{ map, normal, clouds, rings }`
 - **Material System**: `meshStandardMaterial` with proper texture mapping
@@ -625,6 +669,7 @@ npm start          # Start production server
 - **File Structure**: `/public/textures/` with predictable naming
 
 ### Files Added
+
 ```
 public/textures/
 ├── sun.jpg
@@ -643,6 +688,7 @@ public/textures/
 ```
 
 ### Deployment Status
+
 - **Committed**: Both repos updated with texture system
 - **Pushed**: Changes pushed to GitHub
 - **Deployed**: Tracker deployed to Vercel with new textures
