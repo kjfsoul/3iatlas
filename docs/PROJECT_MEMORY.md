@@ -593,6 +593,37 @@ npm start          # Start production server
 **Last Migration Attempt:** January 22, 2025, 4:30 PM PST
 **Status:** Blocked on R3F compatibility
 
+## Update: January 23, 2025, 2:15 AM PST - TRACKER LOADING FIXED + DEPLOYMENT WORKFLOW ADDED
+
+### Files Changed (Tracker Loading Fix)
+- **Environment Variables**: Updated `NEXT_PUBLIC_TRACKER_URL` in Vercel production to `https://tracker.3iatlas.mysticarcana.com`
+- **PROJECT_RULES_COMPLETE.md**: Added mandatory deployment workflow section
+
+### Status
+✅ **Tracker Loading Fixed:**
+- Updated production environment variable to point to deployed tracker
+- Eliminated MIME type errors and localhost loading issues
+- Tracker now loads from production URL in production environment
+- Local development still works with Vite server
+
+✅ **Deployment Workflow Added:**
+- Added mandatory deployment steps to project rules
+- Must commit to both repos (3iatlas + 3iatlas-flight-tracker)
+- Must push to GitHub and deploy to Vercel
+- Updated complete process to include deployment steps
+
+### Technical Implementation
+- **Production Environment**: `NEXT_PUBLIC_TRACKER_URL=https://tracker.3iatlas.mysticarcana.com`
+- **Local Development**: Still uses `http://localhost:5173` when Vite server running
+- **Deployment Workflow**: Commit → Push → Deploy → Test → Document
+
+### Issue Resolved
+- **Problem**: Tracker not loading due to localhost URL in production
+- **Root Cause**: Environment variable pointing to localhost instead of production tracker
+- **Solution**: Updated Vercel environment variable and redeployed both projects
+
+---
+
 ## Update: January 23, 2025, 2:00 AM PST - PRINTIFY INTEGRATION COMPLETELY FIXED
 
 ### Files Changed (Complete Printify Fix)
