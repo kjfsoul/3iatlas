@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
 interface Atlas3DTrackerIframeProps {
   autoPlay?: boolean;
@@ -17,8 +17,14 @@ export default function Atlas3DTrackerIframe({
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  const TRACKER_URL = process.env.NEXT_PUBLIC_TRACKER_URL || 'http://localhost:5173';
+  const TRACKER_URL = process.env.NEXT_PUBLIC_TRACKER_URL || '';
   const iframeUrl = `${TRACKER_URL}?autoPlay=${autoPlay}&speed=${initialSpeed}&view=${initialViewMode}`;
+  
+  // Check if we're in production or if tracker URL is localhost
+  const isProduction = typeof window !== 'undefined' && 
+    !window.location.hostname.includes('localhost') && 
+    !window.location.hostname.includes('127.0.0.1');
+  const isLocalhostTracker = TRACKER_URL.includes('localhost') || TRACKER_URL.includes('127.0.0.1');
 
   useEffect(() => {
     // Detect mobile devices
@@ -27,7 +33,7 @@ export default function Atlas3DTrackerIframe({
       const smallScreen = window.innerWidth < 768;
       setIsMobile(mobile || smallScreen);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
@@ -38,11 +44,19 @@ export default function Atlas3DTrackerIframe({
         return;
       }
 
+      // If in production and tracker is localhost, show error immediately
+      if (isProduction && (isLocalhostTracker || !TRACKER_URL)) {
+        setError('3D Tracker not available in production. Coming soon!');
+        setIsLoading(false);
+        return;
+      }
+
+      // Try to reach the tracker server
       try {
         const response = await fetch(TRACKER_URL, { mode: 'no-cors' });
         setIsLoading(false);
       } catch (err) {
-        setError('Tracker not available. Please view on desktop for the full 3D experience.');
+        setError('3D Tracker temporarily unavailable. Please try again later.');
         setIsLoading(false);
       }
     };
@@ -52,7 +66,7 @@ export default function Atlas3DTrackerIframe({
       clearTimeout(timer);
       window.removeEventListener('resize', checkMobile);
     };
-  }, [TRACKER_URL, isMobile]);
+  }, [TRACKER_URL, isMobile, isProduction, isLocalhostTracker]);
 
   // Mobile-friendly placeholder
   if (isMobile) {
@@ -74,12 +88,19 @@ export default function Atlas3DTrackerIframe({
   }
 
   if (error) {
+    const isComingSoon = error.includes('Coming soon');
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-900 to-black rounded-xl border border-red-500/30">
-        <div className="text-center text-white px-6">
-          <div className="text-4xl mb-4">⚠️</div>
-          <h3 className="text-xl font-bold mb-2 text-red-400">Tracker Not Available</h3>
-          <p className="text-sm text-gray-300 mb-4 max-w-md">{error}</p>
+      <div className={`w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-900 to-black rounded-xl border ${isComingSoon ? 'border-blue-500/30' : 'border-yellow-500/30'} relative overflow-hidden`}>
+        {isComingSoon && <div className="absolute inset-0 bg-[url('/images/3iAtlas_Logo.png')] bg-center bg-no-repeat bg-contain opacity-10" />}
+        <div className="text-center text-white px-6 z-10">
+          <div className="text-5xl mb-4">{isComingSoon ? '🚀' : '⏳'}</div>
+          <h3 className={`text-lg sm:text-xl font-bold mb-2 ${isComingSoon ? 'text-blue-400' : 'text-yellow-400'}`}>
+            {isComingSoon ? 'Interactive 3D Tracker' : 'Tracker Temporarily Unavailable'}
+          </h3>
+          <p className="text-sm text-gray-300 mb-2 max-w-md">{error}</p>
+          {!isComingSoon && (
+            <p className="text-xs text-white/60">Please check back soon or try refreshing the page.</p>
+          )}
         </div>
       </div>
     );
@@ -112,4 +133,3 @@ export default function Atlas3DTrackerIframe({
     </div>
   );
 }
-
