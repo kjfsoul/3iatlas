@@ -1,4 +1,5 @@
 # 3I/Atlas Project Memory & Quick Reference
+
 **Last Updated:** January 23, 2025, 1:00 AM PST
 **Status:** ✅ PRODUCTION READY - All Features Working
 
@@ -9,6 +10,7 @@
 **Transform basic NASA data into an unforgettable, interactive 3D experience** that makes users want to share the 3I/ATLAS interstellar comet with friends.
 
 ### Core Value Proposition
+
 - **Real NASA Data** - 100% authentic orbital calculations from JPL Horizons API
 - **Cinematic Experience** - Multiple view modes including "Ride With ATLAS"
 - **Interactive Learning** - Gamified education with "The ATLAS Directive" narrative
@@ -19,6 +21,7 @@
 ## 📋 Critical Project Rules (NEVER VIOLATE)
 
 ### Absolute Truths
+
 1. **NO mock data, NO stubs, NO hardcoded orbital data** ✅
 2. **NO changes to Printify logic without explicit request** ✅
 3. **NO linting or TypeScript errors** ✅
@@ -28,7 +31,8 @@
 7. **Document failures and blockers clearly**
 8. **If stuck for >1 hour, document state and request handoff**
 
-### 3I/ATLAS Facts (ABSOLUTE TRUTH):
+### 3I/ATLAS Facts (ABSOLUTE TRUTH)
+
 - **Discovery Date:** July 1, 2025 by ATLAS telescope, Chile
 - **Current Date Context:** October 2025 (perihelion approach)
 - **Designation:** 3I/ATLAS or C/2025 N1
@@ -41,6 +45,7 @@
 ## 🏗️ Technical Architecture
 
 ### Tech Stack (CURRENT - Jan 2025)
+
 ```yaml
 Frontend:
   - Framework: Next.js 15.5.4 (App Router)
@@ -62,6 +67,7 @@ External APIs:
 ```
 
 ### Key File Structure
+
 ```
 /components/
   ├── Atlas3DTrackerEnhanced.tsx     # Main 3D visualization ❌ BROKEN
@@ -107,6 +113,7 @@ External APIs:
 **Status**: 🔴 BLOCKING - 3D tracker does not render
 
 **Error**:
+
 ```
 TypeError: Cannot read properties of undefined (reading 'ReactCurrentOwner')
 at $$$reconciler (react-reconciler/cjs/react-reconciler.development.js:498:46)
@@ -114,17 +121,20 @@ at createRenderer (@react-three/fiber/dist/events-776716bd.esm.js:271:77)
 ```
 
 **Root Cause**: Version incompatibility between:
+
 - React 18.2.0
 - @react-three/fiber 8.13.0
 - Next.js 15.5.4
 
 **What Works**: Tracker works perfectly in Vite project at:
+
 - `/Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/`
-- Dev URL: http://localhost:5173
+- Dev URL: <http://localhost:5173>
 
 **What's Broken**: Same code fails in Next.js project at:
+
 - `/Users/kfitz/3iatlas/`
-- Dev URL: http://localhost:3030
+- Dev URL: <http://localhost:3030>
 
 **Documented Solutions**: See `MIGRATION_TASKS.md` for 7 detailed approaches
 
@@ -139,12 +149,14 @@ at createRenderer (@react-three/fiber/dist/events-776716bd.esm.js:271:77)
 ### ✅ WORKING (DO NOT BREAK)
 
 **Site Infrastructure:**
+
 - ✅ Next.js dev server on port 3030
 - ✅ Page structure and layout
 - ✅ Responsive design
 - ✅ All routes working
 
 **Printify Integration (CRITICAL - REVENUE SOURCE):**
+
 - ✅ 3I/Atlas products loading
 - ✅ Mystic Arcana products loading
 - ✅ EDM Shuffle products loading
@@ -154,6 +166,7 @@ at createRenderer (@react-three/fiber/dist/events-776716bd.esm.js:271:77)
 - ✅ Social links functional
 
 **Data Files:**
+
 - ✅ trajectory_static.json (1,093 data points)
 - ✅ timeline_events.json (events data)
 - ✅ Both files load successfully (200 status)
@@ -161,6 +174,7 @@ at createRenderer (@react-three/fiber/dist/events-776716bd.esm.js:271:77)
 ### ❌ BROKEN (NEEDS FIX)
 
 **3D Visualization:**
+
 - ❌ React Three Fiber initialization
 - ❌ Canvas rendering
 - ❌ All 3D components (depends on R3F)
@@ -213,6 +227,7 @@ at createRenderer (@react-three/fiber/dist/events-776716bd.esm.js:271:77)
 ### What Works vs What Doesn't
 
 **Working in Vite Project**:
+
 - ✅ All 3D rendering
 - ✅ Camera controls
 - ✅ Data loading
@@ -220,6 +235,7 @@ at createRenderer (@react-three/fiber/dist/events-776716bd.esm.js:271:77)
 - ✅ View modes
 
 **Broken in Next.js Project**:
+
 - ❌ R3F reconciler initialization
 - ❌ Everything that depends on R3F
 
@@ -230,6 +246,7 @@ at createRenderer (@react-three/fiber/dist/events-776716bd.esm.js:271:77)
 ## 🎯 Implementation Patterns That Work
 
 ### Static Data Pattern (PROVEN)
+
 ```typescript
 // Pre-generate data with Python
 python backend/generate_atlas_trajectory.py
@@ -243,6 +260,7 @@ if (cacheAge < 7 days) return cached;
 ```
 
 ### Printify Integration (DO NOT MODIFY)
+
 ```typescript
 // Shop mapping - WORKING, don't touch
 const BASES = {
@@ -268,6 +286,7 @@ const BASES = {
 ```
 
 ### Next.js Dynamic Import Pattern
+
 ```typescript
 // For client-only components
 const Component = dynamic(() => import('./Component'), {
@@ -309,6 +328,7 @@ const Component = dynamic(() => import('./Component'), {
 ### When Stuck Protocol
 
 **If blocked for >30 minutes on same issue:**
+
 1. Document exactly what was tried
 2. Document exact error messages
 3. Write current state to CURRENT_STATE.md
@@ -316,6 +336,7 @@ const Component = dynamic(() => import('./Component'), {
 5. Request handoff with context
 
 **Don't:**
+
 - ❌ Keep trying random fixes for hours
 - ❌ Make up data or mock implementations
 - ❌ Break working features to fix broken ones
@@ -326,21 +347,25 @@ const Component = dynamic(() => import('./Component'), {
 ## 🔄 ByteRover MCP Status (HONEST ASSESSMENT)
 
 ### What Was Supposed to Happen
+
 - Store knowledge after completing tasks
 - Retrieve knowledge before starting tasks
 - Build cumulative project understanding
 - Reduce context repetition
 
 ### What Actually Happened
+
 - ❌ ByteRover tools were called but knowledge was not persistently available
 - ❌ Had to re-explain same context multiple times
 - ❌ No evidence of successful knowledge retrieval
 - ❌ Added overhead without clear benefit
 
 ### Current Policy
+
 **DO NOT DEPEND ON BYTEROVER MCP** for this project.
 
 **Instead:**
+
 - ✅ Use PROJECT_MEMORY.md (this file) as source of truth
 - ✅ Update CURRENT_STATE.md with current status
 - ✅ Write detailed MIGRATION_TASKS.md for handoffs
@@ -348,7 +373,9 @@ const Component = dynamic(() => import('./Component'), {
 - ✅ Use inline code comments for complex logic
 
 ### Future Consideration
+
 If ByteRover MCP becomes reliable:
+
 1. Test it on a small, isolated task
 2. Verify retrieval actually works
 3. Only then integrate into workflow
@@ -360,9 +387,11 @@ If ByteRover MCP becomes reliable:
 ## 🚀 Immediate Next Steps (Priority Order)
 
 ### Priority 1: Fix R3F Compatibility (CRITICAL)
+
 **Goal**: Get 3D tracker rendering in Next.js
 
 **Option A** (15 min): Try R3F 8.16.0
+
 ```bash
 cd /Users/kfitz/3iatlas
 npm install @react-three/fiber@8.16.0 @react-three/drei@9.100.0
@@ -371,6 +400,7 @@ npm run dev
 ```
 
 **Option B** (30 min): Iframe embed (guaranteed to work)
+
 ```bash
 # Use working Vite project via iframe
 # Keeps code separation clean
@@ -378,6 +408,7 @@ npm run dev
 ```
 
 **Option C** (1 hour): Minimal R3F debug
+
 ```bash
 # Start with just a cube
 # Add features incrementally
@@ -387,12 +418,14 @@ npm run dev
 **Decision Point**: If Option A fails, go directly to Option B. Don't waste time on Option C unless specifically requested.
 
 ### Priority 2: Visual Polish (AFTER TRACKER WORKS)
+
 1. Re-enable PlanetLocators
 2. Enhance comet trail effects
 3. Optimize camera smoothing
 4. Test all view modes
 
 ### Priority 3: Narrative Integration
+
 1. Connect ATLAS Directive narrative
 2. Implement Chrono-Token system
 3. Add educational content overlays
@@ -402,15 +435,18 @@ npm run dev
 ## 📚 Key Documentation (READ THESE)
 
 ### For Fixing Current Issue
+
 1. **CURRENT_STATE.md** - What's broken right now
 2. **MIGRATION_TASKS.md** - Step-by-step fixes
 3. **COMPLETE_CODE_CONSOLIDATION.md** - All tracker code
 
 ### For Understanding Context
+
 4. **PROJECT_MEMORY.md** - This file (source of truth)
 5. **3I_ATLAS_KNOWLEDGE_BASE.md** - Scientific facts
 
 ### For Reference Only
+
 6. **PROJECT_HANDOFF_COMPLETE.md** - Old state (pre-migration)
 7. **3D_TRACKER_IMPLEMENTATION.md** - Original implementation
 
@@ -435,12 +471,14 @@ PORT=3030
 ## 🎓 Hard-Learned Lessons
 
 ### NASA Horizons Integration
+
 - ✅ SPK-ID 1004083 requires `DES=1004083` format
 - ✅ 6-hour step size works well for comets
 - ✅ Pre-generating data is more reliable than live API
 - ✅ 7-day cache prevents unnecessary regeneration
 
 ### React Three Fiber + Next.js
+
 - ❌ R3F 8.x has compatibility issues with Next.js 15 + React 18
 - ❌ Version mismatches cause React reconciler errors
 - ❌ Dynamic imports alone don't solve the issue
@@ -448,6 +486,7 @@ PORT=3030
 - ✅ Iframe embed is a valid architectural choice
 
 ### Project Management
+
 - ✅ Document failures as thoroughly as successes
 - ✅ Know when to request handoff (after 1-2 hours stuck)
 - ✅ Local files > external MCPs for reliability
@@ -481,13 +520,15 @@ npm start          # Start production server
 ## 🎯 Success Criteria (Updated)
 
 **Minimum Viable:**
-- ✅ Site loads at http://localhost:3030
+
+- ✅ Site loads at <http://localhost:3030>
 - ✅ All Printify products display correctly
 - ❌ 3D tracker renders without errors
 - ❌ Can see Sun, planets, and comet
 - ❌ Can interact with camera controls
 
 **Full Success:**
+
 - All minimum viable criteria +
 - ❌ Playback controls work
 - ❌ View mode toggle works
@@ -501,12 +542,14 @@ npm start          # Start production server
 ## 🔄 Update Protocol
 
 **This file should be updated:**
+
 - After any significant progress
 - After any significant failure
 - Before requesting handoff
 - At least once per session
 
 **Update these sections:**
+
 - "Last Updated" timestamp
 - "Current Implementation Status"
 - "Immediate Next Steps"
@@ -519,6 +562,7 @@ npm start          # Start production server
 ### For Next Developer
 
 **Good News:**
+
 - Site structure is correct
 - Printify integration works perfectly
 - Data files are correct and loading
@@ -526,17 +570,20 @@ npm start          # Start production server
 - Issue is isolated to one compatibility problem
 
 **Bad News:**
+
 - React Three Fiber won't initialize
 - Multiple version combinations have been tried
 - 6+ hours invested without resolution
 - Likely needs architectural decision (iframe vs keep trying)
 
 **Recommendation:**
+
 1. Try MIGRATION_TASKS.md Task 2 (one more R3F version)
 2. If that fails, go straight to Task 6 (iframe embed)
 3. Don't waste days on this - iframe is a valid solution
 
 **Remember:**
+
 - Working Printify = Revenue
 - Broken tracker = Feature (important but not critical)
 - Don't break what works to fix what doesn't
@@ -545,15 +592,19 @@ npm start          # Start production server
 
 **Last Migration Attempt:** January 22, 2025, 4:30 PM PST
 **Status:** Blocked on R3F compatibility
+
 ## Update: January 23, 2025, 1:00 AM PST - PRODUCTION TRACKER DEPLOYED
 
 ### Files Changed (Production Deployment)
+
 - **Vite Tracker**: Deployed to `https://tracker.3iatlas.mysticarcana.com`
 - **Main Site**: Redeployed with `NEXT_PUBLIC_TRACKER_URL` environment variable
 - **DNS**: Added A record for `tracker.3iatlas.mysticarcana.com` → `76.76.21.21`
 
 ### Status
+
 ✅ **Production Tracker Working:**
+
 - Vite tracker deployed to `tracker.3iatlas.mysticarcana.com`
 - Main site at `3iatlas.mysticarcana.com` now loads tracker from production URL
 - No more `ERR_BLOCKED_BY_CLIENT` errors
@@ -561,20 +612,25 @@ npm start          # Start production server
 - Environment variable `NEXT_PUBLIC_TRACKER_URL` set in Vercel production
 
 ### Architecture
+
 - **Main Site**: `3iatlas.mysticarcana.com` (Next.js)
 - **Tracker**: `tracker.3iatlas.mysticarcana.com` (Vite/R3F)
 - **Integration**: Iframe embedding (microservices pattern)
 
 ### Next Steps
-1. ⏳ **DNS Propagation** - Wait for `tracker.3iatlas.mysticarcana.com` DNS to propagate
-2. ⏳ **Test Production** - Verify tracker loads on `3iatlas.mysticarcana.com`
-3. ⏳ **Performance Monitoring** - Track FPS and memory usage in production
+
+1. ✅ **DNS Propagation** - `tracker.3iatlas.mysticarcana.com` DNS propagated
+2. ✅ **Test Production** - Tracker loads on `3iatlas.mysticarcana.com`
+3. ✅ **Camera Controls Fixed** - Click/drag for rotation, double-click/pinch for zoom
+4. ✅ **UI Controls Fixed** - Invisible barrier resolved with proper z-index
+5. ⏳ **Performance Monitoring** - Track FPS and memory usage in production
 
 ---
 
 ## Update: January 22, 2025, 10:15 PM PST - PRODUCTION READY + TRACKER FIXES
 
 ### Files Changed (3iatlas project)
+
 - `components/Atlas3DTrackerIframe.tsx` - NEW - Iframe wrapper component
 - `components/Atlas3DTrackerWrapper.tsx` - UPDATED - Now uses iframe approach
 - `app/page.tsx` - FIXED - Resolved Git merge conflicts
@@ -584,6 +640,7 @@ npm start          # Start production server
 - `package.json` - UPDATED - Added @vercel/analytics
 
 ### Files Changed (Vite tracker project)
+
 - `../3iatlas-flight-tracker/frontend/src/components/PlaybackControls.tsx` - FIXED - z-index issues
 - `../3iatlas-flight-tracker/frontend/src/components/SceneContent.tsx` - FIXED - Camera controls enabled
 - `../3iatlas-flight-tracker/frontend/src/components/TelemetryHUD.tsx` - FIXED - Moved below Jupiter panel
@@ -591,7 +648,9 @@ npm start          # Start production server
 - `../3iatlas-flight-tracker/frontend/src/components/Atlas3DTrackerEnhanced.tsx` - FIXED - True-scale camera position
 
 ### Status
+
 ✅ **Working Now:**
+
 - Site builds successfully (3.6s compile time)
 - All Printify products displaying with Amber backgrounds (4 brands)
 - **3I/ATLAS products now route to 3iatlasshop.mysticarcana.com**
@@ -609,19 +668,23 @@ npm start          # Start production server
 - **Production Build Fixed** - React fragment syntax error resolved
 
 ✅ **Browser Verified (User Confirmed):**
+
 - Tracker displays in browser after client-side hydration
 - Intermittent UI blocking issue identified and resolved
 - All interactive controls working consistently
 
 ### Implementation Details
+
 **Approach**: Iframe microservices pattern (Option B)
-**Vite Tracker**: http://localhost:5173 (running separately)
-**Next.js Site**: http://localhost:3030 (embeds tracker via iframe)
+**Vite Tracker**: <http://localhost:5173> (running separately)
+**Next.js Site**: <http://localhost:3030> (embeds tracker via iframe)
 **Time Taken**: 45 minutes
 **Success Rate**: As predicted - architectural approach works, awaiting final browser verification
 
 ### Architecture Decision
+
 Chose iframe over direct R3F integration because:
+
 1. R3F compatibility issue persisted after 6+ hours
 2. Iframe guarantees compatibility (proven pattern)
 3. Clean separation of concerns (Vite vs Next.js)
@@ -629,6 +692,7 @@ Chose iframe over direct R3F integration because:
 5. No risk to working Printify integration
 
 ### Learned
+
 - Git merge conflicts from async agents caused major regression
 - Iframe approach is valid architecture, not a workaround
 - BabylonJS widget provided valuable reference for required features
@@ -638,12 +702,14 @@ Chose iframe over direct R3F integration because:
   - Tailwind `z-10` class was insufficient for proper layering
 
 ### Hard-Learned Lessons Added
+
 - **Z-index layering in 3D apps**: Canvas elements can capture pointer events
   - Always use high z-index values (1000+) for UI controls
   - Add `pointerEvents: 'auto'` to dropdowns to ensure click capture
   - Test ALL interactive elements in actual browser, not just visual rendering
 
 ### Next Steps
+
 1. ✅ **Manual browser test** - User confirmed tracker displays
 2. ✅ **UI controls fixed** - Speed/View dropdowns now clickable
 3. ⏳ **Production deployment planning** - Subdomain setup for tracker
