@@ -1,5 +1,5 @@
 # 3I/Atlas Project Memory & Quick Reference
-**Last Updated:** January 22, 2025, 11:45 PM PST
+**Last Updated:** January 23, 2025, 12:15 AM PST
 **Status:** ✅ PRODUCTION READY - All Features Working
 
 ---
@@ -258,6 +258,13 @@ const BASES = {
 // URL Generation - FIXED (Jan 22, 2025)
 // ProductCarousel now uses toPublicProductUrl() from lib/printify.ts
 // Ensures 3I/ATLAS products stay on domain instead of redirecting to printify.me
+
+// Mobile Responsive - FIXED (Jan 23, 2025)
+// - Products display in 3-column grid on all devices (was 1-column on mobile)
+// - Image heights responsive: h-32 (mobile) vs h-56 (desktop)
+// - Text sizes responsive: text-xs (mobile) vs text-sm (desktop)
+// - Navigation arrows sized appropriately for mobile
+// - 3D Tracker shows informative placeholder on mobile instead of broken iframe
 ```
 
 ### Next.js Dynamic Import Pattern
