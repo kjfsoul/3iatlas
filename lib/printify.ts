@@ -99,7 +99,7 @@ export function toPublicProductUrl(
   product: Product
 ): string {
   // Special handling for 3I/ATLAS store - use new domain format
-  if (storeBase.includes("3iatlasshop.mysticarcana.com")) {
+  if (storeBase.includes("3iatlasstore.mysticarcana.com")) {
     // Generate URL in format: 3iatlasstore.mysticarcana.com/product/{product_ID}/{Product_Title}
     const productId = product.external?.id || product.id;
     const productTitle = product.title
