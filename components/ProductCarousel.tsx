@@ -135,7 +135,7 @@ export default function ProductCarousel({
                       )}
                     </div>
                     {description && (
-                      <p className="text-xs text-white/60 line-clamp-2 hidden sm:block">
+                      <p className="text-xs text-white/60 line-clamp-3 hidden sm:block">
                         {description}
                       </p>
                     )}

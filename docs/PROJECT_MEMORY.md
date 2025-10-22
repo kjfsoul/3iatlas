@@ -596,12 +596,15 @@ npm start          # Start production server
 ## Update: January 23, 2025, 2:00 AM PST - PRINTIFY INTEGRATION COMPLETELY FIXED
 
 ### Files Changed (Complete Printify Fix)
+
 - **lib/printify.ts**: Added custom domain mapping and corrected URL generation
 - **Shop Mapping**: Added `CUSTOM_DOMAIN_SHOP_MAP` for `3iatlasstore.mysticarcana.com` → shop ID `24436338`
 - **URL Generation**: Fixed format from `/product/{id}/{title}` to `/products/{title}` to match actual URLs
 
 ### Status
+
 ✅ **3I/ATLAS Products Fully Working:**
+
 - Custom domain `3iatlasstore.mysticarcana.com` now properly mapped to Printify shop ID
 - URL generation matches actual product URL format: `/products/{title}`
 - No more "No shop mapping" errors in console
@@ -609,12 +612,14 @@ npm start          # Start production server
 - Logic handles new products dynamically (no hardcoding)
 
 ### Technical Implementation
+
 - **Custom Domain Mapping**: Direct shop ID lookup for custom domains
 - **Fallback Logic**: Still supports Printify.me domains via title mapping
 - **URL Format**: Matches provided product links exactly
 - **Dynamic**: New products automatically picked up from Printify API
 
 ### Product URL Examples (Auto-Generated)
+
 - `https://3iatlasstore.mysticarcana.com/products/the-3i-atlas-tee-your-gateway-to-interstellar-adventure`
 - `https://3iatlasstore.mysticarcana.com/products/journey-beyond-the-3i-atlas-interstellar-comet-framed-poster`
 - `https://3iatlasstore.mysticarcana.com/products/unlock-your-cosmos-the-interstellar-odyssey-journal-your-visionary-launchpad`

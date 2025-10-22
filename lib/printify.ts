@@ -120,7 +120,7 @@ export function toPublicProductUrl(
       .replace(/\s+/g, "-") // Replace spaces with hyphens
       .replace(/-+/g, "-") // Replace multiple hyphens with single
       .trim();
-    
+
     return `https://3iatlasstore.mysticarcana.com/products/${productTitle}`;
   }
 
