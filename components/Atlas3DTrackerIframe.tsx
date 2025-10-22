@@ -19,11 +19,12 @@ export default function Atlas3DTrackerIframe({
 
   const TRACKER_URL = process.env.NEXT_PUBLIC_TRACKER_URL || '';
   const iframeUrl = `${TRACKER_URL}?autoPlay=${autoPlay}&speed=${initialSpeed}&view=${initialViewMode}`;
-  
+
   // Check if we're in production or if tracker URL is localhost
-  const isProduction = typeof window !== 'undefined' && 
-    !window.location.hostname.includes('localhost') && 
-    !window.location.hostname.includes('127.0.0.1');
+  const isProduction =
+    typeof window !== "undefined" &&
+    !window.location.hostname.includes("localhost") &&
+    !window.location.hostname.includes("127.0.0.1");
   const isLocalhostTracker = TRACKER_URL.includes('localhost') || TRACKER_URL.includes('127.0.0.1');
 
   useEffect(() => {
