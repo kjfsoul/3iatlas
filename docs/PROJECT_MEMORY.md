@@ -621,7 +621,7 @@ npm start          # Start production server
 
 1. ✅ **DNS Propagation** - `tracker.3iatlas.mysticarcana.com` DNS propagated
 2. ✅ **Test Production** - Tracker loads on `3iatlas.mysticarcana.com`
-3. ✅ **Camera Controls Fixed** - Click/drag for rotation, double-click/pinch for zoom
+3. ✅ **Camera Controls Fixed** - Click/drag for rotation, +/- buttons for zoom
 4. ✅ **UI Controls Fixed** - Invisible barrier resolved with proper z-index
 5. ⏳ **Performance Monitoring** - Track FPS and memory usage in production
 
