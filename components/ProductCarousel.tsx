@@ -2,6 +2,7 @@
 import SafeImage from "@/components/SafeImage";
 import Link from "next/link";
 import { useState } from "react";
+import { toPublicProductUrl } from "@/lib/printify";
 
 type Product = {
   id: string;
@@ -32,17 +33,8 @@ export default function ProductCarousel({ products, storeBase, productsPerPage =
   const prevPage = () => setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
   
   const getProductUrl = (p: Product) => {
-    if (p.external?.handle?.startsWith('http')) {
-      return p.external.handle;
-    }
-    const base = storeBase.replace(/\/$/, "");
-    if (p.external?.handle) {
-      return `${base}${p.external.handle.startsWith('/') ? '' : '/'}${p.external.handle}`;
-    }
-    if (p.external?.id) {
-      return `${base}/product/${p.external.id}`;
-    }
-    return `${base}/product/${p.id}`;
+    // Use the centralized URL generation logic from lib/printify.ts
+    return toPublicProductUrl(storeBase, p);
   };
 
   const getProductImage = (p: Product) => {
