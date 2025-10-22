@@ -593,20 +593,77 @@ npm start          # Start production server
 **Last Migration Attempt:** January 22, 2025, 4:30 PM PST
 **Status:** Blocked on R3F compatibility
 
+## Update: January 23, 2025, 3:00 AM PST - CRITICAL UI AND TEXTURE ISSUES FIXED
+
+### Files Changed (Critical Fixes)
+- **usePlanetTextures.ts**: Added debugging and isLoading state for texture loading
+- **PlaybackControls.tsx**: Fixed UI blocking and appearance issues
+- **PlanetLocators.tsx**: Fixed invisible barrier blocking controls
+
+### Status
+✅ **Texture Loading Fixed:**
+- Added debugging to track texture loading progress
+- Added isLoading state to usePlanetTextures hook
+- Textures should now load immediately, not just at perihelion
+- Console logging added to debug texture loading issues
+
+✅ **UI Blocking Issues Resolved:**
+- Reduced control panel width from 600px to 500px (maxWidth: 90vw)
+- Increased z-index to 99999 for control panel
+- Added explicit pointerEvents: auto to control panel
+- Fixed PlanetLocators to ensure pointerEvents: none
+- Eliminated invisible barrier blocking controls
+
+✅ **Control Appearance Improved:**
+- Made all buttons more compact (px-3 py-2 instead of px-4 py-2)
+- Added text-sm and whitespace-nowrap to prevent text squeezing
+- Reduced gaps between controls (gap-3 instead of gap-4)
+- Made zoom buttons smaller (px-2 py-1)
+- Added flex-wrap to control container
+
+### Technical Implementation
+- **Texture Debugging**: Console logging for texture loading progress
+- **UI Responsiveness**: maxWidth: 90vw for mobile compatibility
+- **Z-Index Management**: 99999 for controls, 1 for PlanetLocators
+- **Pointer Events**: Explicit pointerEvents management
+- **Compact Design**: Smaller padding and gaps throughout
+
+### Issues Resolved
+- **Problem**: Textures not loading until perihelion
+- **Solution**: Added debugging and proper loading state management
+
+- **Problem**: Invisible barrier blocking controls
+- **Solution**: Fixed PlanetLocators pointerEvents and increased control z-index
+
+- **Problem**: Squeezed text in control box
+- **Solution**: Compact design with whitespace-nowrap and responsive sizing
+
+### Deployment Status
+- **Committed**: All fixes committed to tracker repo
+- **Pushed**: Changes pushed to GitHub
+- **Deployed**: Tracker deployed to Vercel with fixes
+- **Production**: All UI and texture issues should now be resolved
+
+---
+
 ## Update: January 23, 2025, 2:45 AM PST - CANVAS BORDER + DROPDOWN CLICKABILITY FIXED
 
 ### Files Changed (UI Fixes)
+
 - **Atlas3DTrackerEnhanced.tsx**: Added blue border around 3D canvas
 - **PlaybackControls.tsx**: Fixed dropdown clickability and positioning
 
 ### Status
+
 ✅ **Canvas Border Added:**
+
 - Added `border-2 border-blue-500/30 rounded-lg` to Canvas
 - Creates clear visual separation between 3D scene and UI panels
 - Stars no longer appear behind text panels
 - Professional visual separation
 
 ✅ **Dropdown Clickability Fixed:**
+
 - Moved dropdowns higher (bottom: 140px instead of 120px)
 - Added border to dropdowns for better visibility
 - Added click-outside handler to close dropdowns
@@ -614,17 +671,20 @@ npm start          # Start production server
 - Enhanced z-index and pointer events
 
 ### Technical Implementation
+
 - **Canvas Border**: `className="w-full h-full border-2 border-blue-500/30 rounded-lg"`
 - **Dropdown Positioning**: Moved from `bottom: "120px"` to `bottom: "140px"`
 - **Click Outside**: Added `useEffect` with `mousedown` event listener
 - **Visual Enhancement**: Added `border border-gray-600` to dropdowns
 
 ### Issue Resolved
+
 - **Problem**: View dropdown not clickable despite being visible
 - **Root Cause**: Dropdowns positioned too low, potentially behind other elements
 - **Solution**: Higher positioning + click-outside handler + better z-index management
 
 ### Deployment Status
+
 - **Committed**: Changes committed to tracker repo
 - **Pushed**: Changes pushed to GitHub
 - **Deployed**: Tracker deployed to Vercel with fixes
