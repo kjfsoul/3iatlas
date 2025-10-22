@@ -593,6 +593,26 @@ npm start          # Start production server
 **Last Migration Attempt:** January 22, 2025, 4:30 PM PST
 **Status:** Blocked on R3F compatibility
 
+## Update: January 23, 2025, 1:45 AM PST - PRINTIFY DOMAIN FIXED
+
+### Files Changed (Printify Domain Correction)
+- **.env.local**: Updated `NEXT_PUBLIC_3IATLAS_BASE` from `3iatlasshop.mysticarcana.com` to `3iatlasstore.mysticarcana.com`
+- **lib/printify.ts**: Updated domain check in `toPublicProductUrl` function
+
+### Status
+✅ **3I/ATLAS Products Fixed:**
+- Corrected domain mismatch that was preventing 3I/ATLAS products from displaying
+- Environment variable now points to correct `3iatlasstore.mysticarcana.com`
+- URL generation function updated to match new domain
+- Products should now load correctly on the main site
+
+### Issue Resolved
+- **Problem**: 3I/ATLAS Printify products weren't showing due to domain mismatch
+- **Root Cause**: Environment variable had `3iatlasshop` but should be `3iatlasstore`
+- **Solution**: Updated both .env.local and printify.ts to use correct domain
+
+---
+
 ## Update: January 23, 2025, 1:30 AM PST - CELESTIAL BODY TEXTURE SYSTEM IMPLEMENTED
 
 ### Files Changed (Major Texture Upgrade)
