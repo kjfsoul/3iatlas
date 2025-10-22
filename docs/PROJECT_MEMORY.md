@@ -1,5 +1,5 @@
 # 3I/Atlas Project Memory & Quick Reference
-**Last Updated:** January 22, 2025, 10:25 PM PST
+**Last Updated:** January 22, 2025, 11:45 PM PST
 **Status:** ✅ PRODUCTION READY - All Features Working
 
 ---
@@ -254,6 +254,10 @@ const BASES = {
 
 // Product fetching - WORKING
 <FeaturedRow storeBase={BASES.atlas} />
+
+// URL Generation - FIXED (Jan 22, 2025)
+// ProductCarousel now uses toPublicProductUrl() from lib/printify.ts
+// Ensures 3I/ATLAS products stay on domain instead of redirecting to printify.me
 ```
 
 ### Next.js Dynamic Import Pattern
