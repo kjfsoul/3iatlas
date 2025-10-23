@@ -1,0 +1,23 @@
+GAP IDENTIFIED: Bottom control strip (speed/view menus, zoom indicators) still drops outside the visible canvas area on web/mobile, so users can’t reliably interact with the controls across breakpoints.
+BLOCKS PROGRESS BECAUSE: Without a confirmed responsive layout strategy (flex/wrap rules, absolute positioning relative to iframe constraints), any tweaks risk repeating the clipping issue or breaking the design on smaller screens.
+
+CHECKED SOURCES:
+
+src/components/PlaybackControls.tsx: current layout uses fixed-width range + flex wrap, dropdowns positioned with bottom-full but container remains relatively tight with max-w-5xl, no breakpoint-specific adjustments.
+src/components/Atlas3DTrackerEnhanced.tsx: wraps controls under canvas but doesn’t constrain min-heights or provide responsive grid behavior.
+Production tracker (iframe in https://3iatlas-hlfp7y1zj-kjfsouls-projects.vercel.app, mobile Chrome dev tools): controls overflow vertically, dropdowns clipped.
+docs/PROJECT_MEMORY.md: no documented responsive layout decisions for the playback bar; only notes about dropdown fixes.
+RETRIEVAL PROMPT FOR NEXT AGENT:
+SEARCH: “playback control responsive layout bottom panel”
+SOURCE: /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend/src/components/PlaybackControls.tsx, Atlas3DTrackerEnhanced.tsx, existing commits (5f15ba7, 46c2fce) when controls sat outside canvas.
+PARAMS: look for prior flex/grid structure, media queries, or Tailwind classes that kept menus visible; check iframe container sizing.
+REQUIRED FIELDS: { containerStrategy: string, dropdownPlacement: string, mobileBehavior: string, iframeConstraints: string }
+SCHEMA: summary per breakpoint (desktop ≥1024, tablet 768–1023, mobile ≤767).
+VALIDATION: verify in browser dev tools that all buttons fit within visible area without scrolling, and dropdown menus remain fully visible at 360px width.
+
+NEXT STEPS (Choose One):
+A) Design a responsive layout plan (grid/flex + media queries) that guarantees the control strip height stays within the canvas footer on mobile, including exact Tailwind classes or CSS rules (success: documented plan ready for implementation).
+B) Prototype the new layout in a minimal sandbox (Storybook or isolated component) to prove menus stay visible before touching production code (success: screenshot + CSS diff).
+C) Document the current overflow issue with measurements and hand it off for UI redesign guidance (success: CURRENT_STATE.md entry with breakpoint analysis).
+
+Pausing implementation until the responsive approach is defined or approved.

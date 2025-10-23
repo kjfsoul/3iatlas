@@ -25,6 +25,7 @@ This file contains THREE rule files that should be placed in `/Users/kfitz/3iatl
 **Status**: ✅ Already created
 
 Key contents:
+
 - NO ByteRover MCP (use local files)
 - Current status (what's working vs broken)
 - Absolute rules (never violate)
@@ -40,6 +41,7 @@ Key contents:
 **Status**: ✅ Already created
 
 Key contents:
+
 - Incremental development (change → test → commit)
 - Testing protocols
 - 30-minute stuck rule
@@ -55,6 +57,7 @@ Key contents:
 **Status**: ✅ Already created
 
 Key contents:
+
 - Complete technical stack
 - R3F compatibility issue documentation
 - NASA Horizons data patterns
@@ -88,11 +91,13 @@ git log --oneline -10            # 1 min
 ### Current Status (Jan 22, 2025)
 
 **✅ Working:**
+
 - Next.js site (port 3030)
 - All Printify products (4 brands)
 - Data files (1,093 trajectory points)
 
 **❌ To Fix:**
+
 - Implement iframe integration (Option B)
 - Takes 30-45 minutes
 - Guaranteed to work
@@ -134,6 +139,7 @@ vercel --prod --yes
 ```
 
 **CRITICAL RULES:**
+
 - ✅ **ALWAYS commit to both repos** - Changes affect both projects
 - ✅ **ALWAYS push to GitHub** - Triggers automatic deployments
 - ✅ **ALWAYS deploy to Vercel** - Ensures production is updated
@@ -142,6 +148,7 @@ vercel --prod --yes
 - ❌ **NEVER assume auto-deploy** - Manual deployment required
 
 **Why Both Repos:**
+
 - `/Users/kfitz/3iatlas` - Main Next.js site
 - `/Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend` - Vite tracker
 - Changes to either affect the complete system
@@ -152,6 +159,7 @@ vercel --prod --yes
 ## Memory System (Local Files Only)
 
 ### Source of Truth
+
 ```
 /Users/kfitz/3iatlas/docs/PROJECT_MEMORY.md     ← Read first
 /Users/kfitz/3iatlas/docs/CURRENT_STATE.md      ← What's broken
@@ -163,6 +171,7 @@ Git history                                      ← Permanent record
 ### Why No External MCPs
 
 ByteRover MCP failed during development:
+
 - Storage appeared to work but retrieval failed
 - Had to re-explain context each session
 - Wasted ~2 hours with no benefit
@@ -171,6 +180,7 @@ ByteRover MCP failed during development:
 ### Update Protocol
 
 After completing work:
+
 ```markdown
 ## Update: [Date/Time]
 
@@ -203,6 +213,7 @@ Add to `/docs/PROJECT_MEMORY.md` and commit.
 ```
 
 **Before modifying any file:**
+
 1. Check if marked ✅ WORKING in docs
 2. Test feature BEFORE your change
 3. Make your change
@@ -214,6 +225,7 @@ Add to `/docs/PROJECT_MEMORY.md` and commit.
 ## Success Metrics
 
 ### Good Session
+
 - [ ] Read docs before starting
 - [ ] Made incremental commits
 - [ ] Preserved working features
@@ -221,6 +233,7 @@ Add to `/docs/PROJECT_MEMORY.md` and commit.
 - [ ] Clear next steps
 
 ### Bad Session
+
 - [ ] Didn't read docs
 - [ ] Broke working features
 - [ ] Unclear commits
@@ -231,6 +244,7 @@ Add to `/docs/PROJECT_MEMORY.md` and commit.
 ## Common Patterns
 
 ### Adding New Feature
+
 ```bash
 # 1. Make minimal version
 # 2. Test it works
@@ -242,6 +256,7 @@ Add to `/docs/PROJECT_MEMORY.md` and commit.
 ```
 
 ### Fixing Issue
+
 ```bash
 # 1. Reproduce issue
 # 2. Make smallest fix
@@ -251,6 +266,7 @@ Add to `/docs/PROJECT_MEMORY.md` and commit.
 ```
 
 ### When Stuck
+
 ```bash
 # After 30 minutes:
 # 1. Document what tried
@@ -279,6 +295,7 @@ After completing? → Update docs → Commit → Push → Deploy
 ```
 
 **MANDATORY DEPLOYMENT STEPS:**
+
 1. **Commit** changes to both repos
 2. **Push** to GitHub (triggers auto-deploy)
 3. **Deploy** to Vercel (ensures production)
@@ -290,6 +307,7 @@ After completing? → Update docs → Commit → Push → Deploy
 ## Key Learning Points
 
 **What Works:**
+
 - ✅ Local markdown documentation
 - ✅ Incremental development
 - ✅ Testing immediately
@@ -297,12 +315,14 @@ After completing? → Update docs → Commit → Push → Deploy
 - ✅ Requesting help at 30 minutes
 
 **What Doesn't Work:**
+
 - ❌ External memory tools (for this project)
 - ❌ Making many changes before testing
 - ❌ Debugging same thing for hours
 - ❌ Breaking working features
 
 **Hard Lessons:**
+
 - Same code: Vite ✅ works, Next.js ❌ doesn't (environment matters)
 - Local files > External MCPs (reliability matters)
 - Working features > New features (revenue matters)
@@ -322,6 +342,147 @@ After completing? → Update docs → Commit → Push → Deploy
 | PASTE_THIS_TO_AGENT.md | Agent prompt | / |
 | RECONCILIATION_SUMMARY.md | Honest assessment | / |
 | RULES_SUMMARY.md | Rules overview | / |
+
+---
+
+## I-DON'T-KNOW PROTOCOL (MANDATORY)
+
+**When to Use**: When you're uncertain about ANY aspect of the task, data, or requirements.
+
+**CRITICAL**: This protocol MUST be followed before making any changes or assumptions. It prevents wasted time and ensures proper context gathering.
+
+### Step 1: State the Gap Precisely
+
+**Format**:
+
+```
+GAP IDENTIFIED: [Specific uncertainty]
+BLOCKS PROGRESS BECAUSE: [Why this uncertainty prevents proper action]
+```
+
+**Examples**:
+
+- "GAP IDENTIFIED: Whether Printify cache warning affects user experience or is just a console warning"
+- "GAP IDENTIFIED: Which specific R3F version combinations have been tested and failed"
+- "GAP IDENTIFIED: Current status of 3D tracker integration in production vs development"
+
+### Step 2: List What You Checked
+
+**Format**:
+
+```
+CHECKED SOURCES:
+- [File path]: [What was found/not found]
+- [Command run]: [Result]
+- [Documentation]: [Relevant information]
+```
+
+**Examples**:
+
+```
+CHECKED SOURCES:
+- /docs/PROJECT_MEMORY.md: Mentions cache warning as "non-blocking" but unclear impact
+- /lib/printify.ts: Shows cache configuration but no impact assessment
+- Browser console: Shows warning but products load correctly
+```
+
+### Step 3: Produce Retrieval Prompt
+
+**Format**:
+
+```
+RETRIEVAL PROMPT FOR NEXT AGENT:
+SEARCH: [Specific search terms]
+SOURCE: [File paths to search]
+PARAMS: [Specific parameters to look for]
+REQUIRED FIELDS: [What information is needed]
+SCHEMA: [Expected data structure]
+VALIDATION: [How to verify the information is correct]
+```
+
+**Examples**:
+
+```
+RETRIEVAL PROMPT FOR NEXT AGENT:
+SEARCH: Printify cache warning impact analysis
+SOURCE: /docs/PROJECT_MEMORY.md, /docs/CURRENT_STATE.md, /lib/printify.ts
+PARAMS: Look for "2MB cache limit", "Failed to set fetch cache", user experience impact
+REQUIRED FIELDS: Error message, impact level (blocking/warning), solution status, test results
+SCHEMA: { error: string, impact: "blocking"|"warning"|"cosmetic", solution: string, tested: boolean, userAffected: boolean }
+VALIDATION: Check if products actually load for users, verify console vs functional impact
+```
+
+### Step 4: Offer Viable Next Steps
+
+**Format**:
+
+```
+NEXT STEPS (Choose One):
+A) [Specific action with success criteria]
+B) [Alternative action with success criteria]
+C) [Investigation action with deliverables]
+```
+
+**Examples**:
+
+```
+NEXT STEPS (Choose One):
+A) Implement cache fix if confirmed as needed (success: no console warnings, products load)
+B) Investigate actual user impact of cache warning (success: clear impact assessment)
+C) Document current behavior and defer fix (success: clear documentation of non-blocking status)
+```
+
+### Step 5: Stop and Wait
+
+**CRITICAL**: Do NOT proceed with implementation until the gap is resolved through proper information gathering.
+
+---
+
+## Enhanced Information Gathering Checklist
+
+### Before Making ANY Changes
+
+**Required Information**:
+
+- [ ] What exactly is the current behavior?
+- [ ] What is the expected behavior?
+- [ ] What files/components are involved?
+- [ ] What is the impact on users?
+- [ ] What has been tried before?
+- [ ] What are the constraints/limitations?
+- [ ] What are the success criteria?
+
+### Documentation Sources to Check
+
+**Primary Sources** (Check in order):
+
+1. `/docs/PROJECT_MEMORY.md` - Source of truth
+2. `/docs/CURRENT_STATE.md` - Current status
+3. `/docs/MIGRATION_TASKS.md` - Planned fixes
+4. Git history - Recent changes
+5. Browser console - Current errors
+6. Production vs development differences
+
+### Validation Requirements
+
+**Before claiming completion**:
+
+- [ ] Verified with actual browser testing
+- [ ] Confirmed no regression in working features
+- [ ] Checked both development and production environments
+- [ ] Validated against success criteria
+- [ ] Documented the solution
+
+### Common Information Gaps
+
+**Frequently Missing Information**:
+
+- Production vs development environment differences
+- User experience impact vs console warnings
+- Previous attempts and why they failed
+- Dependencies and version compatibility
+- Performance implications
+- Security considerations
 
 ---
 
