@@ -114,12 +114,46 @@ cd /Users/kfitz/3iatlas
 npm run dev  # Port 3030
 ```
 
-### Deployment Workflow (MANDATORY)
+### Enhanced Testing & Deployment Workflow (MANDATORY)
 
-**After ANY changes, you MUST complete this full workflow:**
-
+**PRE-COMMIT TESTING (MANDATORY):**
 ```bash
-# 1. Commit changes to both repositories
+# 1. Code Quality Checks
+npm run lint          # TypeScript & ESLint validation
+npm run typecheck     # Type safety verification
+npm run build         # Production build test (must succeed)
+
+# 2. Local Testing
+npm run dev           # Start development server
+# Manual browser testing at localhost
+# Test specific functionality changed
+# Verify no regressions in existing features
+```
+
+**STAGING DEPLOYMENT (OPTIONAL):**
+```bash
+# 1. Deploy to Staging/Preview (ALWAYS OFFER)
+cd /Users/kfitz/3iatlas
+vercel --target preview
+
+cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend
+vercel --target preview
+
+# 2. Provide Preview Links to User (ALWAYS PROVIDE)
+echo "Staging URLs:"
+echo "Main Site: [vercel-preview-url]"
+echo "Tracker: [vercel-preview-url]"
+
+# 3. User Choice
+# Option A: Test staging environment first (recommended for major changes)
+# Option B: Deploy directly to production (for minor fixes)
+# Option C: Continue making changes without immediate deployment
+```
+
+**PRODUCTION DEPLOYMENT (FLEXIBLE):**
+```bash
+# Option 1: Direct Production Deployment (for minor fixes)
+# 1. Commit to both repositories
 cd /Users/kfitz/3iatlas
 git add .
 git commit -m "feat: descriptive commit message"
@@ -130,22 +164,75 @@ git add .
 git commit -m "feat: descriptive commit message"
 git push origin main
 
-# 2. Deploy both to production
+# 2. Deploy to Production
 cd /Users/kfitz/3iatlas
 vercel --prod --yes
 
 cd /Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend
 vercel --prod --yes
+
+# Option 2: Feature Branch Workflow (for major changes)
+git checkout -b feature/description-of-changes
+# Make changes
+git add .
+git commit -m "feat: descriptive commit message"
+git push origin feature/description-of-changes
+# Create PR and merge after review
+# AI handles merging after user approval
+```
+
+**POST-DEPLOYMENT TESTING (MANDATORY):**
+```bash
+# 1. Health Checks
+curl -f https://production-url.com/api/health
+
+# 2. Feature Validation
+# Test changed functionality in production
+# Verify existing features still work
+# Check mobile and web presentation at different zoom levels
+
+# 3. Performance Monitoring
+# Monitor response times
+# Check error rates
+# Verify Printify integration status
+```
+
+**BRANCH STRATEGY (RECOMMENDED):**
+```bash
+# For major changes, use feature branches
+git checkout -b feature/responsive-layout-fix
+# Develop and test on feature branch
+# Create PR for review
+# Merge to main after approval (AI will handle merging)
+```
+
+**ROLLBACK PROCEDURE (EMERGENCY):**
+```bash
+# Quick Rollback
+vercel rollback [deployment-url]  # Immediate rollback
+git revert [commit-hash]          # Code rollback
+
+# Emergency Rollback on Critical Failures
+# Automatic rollback triggers on:
+# - Site availability < 95%
+# - Error rate > 5%
+# - Response time > 5 seconds
 ```
 
 **CRITICAL RULES:**
 
+- ✅ **ALWAYS run pre-commit tests** - Lint, typecheck, build must pass
+- ✅ **ALWAYS offer staging deployment** - Provide preview links to user
+- ✅ **ALWAYS get user choice** - Staging first, direct production, or continue changes
 - ✅ **ALWAYS commit to both repos** - Changes affect both projects
 - ✅ **ALWAYS push to GitHub** - Triggers automatic deployments
 - ✅ **ALWAYS deploy to Vercel** - Ensures production is updated
 - ✅ **ALWAYS test after deployment** - Verify changes work in production
+- ✅ **ALWAYS test mobile/web presentation** - At different zoom levels
+- ✅ **USE feature branches** - For major changes with PR workflow
 - ❌ **NEVER skip deployment** - Local changes don't affect production
 - ❌ **NEVER assume auto-deploy** - Manual deployment required
+- ❌ **NEVER force staging** - User chooses deployment approach
 
 **Why Both Repos:**
 
@@ -153,6 +240,117 @@ vercel --prod --yes
 - `/Users/kfitz/3dsolardeepagent/code_artifacts/3iatlas-flight-tracker/frontend` - Vite tracker
 - Changes to either affect the complete system
 - Both must be synced for full functionality
+
+---
+
+## Flexible Deployment Workflow
+
+### Deployment Options
+
+**For Minor Fixes (Recommended):**
+- Make changes directly on main branch
+- Commit and push to GitHub
+- Deploy directly to production
+- No staging required unless user requests
+
+**For Major Changes (Recommended):**
+- Create feature branch: `git checkout -b feature/description`
+- Make changes on feature branch
+- Deploy to staging for user testing
+- Create PR and merge after approval
+- Deploy to production
+
+**For Continuous Development:**
+- Make multiple changes without immediate deployment
+- Commit changes as you go
+- Deploy when ready or when user requests
+- Always offer staging links but don't require approval
+
+### User Choice Protocol
+
+**Always provide these options:**
+1. **Deploy to staging first** - For testing before production
+2. **Deploy directly to production** - For minor fixes
+3. **Continue making changes** - Without immediate deployment
+4. **Use feature branch** - For major changes with PR workflow
+
+**AI Assistant Responsibilities:**
+- Always offer staging deployment with clickable links
+- Never force staging approval for minor changes
+- Always provide user choice in deployment approach
+- Use feature branches for major changes automatically
+
+---
+
+## Expert Modes & Testing Criteria
+
+### Expert Mode Prompts for AI Developers
+
+**RESPONSIVE DESIGN EXPERT MODE:**
+```
+EXPERT MODE: Responsive Layout Specialist
+Focus: Mobile-first design, cross-browser compatibility, zoom-level testing
+Testing Protocol: Test at 100%, 75%, 67%, 50% browser zoom levels
+Critical Checks: Controls must fit at 100% zoom, no horizontal overflow
+Success Criteria: All controls visible and functional across all zoom levels
+```
+
+**3D VISUALIZATION EXPERT MODE:**
+```
+EXPERT MODE: Three.js/React Three Fiber Specialist
+Focus: 3D performance, camera controls, rendering optimization
+Testing Protocol: FPS monitoring, memory leak detection, cross-device testing
+Critical Checks: 60 FPS target, stable memory usage, responsive controls
+Success Criteria: Smooth 3D experience across desktop and mobile
+```
+
+**API INTEGRATION EXPERT MODE:**
+```
+EXPERT MODE: API Integration Specialist
+Focus: Printify integration, NASA Horizons API, data caching
+Testing Protocol: API response validation, error handling, cache behavior
+Critical Checks: Products load correctly, no 2MB cache warnings, fallback handling
+Success Criteria: Reliable data fetching with proper error recovery
+```
+
+**DEPLOYMENT EXPERT MODE:**
+```
+EXPERT MODE: DevOps/Deployment Specialist
+Focus: Staging workflows, rollback procedures, health monitoring
+Testing Protocol: Multi-environment testing, automated rollback triggers
+Critical Checks: Staging matches production, quick rollback capability
+Success Criteria: Zero-downtime deployments with instant recovery
+```
+
+### Testing Criteria by Change Type
+
+**UI/RESPONSIVE CHANGES:**
+- [ ] Test at 100%, 75%, 67%, 50% browser zoom levels
+- [ ] Test on mobile (375px), tablet (768px), desktop (1024px+)
+- [ ] Verify no horizontal overflow or clipped controls
+- [ ] Test dropdown menus remain fully visible
+- [ ] Verify touch targets are adequate (44px minimum)
+
+**3D VISUALIZATION CHANGES:**
+- [ ] Monitor FPS (target: 60 FPS)
+- [ ] Check memory usage stability (no leaks)
+- [ ] Test camera controls responsiveness
+- [ ] Verify zoom functionality works correctly
+- [ ] Test across different view modes
+
+**API INTEGRATION CHANGES:**
+- [ ] Test API response handling
+- [ ] Verify error states and fallbacks
+- [ ] Check caching behavior
+- [ ] Test offline scenarios
+- [ ] Verify data consistency
+
+**DEPLOYMENT CHANGES:**
+- [ ] Test staging environment first
+- [ ] Verify production deployment
+- [ ] Check health monitoring
+- [ ] Test rollback procedures
+- [ ] Verify both repositories are synced
 
 ---
 
