@@ -73,10 +73,10 @@ export function CelestialBody({
 
 interface SunProps {
   radius?: number;
-  viewMode?: 'explorer' | 'true-scale' | 'ride-atlas';
+  viewMode?: /* 'explorer' | */ 'true-scale' | 'ride-atlas'; // Explorer commented out - no textures
 }
 
-export function Sun({ radius = 2.0, viewMode = "explorer" }: SunProps) {
+export function Sun({ radius = 2.0, viewMode = "ride-atlas" }: SunProps) { // Default changed from "explorer" to "ride-atlas"
   // Graceful texture loading (no Suspense, no crash on 404)
   const [sunTex, setSunTex] = useState<THREE.Texture | null>(null);
   useEffect(() => {

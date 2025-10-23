@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 interface Atlas3DTrackerIframeProps {
   autoPlay?: boolean;
   initialSpeed?: number;
-  initialViewMode?: 'explorer' | 'true-scale' | 'ride-atlas';
+  initialViewMode?: /* 'explorer' | */ 'true-scale' | 'ride-atlas'; // Explorer commented out - no textures
 }
 
 export default function Atlas3DTrackerIframe({

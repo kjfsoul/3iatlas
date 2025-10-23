@@ -12,12 +12,12 @@ interface PlaybackControlsProps {
   speed: number;
   currentIndex: number;
   maxIndex: number;
-  viewMode: 'explorer' | 'true-scale' | 'ride-atlas';
+  viewMode: /* 'explorer' | */ 'true-scale' | 'ride-atlas'; // Explorer commented out - no textures
   onPlayPause: () => void;
   onReset: () => void;
   onSpeedChange: (speed: number) => void;
   onSeek: (index: number) => void;
-  onViewModeChange: (mode: 'explorer' | 'true-scale' | 'ride-atlas') => void;
+  onViewModeChange: (mode: /* 'explorer' | */ 'true-scale' | 'ride-atlas') => void; // Explorer commented out - no textures
 }
 
 export function PlaybackControls({
@@ -37,7 +37,7 @@ export function PlaybackControls({
 
   const speedOptions = [0.5, 1, 2, 5, 10, 25];
   const viewModeLabels = {
-    explorer: "Explorer",
+    // explorer: "Explorer", // COMMENTED OUT - No textures, deactivated
     "true-scale": "True Scale",
     "ride-atlas": "Ride With ATLAS",
   };
@@ -136,7 +136,7 @@ export function PlaybackControls({
                 <button
                   key={mode}
                   onClick={() => {
-                    onViewModeChange(mode as 'explorer' | 'true-scale' | 'ride-atlas');
+                    onViewModeChange(mode as /* 'explorer' | */ 'true-scale' | 'ride-atlas'); // Explorer commented out
                     setShowViewMenu(false);
                   }}
                   className={`block w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors ${

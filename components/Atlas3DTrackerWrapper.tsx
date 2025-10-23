@@ -20,7 +20,7 @@ const Atlas3DTrackerIframe = dynamic(
 interface Atlas3DTrackerWrapperProps {
   autoPlay?: boolean;
   initialSpeed?: number;
-  initialViewMode?: 'explorer' | 'true-scale' | 'ride-atlas';
+  initialViewMode?: /* 'explorer' | */ 'true-scale' | 'ride-atlas'; // Explorer commented out - no textures
 }
 
 export default function Atlas3DTrackerWrapper(props: Atlas3DTrackerWrapperProps) {

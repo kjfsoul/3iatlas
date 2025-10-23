@@ -18,7 +18,7 @@ import { FullTrajectoryLine, TrajectoryTrail } from './TrajectoryTrail';
 
 import { TrajectoryData, VectorData } from "@/types/trajectory";
 
-type ViewMode = "explorer" | "true-scale" | "ride-atlas";
+type ViewMode = /* "explorer" | */ "true-scale" | "ride-atlas"; // Explorer commented out - no textures
 
 interface SceneContentProps {
   trajectoryData: TrajectoryData;
