@@ -119,17 +119,18 @@ export default function Atlas3DTrackerIframe({
   }
 
   return (
-    <div className="w-full h-full relative rounded-xl overflow-hidden bg-black">
+    <div className="w-full h-full relative rounded-xl overflow-auto bg-black">
       <iframe
         src={iframeUrl}
         className="w-full h-full border-0"
         title="3I/ATLAS Orbital Tracker"
-        style={{ 
-          width: '100%', 
-          height: '100%', 
-          border: 'none', 
-          borderRadius: 'inherit',
-          backgroundColor: 'black'
+        style={{
+          width: "100%",
+          height: "100%",
+          border: "none",
+          borderRadius: "inherit",
+          backgroundColor: "black",
+          minHeight: "800px",
         }}
         allow="accelerometer; gyroscope"
         loading="lazy"

@@ -18,15 +18,15 @@ export default async function Page() {
       {/* HERO */}
       <section className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-black/20 p-4">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-2xl font-bold">3I/ATLAS FLIGHTPATH</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">3I/ATLAS FLIGHTPATH</h1>
           <a
-            className="rounded-md bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/20"
+            className="rounded-md bg-white/10 px-4 py-2 text-2xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent hover:bg-white/20"
             href="#brands"
           >
             Explore Brands
           </a>
         </div>
-        <div className="h-[750px] rounded-xl relative">
+        <div className="h-[850px] rounded-xl relative overflow-hidden">
           <Atlas3DTrackerWrapper
             autoPlay={true}
             initialSpeed={2}
