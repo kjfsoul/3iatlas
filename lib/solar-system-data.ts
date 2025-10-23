@@ -53,42 +53,77 @@ export async function fetchSolarSystemData(
   stepSize: string = "6h"
 ): Promise<Record<string, VectorData[]>> {
   const results: Record<string, VectorData[]> = {};
-  const stepHours = normalizeStepHours(stepSize);
-
-  await Promise.all(
-    objects.map((objKey) =>
-      loadObjectData({
-        objKey,
-        startDate,
-        endDate,
-        stepSize,
-        stepHours,
-        results,
-      })
-    )
-  );
-
-  if (!results["atlas"] || results["atlas"].length === 0) {
-    console.warn(
-      "[Solar System] ⚠️ 3I/ATLAS data missing! Using fallback calculations as last resort"
-    );
-    try {
-      const fallbackVectors = generate3IAtlasVectors(
-        startDate,
-        endDate,
-        stepHours
-      );
-      if (fallbackVectors.length > 0) {
-        results["atlas"] = fallbackVectors;
-        console.log(
-          `[Solar System] ✅ FALLBACK: Generated ${fallbackVectors.length} positions for 3I/ATLAS`
-        );
-      } else {
-        console.error("[Solar System] ❌ Fallback returned 0 positions!");
-      }
-    } catch (error) {
-      console.error("[Solar System] ❌ Final fallback failed:", error);
+  
+  try {
+    // Load from local NASA Horizons data file
+    const response = await fetch('/data/SOLAR_SYSTEM_POSITIONS.json');
+    if (!response.ok) {
+      throw new Error(`Failed to load local data: ${response.status}`);
     }
+    
+    const localData = await response.json();
+    console.log(`[Solar System] ✅ Loaded ${localData.length} data points from local NASA Horizons file`);
+    
+    // Parse data by object
+    const dataByObject: Record<string, any[]> = {};
+    localData.forEach((entry: any) => {
+      const objectName = entry.object;
+      if (!dataByObject[objectName]) {
+        dataByObject[objectName] = [];
+      }
+      dataByObject[objectName].push(entry);
+    });
+    
+    // Map NASA object names to our keys
+    const objectMapping: Record<string, string> = {
+      'ATLAS (C/2025 N1)': 'atlas',
+      'Mercury (199)': 'mercury',
+      'Venus (299)': 'venus',
+      'Earth (399)': 'earth',
+      'Mars (499)': 'mars',
+      'Jupiter (599)': 'jupiter',
+      'Saturn (699)': 'saturn',
+      'Uranus (799)': 'uranus',
+      'Neptune (899)': 'neptune'
+    };
+    
+    // Convert to VectorData format
+    Object.entries(dataByObject).forEach(([nasaName, entries]) => {
+      const ourKey = objectMapping[nasaName];
+      if (ourKey && objects.includes(ourKey as SolarSystemObjectKey)) {
+        results[ourKey] = entries.map((entry: any) => ({
+          date: entry.date,
+          position: {
+            x: entry.position_au.x,
+            y: entry.position_au.y,
+            z: entry.position_au.z
+          },
+          velocity: {
+            vx: entry.velocity_au_per_day.vx,
+            vy: entry.velocity_au_per_day.vy,
+            vz: entry.velocity_au_per_day.vz
+          }
+        }));
+        console.log(`[Solar System] ✅ Loaded ${results[ourKey].length} positions for ${ourKey}`);
+      }
+    });
+    
+  } catch (error) {
+    console.error('[Solar System] ❌ Failed to load local data:', error);
+    // Fallback to original API method if local data fails
+    const stepHours = normalizeStepHours(stepSize);
+    await Promise.all(
+      objects.map((objKey) =>
+        loadObjectData({
+          objKey,
+          startDate,
+          endDate,
+          stepSize,
+          stepHours,
+          results,
+        })
+      )
+    );
   }
 
   return results;
