@@ -17,7 +17,7 @@ export default function Atlas3DTrackerIframe({
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  const TRACKER_URL = process.env.NEXT_PUBLIC_TRACKER_URL || '';
+  const TRACKER_URL = process.env.NEXT_PUBLIC_TRACKER_URL || 'https://tracker.3iatlas.mysticarcana.com';
   const iframeUrl = `${TRACKER_URL}?autoPlay=${autoPlay}&speed=${initialSpeed}&view=${initialViewMode}`;
 
   // Check if we're in production or if tracker URL is localhost
@@ -45,8 +45,8 @@ export default function Atlas3DTrackerIframe({
         return;
       }
 
-      // If in production and tracker is localhost, show error immediately
-      if (isProduction && (isLocalhostTracker || !TRACKER_URL)) {
+      // If in production and tracker is localhost or empty, show error immediately
+      if (isProduction && (isLocalhostTracker || !TRACKER_URL || TRACKER_URL === '')) {
         setError('3D Tracker not available in production. Coming soon!');
         setIsLoading(false);
         return;
