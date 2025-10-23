@@ -1,0 +1,153 @@
+# Comprehensive 3I Atlas Recovery and Integration Prompt
+
+## Executive Summary
+The 3I Atlas project has experienced critical failures in the handoff process, requiring immediate recovery, data integration, and system stabilization. This prompt outlines all necessary tasks to restore functionality, integrate NASA Horizons data, and establish a robust development foundation.
+
+## Critical Issues Identified
+- **SOS Failures**: Multiple system outages and data corruption events
+- **Data Integration Gaps**: NASA Horizons API data not properly integrated into orbital mechanics
+- **Documentation Inconsistencies**: Outdated and conflicting implementation plans
+- **Build Failures**: Compilation errors preventing deployment
+- **Architecture Debt**: Legacy code conflicts with modern React Three Fiber migration
+
+## Comprehensive Task Implementation Plan
+
+### Phase 1: Emergency Assessment and Protocol Compliance
+1. **Protocol Compliance Check**
+   - Verify all agent rules and efficiency guidelines are followed
+   - Audit current codebase against established patterns
+   - Document compliance gaps and remediation steps
+
+2. **SOS Issue Assessment**
+   - Analyze `docs/HANDOFF_CRITICAL_FAILURE.md` for root causes
+   - Identify all failure points and cascading effects
+   - Create detailed failure analysis report
+
+3. **System Health Audit**
+   - Check build status and error logs
+   - Validate data integrity across all components
+   - Test critical paths for functionality
+
+### Phase 2: Data Integration and Core Fixes
+4. **NASA Horizons Data Integration Plan**
+   - Implement proper parsing of `NASA_HORIZONS_API/SOLAR_SYSTEM_POSITIONS.json`
+   - Create data transformation utilities for AU coordinates
+   - Integrate velocity calculations (AU/day) into orbital mechanics
+   - Establish data caching and update mechanisms
+
+5. **Orbital Mechanics Engine**
+   - Implement accurate position calculations using J2000 ecliptic coordinates
+   - Add velocity-based trajectory plotting
+   - Create interpolation functions for smooth animations
+   - Validate calculations against known astronomical data
+
+6. **Component Data Binding**
+   - Update `Atlas3DTrackerEnhanced.tsx` to use real NASA data
+   - Modify `CelestialBodies.tsx` for accurate planetary positions
+   - Integrate trajectory data into `TrajectoryTrail.tsx`
+   - Update `PlaybackControls.tsx` for time-based navigation
+
+### Phase 3: Architecture Recovery and Migration
+7. **React Three Fiber Migration Completion**
+   - Resolve remaining R3F integration issues
+   - Update component lifecycle management
+   - Implement proper scene management and cleanup
+   - Add performance optimizations for 3D rendering
+
+8. **State Management Overhaul**
+   - Fix context provider issues in `context/component-context/`
+   - Implement proper data flow for NASA Horizons integration
+   - Add error boundaries and fallback states
+   - Create centralized state for timeline and playback controls
+
+9. **Build System Stabilization**
+   - Fix TypeScript compilation errors
+   - Resolve dependency conflicts
+   - Update build configuration for production deployment
+   - Implement hot reload for development efficiency
+
+### Phase 4: Documentation and Quality Assurance
+10. **Enhanced PLAN_PLANET_INTEGRATION.md**
+    - Add SOS failure remediation steps
+    - Document NASA Horizons data integration process
+    - Include recovery procedures and testing protocols
+    - Add performance benchmarks and validation criteria
+
+11. **Updated PLAN_R3F_MIGRATION.md**
+    - Incorporate post-planet integration context
+    - Document resolved issues and lessons learned
+    - Add migration checklists and verification steps
+    - Include rollback procedures for stability
+
+12. **Battle Task Plan Creation**
+    - Develop comprehensive phased recovery roadmap
+    - Create detailed implementation timeline
+    - Define success criteria for each phase
+    - Establish monitoring and alerting systems
+
+### Phase 5: Development Infrastructure
+13. **Feature Branch Creation**
+    - Create `feature/planet-recovery-and-integration` branch
+    - Implement proper Git workflow for collaborative development
+    - Set up branch protection and code review processes
+    - Establish automated testing pipelines
+
+14. **Testing Framework Implementation**
+    - Add unit tests for NASA data parsing
+    - Create integration tests for orbital calculations
+    - Implement visual regression tests for 3D components
+    - Add performance testing for rendering optimization
+
+15. **Documentation Validation**
+    - Audit all documentation for clarity and accuracy
+    - Fix broken links and outdated references
+    - Ensure consistent tone and formatting
+    - Create documentation maintenance procedures
+
+### Phase 6: Deployment and Monitoring
+16. **Production Deployment Preparation**
+    - Configure production build optimizations
+    - Set up CDN for static assets
+    - Implement error tracking and analytics
+    - Create deployment automation scripts
+
+17. **Monitoring and Alerting**
+    - Implement application performance monitoring
+    - Add error tracking and reporting
+    - Create health check endpoints
+    - Establish incident response procedures
+
+## Success Criteria
+- All critical SOS failures resolved
+- NASA Horizons data fully integrated and validated
+- Build system stable with zero compilation errors
+- All components rendering accurately in 3D space
+- Documentation complete and internally consistent
+- Automated testing coverage >80%
+- Performance benchmarks met for 60fps rendering
+
+## Risk Mitigation
+- Implement feature flags for gradual rollout
+- Maintain backup branches for quick rollback
+- Regular code reviews and pair programming
+- Automated testing gates for all deployments
+- Performance monitoring with alerts
+
+## Timeline Expectations
+- Phase 1: 2-3 days (assessment and planning)
+- Phase 2: 5-7 days (core data integration)
+- Phase 3: 3-4 days (architecture fixes)
+- Phase 4: 2-3 days (documentation updates)
+- Phase 5: 2-3 days (testing and infrastructure)
+- Phase 6: 1-2 days (deployment preparation)
+
+## Required Resources
+- NASA Horizons API documentation
+- React Three Fiber best practices
+- TypeScript advanced patterns
+- Git workflow expertise
+- Performance optimization tools
+- Testing framework knowledge
+
+## Next Steps
+Execute this plan systematically, starting with Phase 1 emergency assessment. Use the established todo list system for tracking progress and maintain detailed documentation of all changes and decisions made during implementation.
