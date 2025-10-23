@@ -29,12 +29,12 @@ type Product = {
     handle?: string;
   };
 };
-function auth() {
+function auth(disableCache = false) {
   const key = process.env.PRINTIFY_API_TOKEN;
   if (!key) return undefined;
   return {
     headers: { Authorization: `Bearer ${key}` },
-    next: { revalidate: 60 },
+    next: disableCache ? { revalidate: 0 } : { revalidate: 60 },
   };
 }
 export async function getShops(): Promise<Shop[]> {
@@ -84,7 +84,7 @@ export async function getLatestPublishedProducts(
   limit = 3
 ): Promise<Product[]> {
   if (!auth()) return [];
-  const res = await fetch(`${API}/shops/${shopId}/products.json`, auth());
+  const res = await fetch(`${API}/shops/${shopId}/products.json`, auth(true));
   if (!res.ok) return [];
 
   const response = await res.json();
