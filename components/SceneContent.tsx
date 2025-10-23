@@ -104,7 +104,8 @@ export function SceneContent({
     trajectory: VectorData[],
     idx: number
   ): [number, number, number] {
-    const frame = trajectory[Math.floor(idx)];
+    const planetIndex = Math.floor(idx) % trajectory.length;
+    const frame = trajectory[planetIndex];
     if (!frame) return [0, 0, 0];
     return [frame.position.x, frame.position.z, -frame.position.y];
   }
