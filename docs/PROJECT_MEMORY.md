@@ -1009,6 +1009,84 @@ Chose iframe over direct R3F integration because:
   - Add `pointerEvents: 'auto'` to dropdowns to ensure click capture
   - Test ALL interactive elements in actual browser, not just visual rendering
 
+## Update: January 23, 2025, 4:45 AM PST - RULE VIOLATIONS FIXED & CODE EVIDENCE RULE ADDED
+
+### Rule Violations Acknowledged
+
+**Why I Violated PROJECT_RULES_COMPLETE.md:**
+1. **❌ Not following mandatory deployment workflow** - I didn't commit to both repos and deploy properly
+2. **❌ Not fixing the speed to 10x** - The tracker wasn't reading URL parameters
+3. **❌ Not addressing missing headers** - The iframe height was covering the headers
+4. **❌ Not providing proper code evidence** - I need before/after code examples
+
+### Files Changed (Rule Violations Fixed)
+
+- **App.tsx**: Fixed URL parameter reading for speed and view mode
+- **app/page.tsx**: Reduced iframe height to show headers
+- **PROJECT_RULES_COMPLETE.md**: Added mandatory code evidence rule
+
+### Status
+
+✅ **Speed Fixed (URL Parameter Reading):**
+
+```typescript
+// BEFORE (Hardcoded Speed)
+<Atlas3DTrackerEnhanced
+  autoPlay={true}
+  initialSpeed={2}  // ❌ Hardcoded to 2x
+  initialViewMode="ride-atlas"
+/>
+
+// AFTER (URL Parameter Reading)
+const urlParams = new URLSearchParams(window.location.search);
+const initialSpeed = parseInt(urlParams.get('speed') || '10', 10);
+<Atlas3DTrackerEnhanced
+  autoPlay={autoPlay}
+  initialSpeed={initialSpeed}  // ✅ Reads from URL parameters
+  initialViewMode={initialViewMode}
+/>
+```
+
+✅ **Headers Fixed (Iframe Height Reduction):**
+
+```typescript
+// BEFORE (Headers Covered)
+<div className="h-[800px] rounded-xl relative overflow-hidden">
+
+// AFTER (Headers Visible)
+<div className="h-[600px] rounded-xl relative overflow-hidden">
+```
+
+✅ **Code Evidence Rule Added:**
+
+- Mandatory before/after code examples for all changes
+- Prevents misrepresentation of fixes
+- Provides clear evidence of what was changed
+- Enables verification of changes
+
+### Technical Implementation
+
+- **URL Parameter Reading**: Tracker now reads speed, autoPlay, and view from URL parameters
+- **Iframe Height**: Reduced from 800px to 600px to show main site headers
+- **Code Evidence Rule**: Added to PROJECT_RULES_COMPLETE.md with examples
+
+### Issue Resolved
+
+- **Problem**: Speed not set to 10x, headers missing, no code evidence
+- **Root Cause**: Tracker not reading URL parameters, iframe too tall, no evidence rule
+- **Solution**: URL parameter reading, iframe height reduction, code evidence rule
+- **Result**: Speed defaults to 10x, headers visible, code evidence mandatory
+
+### Deployment Status
+
+- **Committed**: All fixes committed to both repos with proper messages
+- **Pushed**: Changes pushed to GitHub
+- **Deployed**: Both tracker and main site deployed to staging
+- **Tracker Staging**: https://frontend-2ni1fvxhr-kjfsouls-projects.vercel.app
+- **Main Site Staging**: https://3iatlas-dh3j4e47y-kjfsouls-projects.vercel.app
+
+---
+
 ## Update: January 23, 2025, 4:30 AM PST - BORDER SOURCE IDENTIFIED & FIXED
 
 ### Root Cause Analysis
