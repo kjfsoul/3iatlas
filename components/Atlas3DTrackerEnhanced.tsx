@@ -27,12 +27,14 @@ export default function Atlas3DTrackerEnhanced({
   endDate = "2025-10-31",
   stepSize = "6h",
   autoPlay = true,
-  playbackSpeed = 2,
+  playbackSpeed = 10,
   className = "",
   animationKey = null, // NEW: Animation hook for narrative engine
 }: Props) {
   // E2E: deterministic mode when ?e2e=1
-  const isE2E = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('e2e');
+  const isE2E =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("e2e");
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
     scene: THREE.Scene;
@@ -120,7 +122,12 @@ export default function Atlas3DTrackerEnhanced({
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [speed, setSpeed] = useState(playbackSpeed);
   const [cameraView, setCameraView] = useState<
-    "default" | "followComet" | "topDown" | "closeup" | "marsApproach" | "rideComet"
+    | "default"
+    | "followComet"
+    | "topDown"
+    | "closeup"
+    | "marsApproach"
+    | "rideComet"
   >("default");
   const [showLabels, setShowLabels] = useState(true); // NEW: Toggle planetary labels
 
@@ -157,30 +164,30 @@ export default function Atlas3DTrackerEnhanced({
     const { scene, objects } = sceneRef.current;
 
     // Reset previous animation effects
-    const atlasPath = scene.getObjectByName('atlas_path') as THREE.Line;
+    const atlasPath = scene.getObjectByName("atlas_path") as THREE.Line;
     if (atlasPath) {
       (atlasPath.material as THREE.LineBasicMaterial).color.set(0x00ff88);
     }
-    const atlasGlow = objects.get('atlas_glow');
+    const atlasGlow = objects.get("atlas_glow");
     if (atlasGlow) {
       atlasGlow.visible = true;
     }
 
     // Execute animation sequence based on key
     switch (animationKey) {
-      case 'warning':
-        console.log('[Animation] Triggering WARNING sequence');
+      case "warning":
+        console.log("[Animation] Triggering WARNING sequence");
         if (atlasPath) {
           (atlasPath.material as THREE.LineBasicMaterial).color.set(0xff0000);
         }
         break;
-      case 'artifact':
-        console.log('[Animation] Triggering ARTIFACT sequence');
-        setCameraView('marsApproach');
+      case "artifact":
+        console.log("[Animation] Triggering ARTIFACT sequence");
+        setCameraView("marsApproach");
         break;
-      case 'discovery':
-        console.log('[Animation] Triggering DISCOVERY sequence');
-        setCameraView('closeup');
+      case "discovery":
+        console.log("[Animation] Triggering DISCOVERY sequence");
+        setCameraView("closeup");
         if (atlasGlow) {
           let flickerCount = 0;
           const flickerInterval = setInterval(() => {
@@ -198,14 +205,20 @@ export default function Atlas3DTrackerEnhanced({
 
   // Handle camera mode switching
   const handleCameraModeChange = (
-    newMode: "default" | "followComet" | "topDown" | "closeup" | "marsApproach" | "rideComet"
+    newMode:
+      | "default"
+      | "followComet"
+      | "topDown"
+      | "closeup"
+      | "marsApproach"
+      | "rideComet"
   ) => {
     console.log(`[Camera] Switching to ${newMode}`);
     if (!sceneRef.current) return;
 
     const { controls, camera } = sceneRef.current;
 
-    if (newMode === 'default') {
+    if (newMode === "default") {
       cameraStateRef.current.mode = "free-look";
       cameraStateRef.current.target = null;
       controls.enabled = true;
@@ -336,7 +349,7 @@ export default function Atlas3DTrackerEnhanced({
     // preserveDrawingBuffer is critical for stable headless screenshots
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      preserveDrawingBuffer: isE2E
+      preserveDrawingBuffer: isE2E,
     });
     renderer.setSize(
       containerRef.current.clientWidth,
@@ -499,23 +512,24 @@ export default function Atlas3DTrackerEnhanced({
           transparent: true,
         });
         const path = new THREE.Line(pathGeo, pathMat);
-        if (key === 'atlas') {
-          path.name = 'atlas_path';
+        if (key === "atlas") {
+          path.name = "atlas_path";
         }
         scene.add(path);
       }
 
       // NEW: Add 3D text labels for planets
-      if (key === 'earth' || key === 'mars') {
+      if (key === "earth" || key === "mars") {
         // Labels will be rendered via CSS overlay using screen projection
         mesh.userData.label = obj.name;
 
         // Create the label element
         if (labelsContainerRef.current) {
-          const label = document.createElement('div');
-          label.className = 'text-white text-xs bg-black/50 px-2 py-1 rounded-md absolute';
+          const label = document.createElement("div");
+          label.className =
+            "text-white text-xs bg-black/50 px-2 py-1 rounded-md absolute";
           label.textContent = obj.name;
-          label.style.display = 'none'; // Initially hidden
+          label.style.display = "none"; // Initially hidden
           labelsContainerRef.current.appendChild(label);
           labelElementsRef.current.set(key, label);
         }
@@ -569,26 +583,31 @@ export default function Atlas3DTrackerEnhanced({
     // ---------- E2E Test Harness ----------
     if (isE2E) {
       // Promise that resolves after N animation frames to ensure the camera is visible
-      const ensureFrame = (n = 2) => new Promise<void>(res => {
-        let i = 0;
-        const step = () => {
-          i++;
-          if (i >= n) return res();
+      const ensureFrame = (n = 2) =>
+        new Promise<void>((res) => {
+          let i = 0;
+          const step = () => {
+            i++;
+            if (i >= n) return res();
+            requestAnimationFrame(step);
+          };
           requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-      });
+        });
       (window as any).__atlasTest = {
         ready: true,
         enterRide: () => {
-          setCameraView('rideComet');
-          handleCameraModeChange('rideComet');
+          setCameraView("rideComet");
+          handleCameraModeChange("rideComet");
         },
         ensureFrame,
         getCameraState: () => ({
           pos: sceneRef.current!.camera.position.toArray(),
-          view: (document.querySelector('[data-testid="camera-mode"]') as HTMLSelectElement)?.value
-        })
+          view: (
+            document.querySelector(
+              '[data-testid="camera-mode"]'
+            ) as HTMLSelectElement
+          )?.value,
+        }),
       };
     }
 
@@ -645,7 +664,7 @@ export default function Atlas3DTrackerEnhanced({
       }
       // Clean up labels
       if (labelsContainerRef.current) {
-        labelsContainerRef.current.innerHTML = '';
+        labelsContainerRef.current.innerHTML = "";
       }
       labelElementsRef.current.clear();
     };
@@ -703,7 +722,7 @@ export default function Atlas3DTrackerEnhanced({
 
       for (let i = 0; i < entries.length; i++) {
         const [key, vectors] = entries[i];
-        if (!vectors || vectors.length === 0 || key === 'sun') continue;
+        if (!vectors || vectors.length === 0 || key === "sun") continue;
 
         const mesh = objects.get(key);
         if (!mesh) continue;
@@ -730,10 +749,11 @@ export default function Atlas3DTrackerEnhanced({
             const t = localIndex - frameIndex;
             final.copy(current).lerp(next, t);
 
-            if (key === 'atlas') {
-              offset.copy(next).sub(current).multiplyScalar(
-                cometMotionMultiplier - 1
-              );
+            if (key === "atlas") {
+              offset
+                .copy(next)
+                .sub(current)
+                .multiplyScalar(cometMotionMultiplier - 1);
               final.add(offset);
             }
           } else {
@@ -745,18 +765,18 @@ export default function Atlas3DTrackerEnhanced({
 
         mesh.position.copy(final);
 
-        if (key === 'atlas') {
-          const glow = objects.get('atlas_glow');
+        if (key === "atlas") {
+          const glow = objects.get("atlas_glow");
           if (glow) {
             glow.position.copy(final);
           }
 
-          const bloom = objects.get('atlas_bloom');
+          const bloom = objects.get("atlas_bloom");
           if (bloom) {
             bloom.position.copy(final);
           }
 
-          const trail = objects.get('atlas_trail') as THREE.Points | undefined;
+          const trail = objects.get("atlas_trail") as THREE.Points | undefined;
           if (trail) {
             const positions = trail.geometry.attributes.position
               .array as Float32Array;
@@ -791,11 +811,11 @@ export default function Atlas3DTrackerEnhanced({
         }
       }
 
-      const sun = scene.getObjectByName('sun');
+      const sun = scene.getObjectByName("sun");
       if (sun) {
         sun.position.set(0, 0, 0);
       }
-      const sunGlow = scene.getObjectByName('sunGlow');
+      const sunGlow = scene.getObjectByName("sunGlow");
       if (sunGlow) {
         sunGlow.position.set(0, 0, 0);
       }
@@ -804,13 +824,13 @@ export default function Atlas3DTrackerEnhanced({
         const labelElements = labelElementsRef.current;
         labelElements.forEach((label, key) => {
           if (!showLabels) {
-            label.style.display = 'none';
+            label.style.display = "none";
             return;
           }
 
           const mesh = objects.get(key);
           if (!mesh) {
-            label.style.display = 'none';
+            label.style.display = "none";
             return;
           }
 
@@ -823,25 +843,36 @@ export default function Atlas3DTrackerEnhanced({
           const y =
             (labelVector.y * -0.5 + 0.5) * renderer.domElement.clientHeight;
 
-          label.style.display = 'block';
+          label.style.display = "block";
           label.style.transform = `translate(-50%, -120%) translate(${x}px, ${y}px)`;
         });
       }
 
       // Camera system with smooth tracking
       switch (cameraView) {
-        case 'followComet': {
+        case "followComet": {
           const atlasData = solarSystemData["atlas"];
           const currentIdx = Math.floor(localIndex);
           if (atlasData && currentIdx < atlasData.length) {
             const cometPos = atlasData[currentIdx].position;
-            const cometPosition3D = new THREE.Vector3(cometPos.x, cometPos.z, -cometPos.y);
-            const { distance: followDistance, height, smoothing } = followParamsRef.current;
-            const cameraOffset = new THREE.Vector3(1, 0, 0).normalize().multiplyScalar(followDistance);
+            const cometPosition3D = new THREE.Vector3(
+              cometPos.x,
+              cometPos.z,
+              -cometPos.y
+            );
+            const {
+              distance: followDistance,
+              height,
+              smoothing,
+            } = followParamsRef.current;
+            const cameraOffset = new THREE.Vector3(1, 0, 0)
+              .normalize()
+              .multiplyScalar(followDistance);
             cameraOffset.y += height;
             const idealPosition = cometPosition3D.clone().add(cameraOffset);
             const distance = camera.position.distanceTo(idealPosition);
-            const adaptiveSmoothing = distance > 1.0 ? smoothing * 3.0 : smoothing;
+            const adaptiveSmoothing =
+              distance > 1.0 ? smoothing * 3.0 : smoothing;
             if (distance > 0.01) {
               camera.position.lerp(idealPosition, adaptiveSmoothing);
             }
@@ -849,39 +880,66 @@ export default function Atlas3DTrackerEnhanced({
           }
           break;
         }
-        case 'topDown':
+        case "topDown":
           camera.position.set(0, 25, 0);
           camera.lookAt(0, 0, 0);
           camera.fov = 90;
           camera.updateProjectionMatrix();
           break;
-        case 'closeup': {
+        case "closeup": {
           const atlasData = solarSystemData["atlas"];
           const currentIdx = Math.floor(localIndex);
           if (atlasData && currentIdx < atlasData.length) {
             const cometPos = atlasData[currentIdx].position;
-            const cometPosition3D = new THREE.Vector3(cometPos.x, cometPos.z, -cometPos.y);
+            const cometPosition3D = new THREE.Vector3(
+              cometPos.x,
+              cometPos.z,
+              -cometPos.y
+            );
             const sunPosition = new THREE.Vector3(0, 0, 0);
-            const cometToSun = sunPosition.clone().sub(cometPosition3D).normalize();
+            const cometToSun = sunPosition
+              .clone()
+              .sub(cometPosition3D)
+              .normalize();
             const cameraDistance = 2.0;
-            const cameraPosition = cometPosition3D.clone().add(cometToSun.multiplyScalar(cameraDistance));
+            const cameraPosition = cometPosition3D
+              .clone()
+              .add(cometToSun.multiplyScalar(cameraDistance));
             camera.position.copy(cameraPosition);
             camera.lookAt(cometPosition3D);
           }
           break;
         }
-        case 'marsApproach': {
+        case "marsApproach": {
           const atlasData = solarSystemData["atlas"];
           const marsData = solarSystemData["mars"];
           const currentIdx = Math.floor(localIndex);
-          if (atlasData && marsData && currentIdx < atlasData.length && currentIdx < marsData.length) {
+          if (
+            atlasData &&
+            marsData &&
+            currentIdx < atlasData.length &&
+            currentIdx < marsData.length
+          ) {
             const cometPos = atlasData[currentIdx].position;
             const marsPos = marsData[currentIdx].position;
-            const cometPosition3D = new THREE.Vector3(cometPos.x, cometPos.z, -cometPos.y);
-            const marsPosition3D = new THREE.Vector3(marsPos.x, marsPos.z, -marsPos.y);
-            const cometToMars = marsPosition3D.clone().sub(cometPosition3D).normalize();
+            const cometPosition3D = new THREE.Vector3(
+              cometPos.x,
+              cometPos.z,
+              -cometPos.y
+            );
+            const marsPosition3D = new THREE.Vector3(
+              marsPos.x,
+              marsPos.z,
+              -marsPos.y
+            );
+            const cometToMars = marsPosition3D
+              .clone()
+              .sub(cometPosition3D)
+              .normalize();
             const cameraDistance = 3.0;
-            const cameraPosition = cometPosition3D.clone().add(cometToMars.multiplyScalar(cameraDistance));
+            const cameraPosition = cometPosition3D
+              .clone()
+              .add(cometToMars.multiplyScalar(cameraDistance));
             camera.position.copy(cameraPosition);
             camera.lookAt(cometPosition3D);
             const marsMesh = objects.get("mars");
@@ -889,7 +947,7 @@ export default function Atlas3DTrackerEnhanced({
           }
           break;
         }
-        case 'rideComet': {
+        case "rideComet": {
           const atlasData = solarSystemData["atlas"];
           const currentIdx = Math.floor(localIndex);
           if (atlasData && currentIdx < atlasData.length - 1) {
@@ -908,9 +966,15 @@ export default function Atlas3DTrackerEnhanced({
             const nextVec = atlasData[currentIdx + 1];
 
             cometPosition.copy(cometMesh.position);
-            nextPosition3D.set(nextVec.position.x, nextVec.position.z, -nextVec.position.y);
+            nextPosition3D.set(
+              nextVec.position.x,
+              nextVec.position.z,
+              -nextVec.position.y
+            );
 
-            travelDirection.subVectors(nextPosition3D, cometPosition).normalize();
+            travelDirection
+              .subVectors(nextPosition3D, cometPosition)
+              .normalize();
 
             cameraOffset.copy(travelDirection).multiplyScalar(-0.1);
             cameraOffset.y += 0.05;
@@ -918,13 +982,15 @@ export default function Atlas3DTrackerEnhanced({
             cameraPosition.copy(cometPosition).add(cameraOffset);
             camera.position.copy(cameraPosition);
 
-            lookAtPosition.copy(cometPosition).add(travelDirection.multiplyScalar(10));
+            lookAtPosition
+              .copy(cometPosition)
+              .add(travelDirection.multiplyScalar(10));
             camera.lookAt(lookAtPosition);
             if (isE2E) camera.updateMatrixWorld(true);
           }
           break;
         }
-        case 'default':
+        case "default":
         default:
           camera.position.set(8, 5, 8);
           camera.lookAt(0, 0, 0);
@@ -934,7 +1000,7 @@ export default function Atlas3DTrackerEnhanced({
       }
 
       // Reset Mars scale if not in Mars Approach view
-      if (cameraView !== 'marsApproach') {
+      if (cameraView !== "marsApproach") {
         const marsMesh = objects.get("mars");
         if (marsMesh) marsMesh.scale.setScalar(1.0);
       }
@@ -945,7 +1011,7 @@ export default function Atlas3DTrackerEnhanced({
       }
 
       renderer.render(scene, camera);
-    }
+    };
 
     animate();
 
@@ -964,32 +1030,30 @@ export default function Atlas3DTrackerEnhanced({
   let distanceFromEarth = 0;
   let distanceFromSun = 0;
   let cometSpeed = 0;
-  
+
   if (atlasData[currentIndex] && earthData[currentIndex]) {
     const atlasPos = atlasData[currentIndex].position;
     const earthPos = earthData[currentIndex].position;
-    
+
     // Distance from Earth (in AU)
     distanceFromEarth = Math.sqrt(
       Math.pow(atlasPos.x - earthPos.x, 2) +
-      Math.pow(atlasPos.y - earthPos.y, 2) +
-      Math.pow(atlasPos.z - earthPos.z, 2)
+        Math.pow(atlasPos.y - earthPos.y, 2) +
+        Math.pow(atlasPos.z - earthPos.z, 2)
     );
-    
+
     // Distance from Sun (in AU)
     distanceFromSun = Math.sqrt(
       Math.pow(atlasPos.x, 2) +
-      Math.pow(atlasPos.y, 2) +
-      Math.pow(atlasPos.z, 2)
+        Math.pow(atlasPos.y, 2) +
+        Math.pow(atlasPos.z, 2)
     );
-    
+
     // Speed (from velocity vector in AU/day) - ADD NULL CHECK
     const vel = atlasData[currentIndex]?.velocity;
     if (vel) {
       cometSpeed = Math.sqrt(
-        Math.pow(vel.vx, 2) +
-        Math.pow(vel.vy, 2) +
-        Math.pow(vel.vz, 2)
+        Math.pow(vel.vx, 2) + Math.pow(vel.vy, 2) + Math.pow(vel.vz, 2)
       );
     }
   }
@@ -1055,7 +1119,7 @@ export default function Atlas3DTrackerEnhanced({
               {currentDate.split("T")[1]?.substring(0, 8)} UTC • 3I/ATLAS
               Perihelion Approach
             </div>
-            
+
             {/* NEW: Enhanced data overlay */}
             <div className="grid grid-cols-3 gap-4 mt-3 text-xs">
               <div className="bg-black/50 rounded-lg p-2">
@@ -1156,7 +1220,9 @@ export default function Atlas3DTrackerEnhanced({
             </div>
 
             <div className="flex items-center gap-2 text-white/70 text-sm">
-              <span title="Switch between different camera perspectives">Camera View:</span>
+              <span title="Switch between different camera perspectives">
+                Camera View:
+              </span>
               <select
                 value={cameraView}
                 onChange={(e) => {
@@ -1172,14 +1238,16 @@ export default function Atlas3DTrackerEnhanced({
                 <option value="topDown">Top-Down View</option>
                 <option value="closeup">Perihelion Closeup</option>
                 <option value="marsApproach">Mars Approach</option>
-              <option value="rideComet">Ride the Comet</option>
+                <option value="rideComet">Ride the Comet</option>
               </select>
             </div>
 
             {cameraView === "followComet" && (
               <>
                 <div className="flex items-center gap-2 text-white/70 text-sm">
-                  <span title="How far the camera stays from the comet">Distance:</span>
+                  <span title="How far the camera stays from the comet">
+                    Distance:
+                  </span>
                   <input
                     type="range"
                     min="1"
@@ -1197,7 +1265,9 @@ export default function Atlas3DTrackerEnhanced({
                 </div>
 
                 <div className="flex items-center gap-2 text-white/70 text-sm">
-                  <span title="How high the camera is positioned above the comet's orbital plane">Height:</span>
+                  <span title="How high the camera is positioned above the comet's orbital plane">
+                    Height:
+                  </span>
                   <input
                     type="range"
                     min="0"
@@ -1215,7 +1285,9 @@ export default function Atlas3DTrackerEnhanced({
                 </div>
 
                 <div className="flex items-center gap-2 text-white/70 text-sm">
-                  <span title="How quickly the camera follows the comet's movement (lower is smoother)">Smooth:</span>
+                  <span title="How quickly the camera follows the comet's movement (lower is smoother)">
+                    Smooth:
+                  </span>
                   <input
                     type="range"
                     min="0.01"
