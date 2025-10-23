@@ -1012,6 +1012,7 @@ Chose iframe over direct R3F integration because:
 ## Update: January 23, 2025, 3:30 AM PST - CRITICAL ISSUES RESOLVED
 
 ### Files Changed
+
 - `/src/hooks/usePlanetTextures.ts` - Switched to Suspense-aware useTexture
 - `/src/components/SceneContent.tsx` - Fixed mouse mapping and user interaction detection
 - `/src/components/Atlas3DTrackerEnhanced.tsx` - Updated help text and made non-interactive
@@ -1019,7 +1020,9 @@ Chose iframe over direct R3F integration because:
 - `/src/components/Comet3D.tsx` - Added inner glow and distance-reactive emissive
 
 ### Status
+
 ✅ **Working**: All critical functionality restored
+
 - Textures load immediately on first paint (Suspense-aware)
 - Camera controls work properly (LEFT=ROTATE, RIGHT=PAN)
 - Ride-along camera respects user interaction
@@ -1030,6 +1033,7 @@ Chose iframe over direct R3F integration because:
 ❌ **Broken**: None - all reported issues resolved
 
 ### Learned
+
 - **Suspense-aware texture loading**: `useTexture` from drei ensures immediate loading
 - **User interaction detection**: OrbitControls `start/end` events prevent camera fighting
 - **Timeline scrubbing**: Pausing animation loop prevents conflicts
@@ -1049,3 +1053,10 @@ Chose iframe over direct R3F integration because:
 ---
 
 **This file is the ONLY source of truth. ByteRover MCP is NOT reliable for this project.**
+
+## Update: October 22, 2025, 4:30 PM PDT - Tracker layout reorganized
+
+- Realigned Atlas tracker UI to match four-panel grid: mission timeline and camera control info rows render as centered headers followed by two 4-column content bands (Discovery/Perihelion, Mars Flyby/Jupiter Approach with camera instructions).
+- Restored primary canvas prominence with rounded border, embedded telemetry overlay at top-left using live data with compact styling.
+- Rebuilt playback row: slider sits directly beneath the canvas with explicit July 1, 2025 → March 31, 2026 range, progress percent display, and centered control buttons (Reset, Play/Pause, Speed, View).
+- Dropped old floating timeline/telemetry cards to prevent overlap; playback controls now remain visible instead of hiding behind the canvas.
