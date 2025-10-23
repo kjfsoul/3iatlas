@@ -29,7 +29,7 @@ export default async function Page() {
         <div className="h-[850px] rounded-xl relative overflow-hidden">
           <Atlas3DTrackerWrapper
             autoPlay={true}
-            initialSpeed={2}
+            initialSpeed={10}
             initialViewMode="explorer"
           />
         </div>
