@@ -4,9 +4,9 @@
  * Creates a comprehensive, accurate visualization of the solar system
  */
 
-import { generate3IAtlasVectors } from './atlas-orbital-data';
-import { getCached3IAtlasVectors } from './horizons-cache';
+import { generate3IAtlasVectors } from "./atlas-orbital-data";
 import { type VectorData, parseVectorData } from './horizons-api';
+import { getCached3IAtlasVectors } from "./horizons-cache";
 
 // ============================================================================
 // SOLAR SYSTEM OBJECTS (NASA Horizons COMMAND codes)
@@ -14,26 +14,26 @@ import { type VectorData, parseVectorData } from './horizons-api';
 
 export const SOLAR_SYSTEM_OBJECTS = {
   // Inner Planets
-  mercury: { command: '199', name: 'Mercury', color: 0x8c7853, size: 0.025 },
-  venus: { command: '299', name: 'Venus', color: 0xffc649, size: 0.038 },
-  earth: { command: '399', name: 'Earth', color: 0x2266ff, size: 0.04 },
-  mars: { command: '499', name: 'Mars', color: 0xff6644, size: 0.034 },
-  
+  mercury: { command: "199", name: "Mercury", color: 0x8c7853, size: 0.025 },
+  venus: { command: "299", name: "Venus", color: 0xffc649, size: 0.038 },
+  earth: { command: "399", name: "Earth", color: 0x2266ff, size: 0.04 },
+  mars: { command: "499", name: "Mars", color: 0xff6644, size: 0.034 },
+
   // Outer Planets
-  jupiter: { command: '599', name: 'Jupiter', color: 0xd4a574, size: 0.12 },
-  saturn: { command: '699', name: 'Saturn', color: 0xfad5a5, size: 0.10 },
-  uranus: { command: '799', name: 'Uranus', color: 0x4fd0e7, size: 0.07 },
-  neptune: { command: '899', name: 'Neptune', color: 0x4166f5, size: 0.07 },
-  
+  jupiter: { command: "599", name: "Jupiter", color: 0xd4a574, size: 0.12 },
+  saturn: { command: "699", name: "Saturn", color: 0xfad5a5, size: 0.1 },
+  uranus: { command: "799", name: "Uranus", color: 0x4fd0e7, size: 0.07 },
+  neptune: { command: "899", name: "Neptune", color: 0x4166f5, size: 0.07 },
+
   // Dwarf Planets
-  pluto: { command: '999', name: 'Pluto', color: 0xccaa88, size: 0.02 },
-  
+  pluto: { command: "999", name: "Pluto", color: 0xccaa88, size: 0.02 },
+
   // Spacecraft (famous missions)
-  voyager1: { command: '-31', name: 'Voyager 1', color: 0xffff00, size: 0.03 },
-  voyager2: { command: '-32', name: 'Voyager 2', color: 0xffff00, size: 0.03 },
-  
+  voyager1: { command: "-31", name: "Voyager 1", color: 0xffff00, size: 0.03 },
+  voyager2: { command: "-32", name: "Voyager 2", color: 0xffff00, size: 0.03 },
+
   // 3I/ATLAS
-  atlas: { command: '1004083', name: '3I/ATLAS', color: 0x00ff88, size: 0.06 },
+  atlas: { command: "1004083", name: "3I/ATLAS", color: 0x00ff88, size: 0.06 },
 };
 
 export type SolarSystemObjectKey = keyof typeof SOLAR_SYSTEM_OBJECTS;
@@ -41,6 +41,24 @@ export type SolarSystemObjectKey = keyof typeof SOLAR_SYSTEM_OBJECTS;
 // ============================================================================
 // FETCH MULTIPLE OBJECTS FROM HORIZONS
 // ============================================================================
+
+// Time interpolation engine (from comprehensive prompt)
+const interpolatePosition = (dataArray: any[], timestamp: number) => {
+  // Find lower and upper indices
+  const index = Math.floor(timestamp);
+  const t = timestamp - index;  // Fraction 0-1
+  
+  if (index >= dataArray.length - 1) return dataArray[dataArray.length - 1].position_au;
+  
+  const p0 = dataArray[index].position_au;
+  const p1 = dataArray[index + 1].position_au;
+  
+  return {
+    x: p0.x + (p1.x - p0.x) * t,
+    y: p0.y + (p1.y - p0.y) * t,
+    z: p0.z + (p1.z - p0.z) * t
+  };
+}
 
 /**
  * Fetch position data for multiple objects at once
@@ -53,17 +71,19 @@ export async function fetchSolarSystemData(
   stepSize: string = "6h"
 ): Promise<Record<string, VectorData[]>> {
   const results: Record<string, VectorData[]> = {};
-  
+
   try {
     // Load from local NASA Horizons data file
-    const response = await fetch('/data/SOLAR_SYSTEM_POSITIONS.json');
+    const response = await fetch("/data/SOLAR_SYSTEM_POSITIONS.json");
     if (!response.ok) {
       throw new Error(`Failed to load local data: ${response.status}`);
     }
-    
+
     const localData = await response.json();
-    console.log(`[Solar System] ✅ Loaded ${localData.length} data points from local NASA Horizons file`);
-    
+    console.log(
+      `[Solar System] ✅ Loaded ${localData.length} data points from local NASA Horizons file`
+    );
+
     // Parse data by object
     const dataByObject: Record<string, any[]> = {};
     localData.forEach((entry: any) => {
@@ -73,20 +93,20 @@ export async function fetchSolarSystemData(
       }
       dataByObject[objectName].push(entry);
     });
-    
-    // Map NASA object names to our keys
+
+    // Map NASA object names to our keys (from comprehensive prompt)
     const objectMapping: Record<string, string> = {
-      'ATLAS (C/2025 N1)': 'atlas',
-      'Mercury (199)': 'mercury',
-      'Venus (299)': 'venus',
-      'Earth (399)': 'earth',
-      'Mars (499)': 'mars',
-      'Jupiter (599)': 'jupiter',
-      'Saturn (699)': 'saturn',
-      'Uranus (799)': 'uranus',
-      'Neptune (899)': 'neptune'
+      "ATLAS (C/2025 N1)": "atlas",
+      "Mercury": "mercury",
+      "Venus": "venus", 
+      "Earth": "earth",
+      "Mars": "mars",
+      "Jupiter": "jupiter",
+      "Saturn": "saturn",
+      "Uranus": "uranus",
+      "Neptune": "neptune"
     };
-    
+
     // Convert to VectorData format
     Object.entries(dataByObject).forEach(([nasaName, entries]) => {
       const ourKey = objectMapping[nasaName];
@@ -96,20 +116,21 @@ export async function fetchSolarSystemData(
           position: {
             x: entry.position_au.x,
             y: entry.position_au.y,
-            z: entry.position_au.z
+            z: entry.position_au.z,
           },
           velocity: {
             vx: entry.velocity_au_per_day.vx,
             vy: entry.velocity_au_per_day.vy,
-            vz: entry.velocity_au_per_day.vz
-          }
+            vz: entry.velocity_au_per_day.vz,
+          },
         }));
-        console.log(`[Solar System] ✅ Loaded ${results[ourKey].length} positions for ${ourKey}`);
+        console.log(
+          `[Solar System] ✅ Loaded ${results[ourKey].length} positions for ${ourKey}`
+        );
       }
     });
-    
   } catch (error) {
-    console.error('[Solar System] ❌ Failed to load local data:', error);
+    console.error("[Solar System] ❌ Failed to load local data:", error);
     // Fallback to original API method if local data fails
     const stepHours = normalizeStepHours(stepSize);
     await Promise.all(
