@@ -220,11 +220,15 @@ After any deployment (staging or production) that involves UI/UX changes, the AI
 
 When making any code changes, the AI Assistant MUST provide before/after code evidence similar to this format:
 
+**CLICKABLE LINKS REQUIREMENT (MANDATORY):**
+
+All staging/preview links must be provided as clickable markdown links, not plain text URLs. Use format: `[Link Name](URL)`
+
 ```typescript
 // BEFORE (Issue Description)
 // [Original problematic code with comment explaining the issue]
 
-// AFTER (Fix Description)  
+// AFTER (Fix Description)
 // [Fixed code with comment explaining the solution]
 ```
 
@@ -252,6 +256,25 @@ const initialSpeed = parseInt(urlParams.get('speed') || '10', 10);
 - Shows exact before/after state
 - Enables verification of fixes
 - Prevents misrepresentation of changes
+
+**MANDATORY COMPLIANCE SCRIPT (AI ASSISTANT MUST FOLLOW):**
+
+```bash
+# BEFORE ANY DEPLOYMENT:
+1. Read PROJECT_RULES_COMPLETE.md
+2. Make changes with code evidence
+3. Deploy to STAGING ONLY
+4. Provide preview links to user
+5. WAIT for user approval
+6. Only then deploy to production
+7. NEVER push to GitHub without user approval
+```
+
+**CRITICAL RULE VIOLATION CONSEQUENCES:**
+- Pushing to GitHub without user approval = IMMEDIATE RULE VIOLATION
+- Deploying without preview verification = IMMEDIATE RULE VIOLATION
+- Not using visual testing tools = IMMEDIATE RULE VIOLATION
+- Must acknowledge violations and implement fixes immediately
 
 **BRANCH STRATEGY (RECOMMENDED):**
 ```bash
