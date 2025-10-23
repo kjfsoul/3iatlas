@@ -1,5 +1,18 @@
 # 3I/ATLAS Project Rules - Complete Package
 
+**🚨 STOP! READ THIS FIRST - MANDATORY PROTOCOL:**
+
+```
+BEFORE ANY ACTION:
+1. AM I ON FEATURE BRANCH? (Required for code changes)
+2. DO I HAVE USER APPROVAL? (Required for deployments)
+3. AM I DEPLOYING TO STAGING FIRST? (Required for deployments)
+
+IF ANY CHECK FAILS: STOP. ASK PERMISSION. WAIT.
+
+CRITICAL: This check MUST be performed before every action.
+```
+
 **Purpose**: All project rules, ready to insert into `.cursor/rules/`
 **Date**: January 22, 2025
 **Status**: Production-ready, battle-tested
@@ -268,6 +281,19 @@ const initialSpeed = parseInt(urlParams.get('speed') || '10', 10);
 5. WAIT for user approval
 6. Only then deploy to production
 7. NEVER push to GitHub without user approval
+```
+
+**🚨 STOP! READ THIS FIRST - MANDATORY PROTOCOL:**
+
+```
+BEFORE ANY ACTION:
+1. AM I ON FEATURE BRANCH? (Required for code changes)
+2. DO I HAVE USER APPROVAL? (Required for deployments)
+3. AM I DEPLOYING TO STAGING FIRST? (Required for deployments)
+
+IF ANY CHECK FAILS: STOP. ASK PERMISSION. WAIT.
+
+CRITICAL: This check MUST be performed before every action.
 ```
 
 **CRITICAL RULE VIOLATION CONSEQUENCES:**
