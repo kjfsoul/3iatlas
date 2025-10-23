@@ -39,11 +39,11 @@ export default function Atlas3DTrackerIframe({
     window.addEventListener('resize', checkMobile);
 
     const checkServer = async () => {
-      // Skip server check on mobile
-      if (isMobile) {
-        setIsLoading(false);
-        return;
-      }
+      // Allow mobile devices to access tracker
+      // if (isMobile) {
+      //   setIsLoading(false);
+      //   return;
+      // }
 
       // If in production and tracker is localhost or empty, show error immediately
       if (isProduction && (isLocalhostTracker || !TRACKER_URL || TRACKER_URL === '')) {
@@ -69,24 +69,24 @@ export default function Atlas3DTrackerIframe({
     };
   }, [TRACKER_URL, isMobile, isProduction, isLocalhostTracker]);
 
-  // Mobile-friendly placeholder
-  if (isMobile) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-900 to-black rounded-xl border border-blue-500/30 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/images/3iAtlas_Logo.png')] bg-center bg-no-repeat bg-contain opacity-10" />
-        <div className="text-center text-white px-6 z-10">
-          <div className="text-5xl mb-4">🌌</div>
-          <h3 className="text-lg sm:text-xl font-bold mb-2 text-blue-400">Interactive 3D Tracker</h3>
-          <p className="text-sm text-gray-300 mb-4 max-w-md">
-            The full 3D orbital tracker with interactive controls is available on desktop devices.
-          </p>
-          <div className="text-xs text-white/60">
-            View on a larger screen for the complete experience
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Mobile-friendly placeholder - DISABLED to allow mobile access
+  // if (isMobile) {
+  //   return (
+  //     <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-900 to-black rounded-xl border border-blue-500/30 relative overflow-hidden">
+  //       <div className="absolute inset-0 bg-[url('/images/3iAtlas_Logo.png')] bg-center bg-no-repeat bg-contain opacity-10" />
+  //       <div className="text-center text-white px-6 z-10">
+  //         <div className="text-5xl mb-4">🌌</div>
+  //         <h3 className="text-lg sm:text-xl font-bold mb-2 text-blue-400">Interactive 3D Tracker</h3>
+  //         <p className="text-sm text-gray-300 mb-4 max-w-md">
+  //           The full 3D orbital tracker with interactive controls is available on desktop devices.
+  //         </p>
+  //         <div className="text-xs text-white/60">
+  //           View on a larger screen for the complete experience
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     const isComingSoon = error.includes('Coming soon');
