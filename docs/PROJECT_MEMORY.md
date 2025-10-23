@@ -1,6 +1,6 @@
 # 3I/Atlas Project Memory & Quick Reference
 
-**Last Updated:** January 23, 2025, 1:00 AM PST
+**Last Updated:** January 23, 2025, 1:54 AM PST
 **Status:** ✅ PRODUCTION READY - All Features Working
 
 ---
@@ -1053,6 +1053,38 @@ Chose iframe over direct R3F integration because:
 ---
 
 **This file is the ONLY source of truth. ByteRover MCP is NOT reliable for this project.**
+
+## Update: January 23, 2025, 1:54 AM PST - Printify Cache Warning Fixed
+
+### Files Changed (Cache Fix)
+
+- **lib/printify.ts**: Modified auth() function to disable caching for large Printify responses
+
+### Status
+
+✅ **Printify Cache Warning Resolved:**
+
+- Fixed "Failed to set fetch cache" warning for Printify API responses >2MB
+- Modified `auth()` function to accept `disableCache` parameter
+- Set `revalidate: 0` for `getLatestPublishedProducts()` to prevent Next.js caching
+- Eliminated cache warning without affecting product loading functionality
+- All Printify products continue to load correctly across all 4 brands
+
+### Technical Implementation
+
+- **Cache Control**: `next: disableCache ? { revalidate: 0 } : { revalidate: 60 }`
+- **Large Response Handling**: Disabled caching specifically for products API endpoint
+- **Performance Impact**: Minimal - products still load quickly without cache
+- **Error Resolution**: Eliminated 2,499,191 byte cache limit warning
+
+### Issue Resolved
+
+- **Problem**: Next.js cache warning for Printify responses over 2MB limit
+- **Root Cause**: `next: { revalidate: 60 }` trying to cache large product responses
+- **Solution**: Conditional cache disabling for large API responses
+- **Result**: Clean console output, products load normally
+
+---
 
 ## Update: October 22, 2025, 4:30 PM PDT - Tracker layout reorganized
 
