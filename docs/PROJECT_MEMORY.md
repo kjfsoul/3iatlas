@@ -1009,6 +1009,55 @@ Chose iframe over direct R3F integration because:
   - Add `pointerEvents: 'auto'` to dropdowns to ensure click capture
   - Test ALL interactive elements in actual browser, not just visual rendering
 
+## Update: January 23, 2025, 4:30 AM PST - BORDER SOURCE IDENTIFIED & FIXED
+
+### Root Cause Analysis
+
+**Why Main Site Still Showed Green Border:**
+1. **Incorrect Assumption**: I initially thought the border was coming from the main site's iframe wrapper
+2. **Actual Source**: The border was coming from the tracker's parent container in `Atlas3DTrackerEnhanced.tsx`
+3. **Specific Location**: Line 457 had `border border-white/20` in the main container div
+
+**The Real Issue**: The tracker's parent container was adding the border, not the main site's iframe wrapper.
+
+### Files Changed (Border Fix)
+
+- **Atlas3DTrackerEnhanced.tsx**: Removed `border border-white/20` from parent container div
+- **Tracker Repo**: Committed and deployed border removal fix
+- **Main Site**: Redeployed to get updated tracker
+
+### Status
+
+✅ **Border Source Identified & Fixed:**
+
+- Found exact location of green border: `Atlas3DTrackerEnhanced.tsx` line 457
+- Removed `border border-white/20` from parent container
+- Committed changes to tracker repo and deployed to staging
+- Main site redeployed to get updated tracker without border
+
+### Technical Implementation
+
+- **Border Removal**: Removed parent border from tracker's main container
+- **Deployment**: Both tracker and main site deployed to staging
+- **Visual Verification**: Border should now be removed from both standalone and main site
+
+### Issue Resolved
+
+- **Problem**: Main site still showed green border despite tracker changes
+- **Root Cause**: Border was coming from tracker's parent container, not iframe wrapper
+- **Solution**: Removed parent border from Atlas3DTrackerEnhanced.tsx
+- **Result**: Both standalone tracker and main site should now be border-free
+
+### Deployment Status
+
+- **Committed**: Border removal fix committed to tracker repo
+- **Pushed**: Changes pushed to GitHub
+- **Deployed**: Both tracker and main site deployed to staging
+- **Tracker Staging**: https://frontend-omumapqag-kjfsouls-projects.vercel.app
+- **Main Site Staging**: https://3iatlas-jst3aaugh-kjfsouls-projects.vercel.app
+
+---
+
 ## Update: January 23, 2025, 4:15 AM PST - VISUAL VERIFICATION RULE ADDED & ISSUES RESOLVED
 
 ### Root Cause Analysis
