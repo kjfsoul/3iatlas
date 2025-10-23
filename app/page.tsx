@@ -26,7 +26,7 @@ export default async function Page() {
             Explore Brands
           </a>
         </div>
-        <div className="h-[800px] rounded-xl relative overflow-hidden">
+        <div className="h-[600px] rounded-xl relative overflow-hidden">
           <Atlas3DTrackerWrapper
             autoPlay={true}
             initialSpeed={10}

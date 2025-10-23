@@ -216,6 +216,43 @@ After any deployment (staging or production) that involves UI/UX changes, the AI
 - Fabricating results or misrepresenting UI state = RULE VIOLATION
 - Must acknowledge violations and implement fixes immediately
 
+**CODE EVIDENCE REQUIREMENT (MANDATORY):**
+
+When making any code changes, the AI Assistant MUST provide before/after code evidence similar to this format:
+
+```typescript
+// BEFORE (Issue Description)
+// [Original problematic code with comment explaining the issue]
+
+// AFTER (Fix Description)  
+// [Fixed code with comment explaining the solution]
+```
+
+**Examples:**
+```typescript
+// BEFORE (Hardcoded Speed)
+<Atlas3DTrackerEnhanced
+  autoPlay={true}
+  initialSpeed={2}  // ❌ Hardcoded to 2x
+  initialViewMode="ride-atlas"
+/>
+
+// AFTER (URL Parameter Reading)
+const urlParams = new URLSearchParams(window.location.search);
+const initialSpeed = parseInt(urlParams.get('speed') || '10', 10);
+<Atlas3DTrackerEnhanced
+  autoPlay={autoPlay}
+  initialSpeed={initialSpeed}  // ✅ Reads from URL parameters
+  initialViewMode={initialViewMode}
+/>
+```
+
+**Purpose:**
+- Provides clear evidence of what was changed
+- Shows exact before/after state
+- Enables verification of fixes
+- Prevents misrepresentation of changes
+
 **BRANCH STRATEGY (RECOMMENDED):**
 ```bash
 # For major changes, use feature branches
