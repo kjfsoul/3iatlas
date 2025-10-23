@@ -30,7 +30,7 @@ export default async function Page() {
           <Atlas3DTrackerWrapper
             autoPlay={true}
             initialSpeed={10}
-            initialViewMode="explorer"
+            initialViewMode="ride-atlas"
           />
         </div>
       </section>
