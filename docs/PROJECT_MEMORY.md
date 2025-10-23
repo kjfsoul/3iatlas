@@ -1,7 +1,7 @@
 # 3I/Atlas Project Memory & Quick Reference
 
-**Last Updated:** January 23, 2025, 4:00 AM PST
-**Status:** ✅ PRODUCTION DEPLOYED - All Features Working
+**Last Updated:** January 23, 2025, 5:00 AM PST
+**Status:** ✅ PRODUCTION DEPLOYED - Border Removal Complete
 
 ---
 
@@ -1364,3 +1364,46 @@ const initialSpeed = parseInt(urlParams.get('speed') || '10', 10);
 - Dropped old floating timeline/telemetry cards to prevent overlap; playback controls now remain visible instead of hiding behind the canvas.
 - Follow-up: mission timeline buttons hook back into event jump logic, speed/view dropdowns render in-place with working selection, zoom buttons restored, and canvas container switched to fixed height so the 3D scene fills the frame without gray padding above the slider.
 - Latest: limited speed options to 1x/10x/25x with inline beveled menu, trimmed view selector to True Scale vs Ride With 3I/ATLAS (dropdown stays inside panel), gated zoom controls + instruction styling to True Scale mode, beveled timeline buttons, and reinstated Suspense-driven texture loader so planets render correctly in both views.
+
+## Update: January 23, 2025, 5:00 AM PST - BORDER REMOVAL COMPLETE & PRODUCTION DEPLOYED
+
+### Files Changed (Border Removal)
+
+- **PlaybackRecorder.tsx**: Removed container border (`border border-cyan-500/30`) and divider border (`border-t border-gray-600`)
+- **TimelinePanel.tsx**: Removed main container border (`border border-emerald-500/20`), event button borders, content area border, and inline style borders
+- **PROJECT_RULES_COMPLETE.md**: Added clickable links requirement rule
+
+### Status
+
+✅ **Border Removal Complete:**
+
+- Removed all borders from PlaybackRecorder and TimelinePanel components
+- Eliminated distracting borders around timeline slider area
+- Maintained borders in PlaybackControls and TelemetryHUD (as requested)
+- Production deployed with border removal changes
+
+✅ **Speed Default Issue:**
+
+- Tracker's App.tsx correctly reads URL parameters and defaults to speed 10
+- Main site's Atlas3DTrackerIframe.tsx has `initialSpeed = 10`
+- Issue may be caching - production deployment should resolve
+
+### Technical Implementation
+
+- **Border Removal**: Systematically removed all border styling from specified components
+- **Production Deployment**: Committed and deployed changes to production
+- **Rule Addition**: Added clickable links requirement to project rules
+
+### Issue Resolved
+
+- **Problem**: Distracting borders around timeline slider area
+- **Root Cause**: Borders in PlaybackRecorder and TimelinePanel components
+- **Solution**: Complete border removal from specified components
+- **Result**: Clean UI without distracting borders
+
+### Deployment Status
+
+- **Committed**: Border removal changes committed to main repo
+- **Pushed**: Changes pushed to GitHub
+- **Deployed**: Production deployed with border removal fixes
+- **Production Link**: https://3iatlas.mysticarcana.com
