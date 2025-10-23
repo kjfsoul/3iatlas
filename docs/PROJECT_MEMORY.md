@@ -1092,3 +1092,4 @@ Chose iframe over direct R3F integration because:
 - Restored primary canvas prominence with rounded border, embedded telemetry overlay at top-left using live data with compact styling.
 - Rebuilt playback row: slider sits directly beneath the canvas with explicit July 1, 2025 → March 31, 2026 range, progress percent display, and centered control buttons (Reset, Play/Pause, Speed, View).
 - Dropped old floating timeline/telemetry cards to prevent overlap; playback controls now remain visible instead of hiding behind the canvas.
+- Follow-up: mission timeline buttons hook back into event jump logic, speed/view dropdowns render in-place with working selection, zoom buttons restored, and canvas container switched to fixed height so the 3D scene fills the frame without gray padding above the slider.
