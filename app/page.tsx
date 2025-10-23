@@ -16,8 +16,8 @@ export default async function Page() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 text-white">
       {/* HERO */}
-      <section className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-black/20 p-6">
-        <div className="flex items-center justify-between">
+      <section className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-black/20 p-4">
+        <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold">3I/ATLAS FLIGHTPATH</h1>
           <a
             className="rounded-md bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/20"
@@ -26,7 +26,7 @@ export default async function Page() {
             Explore Brands
           </a>
         </div>
-        <div className="mt-6 h-[700px] rounded-xl relative">
+        <div className="h-[750px] rounded-xl relative">
           <Atlas3DTrackerWrapper
             autoPlay={true}
             initialSpeed={2}

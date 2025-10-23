@@ -124,7 +124,13 @@ export default function Atlas3DTrackerIframe({
         src={iframeUrl}
         className="w-full h-full border-0"
         title="3I/ATLAS Orbital Tracker"
-        style={{ width: '100%', height: '100%', border: 'none', borderRadius: 'inherit' }}
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          border: 'none', 
+          borderRadius: 'inherit',
+          backgroundColor: 'black'
+        }}
         allow="accelerometer; gyroscope"
         loading="lazy"
       />
