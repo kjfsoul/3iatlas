@@ -10,7 +10,7 @@ interface Atlas3DTrackerIframeProps {
 
 export default function Atlas3DTrackerIframe({
   autoPlay = true,
-  initialSpeed = 2,
+  initialSpeed = 10,
   initialViewMode = 'explorer',
 }: Atlas3DTrackerIframeProps) {
   const [isLoading, setIsLoading] = useState(true);

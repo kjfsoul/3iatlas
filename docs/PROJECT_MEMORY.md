@@ -1,6 +1,6 @@
 # 3I/Atlas Project Memory & Quick Reference
 
-**Last Updated:** January 23, 2025, 3:45 AM PST
+**Last Updated:** January 23, 2025, 4:00 AM PST
 **Status:** ✅ PRODUCTION DEPLOYED - All Features Working
 
 ---
@@ -1008,6 +1008,53 @@ Chose iframe over direct R3F integration because:
   - Always use high z-index values (1000+) for UI controls
   - Add `pointerEvents: 'auto'` to dropdowns to ensure click capture
   - Test ALL interactive elements in actual browser, not just visual rendering
+
+## Update: January 23, 2025, 4:00 AM PST - BORDERS REMOVED & DEFAULT SPEED FIXED
+
+### Files Changed (Layout & Speed Fixes)
+
+- **PlaybackControls.tsx**: Removed white borders and lifted controls for seamless canvas integration
+- **Atlas3DTrackerIframe.tsx**: Fixed default speed from 2x to 10x
+
+### Status
+
+✅ **Borders Removed & Controls Lifted:**
+
+- Removed `border border-emerald-400/20` from non-floating container
+- Removed `border: '1px solid rgba(0, 255, 136, 0.3)'` from floating style
+- Eliminates white borders that made controls look off-canvas
+- Reduced padding from `py-3 sm:py-4` to `py-1 sm:py-2` (50% reduction)
+- Changed margin from `mb-0` to `-mb-2` (negative margin pulls controls up)
+- Controls now appear seamlessly integrated with canvas
+
+✅ **Default Speed Fixed:**
+
+- Changed `initialSpeed = 2` to `initialSpeed = 10` in Atlas3DTrackerIframe.tsx
+- Tracker now defaults to 10x speed as requested
+- Consistent with other components already set to 10x
+
+### Technical Implementation
+
+- **Border Removal**: Eliminated all border styling from container classes and inline styles
+- **Controls Lifting**: Used negative margin (-mb-2) and reduced padding to pull controls up
+- **Speed Default**: Updated iframe component default from 2x to 10x
+- **Seamless Integration**: Controls now appear part of canvas, not floating
+
+### Issue Resolved
+
+- **Problem**: White borders made controls look "off-canvas" and disconnected
+- **Root Cause**: Border styling in container classes and inline styles
+- **Solution**: Complete border removal + controls lifting for seamless integration
+- **Result**: Controls now seamlessly integrated with canvas
+
+### Deployment Status
+
+- **Committed**: All fixes committed to both repos
+- **Pushed**: Changes pushed to GitHub
+- **Deployed**: Main site deployed to staging
+- **Staging Link**: https://3iatlas-czqy73wpy-kjfsouls-projects.vercel.app
+
+---
 
 ## Update: January 23, 2025, 3:30 AM PST - CRITICAL ISSUES RESOLVED
 
