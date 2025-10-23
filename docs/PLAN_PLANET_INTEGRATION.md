@@ -188,3 +188,161 @@ Acceptance Criteria:
 ## Timeline: 9-13 hours total
 ## Branch: `feature/comet-evolution-stages`
 ## Risk Level: Low-Medium (phased approach with performance monitoring)
+
+---
+
+# Mobile Optimization Plan — Post Planet Integration & Comet Evolution
+
+## Context (Current Status)
+- ✅ **Mobile Access Fixed**: Tracker now loads and runs smoothly on mobile devices
+- ✅ **Functionality Verified**: All controls work (play/pause, speed, view modes)
+- ✅ **Performance Confirmed**: Smooth 60 FPS on mobile devices
+- ⚠️ **Layout Issue**: Requires landscape mode and scrolling (extends beyond viewport)
+
+## Mobile Optimization Strategy (Options 2 & 3)
+
+### Option 2: Mobile-Specific Page (Recommended)
+**Goal**: Create dedicated mobile experience with optimized layout
+
+#### Phase 1: Mobile Route Setup (2-3 hours)
+**Files to Create/Modify**:
+1) `app/mobile-tracker/page.tsx` - Dedicated mobile route
+2) `components/MobileTrackerLayout.tsx` - Mobile-optimized layout component
+3) `components/MobileControls.tsx` - Touch-friendly control interface
+4) `middleware.ts` - Mobile detection and routing
+
+**Acceptance Criteria**:
+- `/mobile-tracker` route accessible on mobile devices
+- Automatic redirect from main tracker on mobile
+- Mobile-specific layout loads without errors
+
+#### Phase 2: Mobile UI Optimization (3-4 hours)
+**Components to Build**:
+1) **Compact Telemetry Panel**: 
+   - Collapsible telemetry with essential data only
+   - Swipe gestures to expand/collapse
+   - Larger touch targets (44px minimum)
+
+2) **Gesture Controls**:
+   - Swipe left/right to scrub timeline
+   - Pinch to zoom in/out
+   - Two-finger pan for camera movement
+   - Tap to play/pause
+
+3) **Responsive Layout**:
+   - Portrait mode support (vertical stacking)
+   - Floating action buttons (FAB) for primary controls
+   - Bottom sheet for secondary controls
+   - Full-screen 3D view option
+
+**Acceptance Criteria**:
+- All controls accessible via touch gestures
+- Portrait mode fully functional
+- No horizontal scrolling required
+- Intuitive mobile-first interface
+
+#### Phase 3: Performance & Polish (2-3 hours)
+**Optimizations**:
+1) **Mobile-Specific Rendering**:
+   - Reduced LOD for mobile GPUs
+   - Lower texture resolution for mobile
+   - Simplified particle effects
+   - Battery optimization (reduce frame rate when backgrounded)
+
+2) **Progressive Enhancement**:
+   - Graceful degradation for older devices
+   - WebGL fallback detection
+   - Touch event optimization
+   - Memory management for mobile constraints
+
+**Acceptance Criteria**:
+- Smooth performance on mid-range mobile devices
+- Battery usage optimized
+- No crashes on older devices
+- WebGL fallbacks work correctly
+
+### Option 3: Progressive Enhancement (Complementary)
+**Goal**: Enhance existing tracker with mobile-specific features
+
+#### Phase 1: Adaptive UI System (2-3 hours)
+**Files to Modify**:
+1) `components/Atlas3DTrackerEnhanced.tsx` - Add mobile detection
+2) `components/PlaybackControls.tsx` - Mobile-responsive controls
+3) `hooks/useMobileDetection.ts` - Mobile detection hook
+4) `styles/mobile.css` - Mobile-specific styles
+
+**Features**:
+1) **Smart Layout Adaptation**:
+   - Auto-detect mobile viewport
+   - Dynamically adjust control panel size
+   - Collapsible telemetry panel
+   - Responsive button sizing
+
+2) **Touch Optimization**:
+   - Larger touch targets (minimum 44px)
+   - Touch-friendly spacing
+   - Haptic feedback (where supported)
+   - Touch gesture recognition
+
+**Acceptance Criteria**:
+- Existing tracker adapts to mobile viewports
+- Touch controls work intuitively
+- No layout breaking on mobile
+- Smooth transitions between orientations
+
+#### Phase 2: Advanced Mobile Features (3-4 hours)
+**Enhancements**:
+1) **Gesture Integration**:
+   - Swipe gestures for timeline scrubbing
+   - Pinch-to-zoom for camera control
+   - Two-finger rotation for 3D navigation
+   - Long-press for context menus
+
+2) **Mobile-Specific Features**:
+   - Device orientation lock option
+   - Full-screen immersive mode
+   - Share functionality (screenshot, current view)
+   - Offline mode with cached data
+
+**Acceptance Criteria**:
+- Gesture controls feel natural
+- Full-screen mode works correctly
+- Share functionality operational
+- Offline mode functional
+
+## Implementation Priority
+
+### Phase 1: Core Mobile Experience (After Planet Integration)
+1. **Mobile-Specific Page** (Option 2, Phase 1-2)
+2. **Basic Progressive Enhancement** (Option 3, Phase 1)
+
+### Phase 2: Advanced Mobile Features (After Comet Evolution)
+1. **Performance Optimization** (Option 2, Phase 3)
+2. **Advanced Gestures** (Option 3, Phase 2)
+
+## Success Criteria
+- **Technical**: Smooth 60 FPS on mobile, no crashes, responsive layout
+- **UX**: Intuitive touch controls, portrait mode support, no scrolling required
+- **Performance**: Battery optimized, memory efficient, works on mid-range devices
+- **Accessibility**: Touch-friendly, gesture-based, full-screen options
+
+## Timeline: 12-18 hours total (across both phases)
+## Branch: `feature/mobile-optimization`
+## Risk Level: Low (mobile-specific features, no breaking changes to desktop)
+
+## Files to Create/Modify (Summary)
+1) `app/mobile-tracker/page.tsx` (new)
+2) `components/MobileTrackerLayout.tsx` (new)
+3) `components/MobileControls.tsx` (new)
+4) `hooks/useMobileDetection.ts` (new)
+5) `middleware.ts` (modify)
+6) `components/Atlas3DTrackerEnhanced.tsx` (modify)
+7) `components/PlaybackControls.tsx` (modify)
+8) `styles/mobile.css` (new)
+
+## Performance Benchmarks (Mobile)
+- **Frame Rate**: 60 FPS on flagship, 30 FPS minimum on mid-range
+- **Memory Usage**: < 100MB on mobile devices
+- **Battery Impact**: < 5% per 10 minutes of usage
+- **Load Time**: < 3 seconds on 3G connection
+- **Touch Response**: < 100ms touch-to-visual feedback
