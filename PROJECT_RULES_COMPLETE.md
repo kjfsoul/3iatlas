@@ -197,6 +197,25 @@ curl -f https://production-url.com/api/health
 # Verify Printify integration status
 ```
 
+**POST-DEPLOYMENT VISUAL VERIFICATION (MANDATORY):**
+
+After any deployment (staging or production) that involves UI/UX changes, the AI Assistant MUST perform a thorough visual verification.
+
+1. **Access Staging/Production Link:** Navigate to the deployed URL.
+2. **Compare Against Requirements:**
+   - Visually compare the deployed UI against the user's latest feedback, screenshots, and explicit requirements.
+   - Confirm that all requested changes are accurately reflected.
+   - Pay close attention to layout, spacing, element visibility, functionality (e.g., button states, interactive elements), and responsiveness across different viewports (if applicable).
+3. **Document Findings:**
+   - If discrepancies are found, immediately document them, identify the root cause (e.g., `search_replace` failure, incorrect target, overriding styles), and revert to the "in_progress" state for the relevant tasks.
+   - If all changes are confirmed, explicitly state "Visual verification passed" in the update.
+4. **Screenshot Evidence (Optional but Recommended):** For complex UI changes, include a screenshot of the *verified* staging/production UI in the `PROJECT_MEMORY.md` update or directly in the conversation, highlighting the fixed areas.
+
+**CRITICAL RULE VIOLATION CONSEQUENCES:**
+- Claiming completion without visual verification = RULE VIOLATION
+- Fabricating results or misrepresenting UI state = RULE VIOLATION
+- Must acknowledge violations and implement fixes immediately
+
 **BRANCH STRATEGY (RECOMMENDED):**
 ```bash
 # For major changes, use feature branches
