@@ -9,8 +9,6 @@ import { Billboard, Text } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { usePlanetTextures } from "../hooks/usePlanetTextures";
-import { SOLAR_SYSTEM_OBJECTS } from "../lib/solar-system-data";
 import { VectorData } from '../types/trajectory';
 
 interface CelestialBodyProps {
@@ -258,81 +256,6 @@ export function Planet({
           />
         </line>
       )}
-    </>
-  );
-}
-
-// Planets Component - Phase 1 Implementation
-interface PlanetsProps {
-  planetData: Record<string, VectorData[]>;
-  frameIndex: number;
-  viewMode: 'true-scale' | 'ride-atlas';
-  showLabels?: boolean;
-}
-
-export function Planets({ planetData, frameIndex, viewMode, showLabels = true }: PlanetsProps) {
-  const textures = usePlanetTextures();
-
-  // Start with 3 inner planets for performance safety (Phase 1)
-  const planetsToRender = ['mercury', 'venus', 'earth'] as const;
-
-  // View mode scaling - smaller planets in ride-atlas mode
-  const scaleMultiplier = viewMode === 'ride-atlas' ? 0.3 : 1.0;
-
-  return (
-    <>
-      {planetsToRender.map((planetKey) => {
-        const planetData = planetData[planetKey];
-        if (!planetData || planetData.length === 0) return null;
-
-        const planetInfo = SOLAR_SYSTEM_OBJECTS[planetKey];
-        if (!planetInfo) return null;
-
-        // Get current position from data
-        const currentFrame = planetData[Math.floor(frameIndex) % planetData.length];
-        if (!currentFrame) return null;
-
-        const position: [number, number, number] = [
-          currentFrame.position.x,
-          currentFrame.position.z, // Convert Z-up to Y-up
-          -currentFrame.position.y
-        ];
-
-        const radius = planetInfo.size * scaleMultiplier;
-        const color = `#${planetInfo.color.toString(16).padStart(6, '0')}`;
-
-        // Get texture for this planet
-        const planetTexture = textures[planetKey];
-
-        return (
-          <group key={planetKey} position={position}>
-            <mesh>
-              <sphereGeometry args={[radius, 16, 16]} />
-              <meshStandardMaterial
-                map={planetTexture.diffuse}
-                color={color}
-                roughness={0.8}
-                metalness={0.1}
-              />
-            </mesh>
-
-            {showLabels && (
-              <Billboard follow lockX={false} lockY={false} lockZ={false} position={[0, radius * 1.5, 0]}>
-                <Text
-                  fontSize={0.1}
-                  color={color}
-                  anchorX="center"
-                  anchorY="middle"
-                  outlineWidth={0.02}
-                  outlineColor="#000000"
-                >
-                  {planetInfo.name}
-                </Text>
-              </Billboard>
-            )}
-          </group>
-        );
-      })}
     </>
   );
 }
