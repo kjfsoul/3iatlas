@@ -153,8 +153,8 @@ export default function Atlas3DTrackerEnhanced({
   useEffect(() => {
     const entries = Object.entries(solarSystemData);
     objectEntriesRef.current = entries;
-    // Use 274 frames per object (274 days of data)
-    maxFrameCountRef.current = 274;
+    // Use 275 frames per object (274 days + 1)
+    maxFrameCountRef.current = 275;
   }, [solarSystemData]);
 
   useEffect(() => {
@@ -752,7 +752,7 @@ export default function Atlas3DTrackerEnhanced({
         if (!mesh) continue;
 
         // Use proper interpolation as per R3F velocity guide
-        const normalizedFrame = localIndex % (vectors.length - 1);
+        const normalizedFrame = localIndex % vectors.length;
         const frameIndex = normalizedFrame;
         const boundedIndex = Math.min(
           Math.floor(frameIndex),

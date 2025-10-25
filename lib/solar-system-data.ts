@@ -46,19 +46,20 @@ export type SolarSystemObjectKey = keyof typeof SOLAR_SYSTEM_OBJECTS;
 const interpolatePosition = (dataArray: any[], timestamp: number) => {
   // Find lower and upper indices
   const index = Math.floor(timestamp);
-  const t = timestamp - index;  // Fraction 0-1
-  
-  if (index >= dataArray.length - 1) return dataArray[dataArray.length - 1].position_au;
-  
+  const t = timestamp - index; // Fraction 0-1
+
+  if (index >= dataArray.length - 1)
+    return dataArray[dataArray.length - 1].position_au;
+
   const p0 = dataArray[index].position_au;
   const p1 = dataArray[index + 1].position_au;
-  
+
   return {
     x: p0.x + (p1.x - p0.x) * t,
     y: p0.y + (p1.y - p0.y) * t,
-    z: p0.z + (p1.z - p0.z) * t
+    z: p0.z + (p1.z - p0.z) * t,
   };
-}
+};
 
 /**
  * Fetch position data for multiple objects at once
@@ -84,7 +85,20 @@ export async function fetchSolarSystemData(
       `[Solar System] ✅ Loaded ${localData.length} data points from local NASA Horizons file`
     );
 
-    // Parse data by object
+    // Map NASA object names to our keys
+    const objectMapping: Record<string, string> = {
+      "ATLAS (C/2025 N1)": "atlas",
+      Mercury: "mercury",
+      Venus: "venus",
+      Earth: "earth",
+      Mars: "mars",
+      Jupiter: "jupiter",
+      Saturn: "saturn",
+      Uranus: "uranus",
+      Neptune: "neptune",
+    };
+
+    // Group data by object for compatibility with existing code
     const dataByObject: Record<string, any[]> = {};
     localData.forEach((entry: any) => {
       const objectName = entry.object;
@@ -93,19 +107,6 @@ export async function fetchSolarSystemData(
       }
       dataByObject[objectName].push(entry);
     });
-
-    // Map NASA object names to our keys (from comprehensive prompt)
-    const objectMapping: Record<string, string> = {
-      "ATLAS (C/2025 N1)": "atlas",
-      "Mercury": "mercury",
-      "Venus": "venus", 
-      "Earth": "earth",
-      "Mars": "mars",
-      "Jupiter": "jupiter",
-      "Saturn": "saturn",
-      "Uranus": "uranus",
-      "Neptune": "neptune"
-    };
 
     // Convert to VectorData format
     Object.entries(dataByObject).forEach(([nasaName, entries]) => {
@@ -129,6 +130,8 @@ export async function fetchSolarSystemData(
         );
       }
     });
+
+    return results;
   } catch (error) {
     console.error("[Solar System] ❌ Failed to load local data:", error);
     // Fallback to original API method if local data fails
