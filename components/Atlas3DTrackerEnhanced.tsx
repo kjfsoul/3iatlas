@@ -751,8 +751,8 @@ export default function Atlas3DTrackerEnhanced({
         const mesh = objects.get(key);
         if (!mesh) continue;
 
-        // Use proper interpolation as per R3F velocity guide
-        const normalizedFrame = localIndex % vectors.length;
+        // Use proper interpolation to prevent wrap-around jump
+        const normalizedFrame = localIndex % (vectors.length - 1);
         const frameIndex = normalizedFrame;
         const boundedIndex = Math.min(
           Math.floor(frameIndex),
