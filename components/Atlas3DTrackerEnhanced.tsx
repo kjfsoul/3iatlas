@@ -61,9 +61,11 @@ export default function Atlas3DTrackerEnhanced({
   const cameraStateRef = useRef<{
     mode: "free-look" | "follow";
     target: THREE.Vector3 | null;
+    currentMode: "default" | "followComet" | "topDown" | "closeup" | "marsApproach" | "rideComet";
   }>({
     mode: "free-look",
     target: null,
+    currentMode: "default",
   });
 
   // Zoom functions
@@ -215,6 +217,9 @@ export default function Atlas3DTrackerEnhanced({
     if (!sceneRef.current) return;
 
     const { controls, camera } = sceneRef.current;
+    
+    // Update camera state
+    cameraStateRef.current.currentMode = newMode;
 
     if (newMode === "default") {
       cameraStateRef.current.mode = "free-look";
@@ -232,6 +237,56 @@ export default function Atlas3DTrackerEnhanced({
         camera.updateMatrixWorld(true);
       }
     }
+  };
+
+  // Calculate planet size based on camera mode and distance
+  const calculatePlanetSize = (
+    baseSize: number,
+    planetName: string,
+    position: THREE.Vector3,
+    camera: THREE.PerspectiveCamera
+  ): number => {
+    const currentMode = cameraStateRef.current.currentMode;
+    let size = baseSize;
+
+    // Apply camera mode scaling
+    switch (currentMode) {
+      case "default":
+        size = baseSize * 0.8; // Slightly smaller for overview
+        break;
+      case "followComet":
+        size = baseSize * 1.2; // Larger when following comet
+        break;
+      case "topDown":
+        size = baseSize * 0.6; // Smaller for top-down view
+        break;
+      case "closeup":
+        size = baseSize * 2.0; // Much larger for closeup
+        break;
+      case "marsApproach":
+        // Make Mars more prominent
+        if (planetName === "mars") {
+          size = baseSize * 3.0;
+        } else {
+          size = baseSize * 0.7;
+        }
+        break;
+      case "rideComet":
+        size = baseSize * 1.5; // Larger when riding with comet
+        break;
+      default:
+        size = baseSize;
+    }
+
+    // Distance-based scaling to maintain visibility
+    const distance = camera.position.distanceTo(position);
+    const minVisibleSize = distance * 0.02; // Minimum size for visibility
+    const maxSize = baseSize * 5.0; // Maximum size to prevent huge planets
+
+    size = Math.max(size, minVisibleSize);
+    size = Math.min(size, maxSize);
+
+    return size;
   };
 
   // Fetch all solar system data
@@ -808,6 +863,21 @@ export default function Atlas3DTrackerEnhanced({
         }
 
         mesh.position.copy(final);
+
+        // Update planet size based on camera mode
+        if (key !== "atlas" && key !== "sun") {
+          const baseSize = SOLAR_SYSTEM_OBJECTS[key as SolarSystemObjectKey]?.size || 0.01;
+          const newSize = calculatePlanetSize(baseSize, key, final, camera);
+          
+          // Update mesh scale
+          const currentScale = mesh.scale.x;
+          const targetScale = newSize / baseSize;
+          
+          // Smooth scaling to prevent jarring size changes
+          const scaleSpeed = 0.1;
+          const smoothedScale = currentScale + (targetScale - currentScale) * scaleSpeed;
+          mesh.scale.setScalar(smoothedScale);
+        }
 
         if (key === "atlas") {
           const glow = objects.get("atlas_glow");
