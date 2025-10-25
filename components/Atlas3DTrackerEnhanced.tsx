@@ -720,7 +720,7 @@ export default function Atlas3DTrackerEnhanced({
 
         const maxFrames = maxFrameCountRef.current;
         if (maxFrames > 0) {
-          localIndex += dt * speedRef.current * 3;
+          localIndex += dt * speedRef.current * 9.0328467153;
           if (localIndex >= maxFrames) {
             localIndex = localIndex % maxFrames;
           }

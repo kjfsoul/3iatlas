@@ -73,7 +73,7 @@ export async function fetchSolarSystemData(
   const results: Record<string, VectorData[]> = {};
 
   try {
-    // Load from local NASA Horizons data file
+    // Load from DATA_CORRECT NASA Horizons data file
     const response = await fetch("/data/SOLAR_SYSTEM_POSITIONS.json");
     if (!response.ok) {
       throw new Error(`Failed to load local data: ${response.status}`);
