@@ -467,7 +467,7 @@ export default function Atlas3DTrackerEnhanced({
       if (expectedOrbitalPeriods[key] && data.length > 0) {
         const totalDays = 274; // Our animation period
         const expectedRotation =
-          (totalDays / expectedOrbitalPeriods[key]) * 360;
+          ((totalDays / expectedOrbitalPeriods[key]) * 360) % 360;
         console.log(
           `[Orbital Validation] ${key}: Expected rotation in 274 days = ${expectedRotation.toFixed(
             1
@@ -774,10 +774,14 @@ export default function Atlas3DTrackerEnhanced({
         const maxFrames = maxFrameCountRef.current;
         if (maxFrames > 0) {
           // CORRECTED: Use actual frames-per-day from NASA Horizons data
-          // 2475 total frames ÷ 274 days = 9.0328467153 frames/day
-          localIndex += dt * speedRef.current * 9.0328467153;
-          // Use modulo for smooth looping instead of hard reset
-          localIndex = localIndex % maxFrames;
+          const framesPerDay = 9.0328467153;
+          localIndex += dt * speedRef.current * framesPerDay;
+
+          // Prevent rounding loss at exact integer boundaries (e.g. Sept 7-8, Nov 15-16)
+          if (localIndex >= maxFrames - 1e-6) {
+            localIndex -= maxFrames;
+          }
+          if (localIndex < 0) localIndex += maxFrames;
         } else {
           localIndex = 0;
         }
@@ -806,13 +810,14 @@ export default function Atlas3DTrackerEnhanced({
         const mesh = objects.get(key);
         if (!mesh) continue;
 
-        // Use proper modulo for smooth looping
-        const normalizedFrame = localIndex % vectors.length;
-        const frameIndex = normalizedFrame;
-        const boundedIndex = Math.min(
-          Math.floor(frameIndex),
-          vectors.length - 1
-        );
+        // Use proper interpolation to prevent wrap-around jump
+        const frameIndex = Math.min(localIndex, vectors.length - 1);
+        const base = Math.floor(frameIndex);
+        const nextIndex = (base + 1) % vectors.length;
+        const t = frameIndex - base;      // fractional progress 0 → 1
+
+        // Fixed interpolation using Hermite smoothing to mask float jitter
+        const smoothT = t * t * (3 - 2 * t);
 
         // Debug orbital motion for planets (not 3I/ATLAS)
         if (
@@ -823,10 +828,10 @@ export default function Atlas3DTrackerEnhanced({
           console.log(
             `[Orbital Debug] ${key}: frameIndex=${frameIndex.toFixed(
               2
-            )}, boundedIndex=${boundedIndex}, totalFrames=${vectors.length}`
+            )}, base=${base}, totalFrames=${vectors.length}`
           );
         }
-        const currentVec = vectors[boundedIndex];
+        const currentVec = vectors[base];
         if (!currentVec) continue;
 
         current.set(
@@ -835,16 +840,15 @@ export default function Atlas3DTrackerEnhanced({
           -currentVec.position.y
         );
 
-        if (interpolationEnabled && boundedIndex < vectors.length - 1) {
-          const nextVec = vectors[boundedIndex + 1];
-          if (nextVec) {
+        if (interpolationEnabled) {
+          const nextVecData = vectors[nextIndex];
+          if (nextVecData) {
             next.set(
-              nextVec.position.x,
-              nextVec.position.z,
-              -nextVec.position.y
+              nextVecData.position.x,
+              nextVecData.position.z,
+              -nextVecData.position.y
             );
-            const t = frameIndex - Math.floor(frameIndex);
-            final.copy(current).lerp(next, t);
+            final.copy(current).lerp(next, smoothT);
 
             if (key === "atlas") {
               offset
