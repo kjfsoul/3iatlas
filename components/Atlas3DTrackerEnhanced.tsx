@@ -217,7 +217,7 @@ export default function Atlas3DTrackerEnhanced({
     if (!sceneRef.current) return;
 
     const { controls, camera } = sceneRef.current;
-    
+
     // Update camera state
     cameraStateRef.current.currentMode = newMode;
 
@@ -776,10 +776,8 @@ export default function Atlas3DTrackerEnhanced({
           // CORRECTED: Use actual frames-per-day from NASA Horizons data
           // 2475 total frames ÷ 274 days = 9.0328467153 frames/day
           localIndex += dt * speedRef.current * 9.0328467153;
-          // Reset to 0 when reaching the end for seamless looping
-          if (localIndex >= maxFrames) {
-            localIndex = 0;
-          }
+          // Use modulo for smooth looping instead of hard reset
+          localIndex = localIndex % maxFrames;
         } else {
           localIndex = 0;
         }
@@ -866,16 +864,18 @@ export default function Atlas3DTrackerEnhanced({
 
         // Update planet size based on camera mode
         if (key !== "atlas" && key !== "sun") {
-          const baseSize = SOLAR_SYSTEM_OBJECTS[key as SolarSystemObjectKey]?.size || 0.01;
+          const baseSize =
+            SOLAR_SYSTEM_OBJECTS[key as SolarSystemObjectKey]?.size || 0.01;
           const newSize = calculatePlanetSize(baseSize, key, final, camera);
-          
+
           // Update mesh scale
           const currentScale = mesh.scale.x;
           const targetScale = newSize / baseSize;
-          
+
           // Smooth scaling to prevent jarring size changes
           const scaleSpeed = 0.1;
-          const smoothedScale = currentScale + (targetScale - currentScale) * scaleSpeed;
+          const smoothedScale =
+            currentScale + (targetScale - currentScale) * scaleSpeed;
           mesh.scale.setScalar(smoothedScale);
         }
 
