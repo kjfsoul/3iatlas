@@ -85,17 +85,17 @@ export async function fetchSolarSystemData(
       `[Solar System] ✅ Loaded ${localData.length} data points from local NASA Horizons file`
     );
 
-    // Map NASA object names to our keys
+    // Map NASA object names to our keys (corrected to match actual data format)
     const objectMapping: Record<string, string> = {
       "ATLAS (C/2025 N1)": "atlas",
-      Mercury: "mercury",
-      Venus: "venus",
-      Earth: "earth",
-      Mars: "mars",
-      Jupiter: "jupiter",
-      Saturn: "saturn",
-      Uranus: "uranus",
-      Neptune: "neptune",
+      "Mercury (199)": "mercury",
+      "Venus (299)": "venus",
+      "Earth (399)": "earth",
+      "Mars (499)": "mars",
+      "Jupiter (599)": "jupiter",
+      "Saturn (699)": "saturn",
+      "Uranus (799)": "uranus",
+      "Neptune (899)": "neptune",
     };
 
     // Group data by object for compatibility with existing code
