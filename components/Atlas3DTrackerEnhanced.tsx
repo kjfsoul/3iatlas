@@ -12,6 +12,33 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
+// Helper functions for interpolation
+function mod(n: number, m: number) { return ((n % m) + m) % m; }
+
+function getInterpolatedSample(
+  vectors: Array<{ position: { x:number; y:number; z:number } }>,
+  idxFloat: number
+) {
+  const total = vectors.length;
+  const s = mod(idxFloat, total);
+  const base = Math.floor(s);
+  const next = (base + 1) % total;
+  const t = s - base;
+  const smoothT = t * t * (3 - 2 * t); // Hermite interpolation
+  const a = vectors[base].position;
+  const b = vectors[next].position;
+  return {
+    x: a.x + (b.x - a.x) * smoothT,
+    y: a.y + (b.y - a.y) * smoothT,
+    z: a.z + (b.z - a.z) * smoothT,
+  };
+}
+
+function toR3F(p:{x:number;y:number;z:number}) {
+  // Horizons: Z-up → Three.js: Y-up conversion
+  return new THREE.Vector3(p.x, p.z, -p.y);
+}
+
 interface Props {
   startDate?: string;
   endDate?: string;
@@ -757,6 +784,7 @@ export default function Atlas3DTrackerEnhanced({
     let animationId: number | null = null;
     let lastTime = performance.now();
     let localIndex = 0;
+    let accumulator = 0;
 
     const animate = () => {
       animationId = requestAnimationFrame(animate);

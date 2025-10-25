@@ -1567,3 +1567,67 @@ This system forces the AI Assistant to check protocol compliance before every ac
 - **Future self will get same message** every time
 - **Training data interference bypassed** through mandatory checks
 - **Collaborative process respected** instead of assuming authority
+
+---
+
+## Update: January 23, 2025, 7:00 AM PST - TIMELINE INTERPOLATION FIX IMPLEMENTATION STARTED
+
+### Files Changed (Timeline Fix Implementation)
+
+- **Atlas3DTrackerEnhanced.tsx**: Added interpolation helper functions and accumulator variable
+- **TIMELINE_FIX_PLAN.md**: Created implementation plan
+- **TIMELINE_FIX_COMPLETE.md**: Created manual implementation guide
+
+### Status
+
+⏳ **IN PROGRESS**: Timeline interpolation fixes partially implemented
+
+✅ **Completed**:
+- Added `mod()` helper function for safe modulo operation
+- Added `getInterpolatedSample()` for smooth position interpolation  
+- Added `toR3F()` for coordinate conversion
+- Added `accumulator` variable for fixed timestep
+
+⏳ **Remaining**:
+- Replace `framesPerDay` logic with days-per-second calculation
+- Update camera modes to use `getInterpolatedSample()`
+- Update mesh position loop to use single interpolator
+- Update telemetry display to use interpolated positions
+
+### Technical Implementation
+
+**Problem 1**: Camera/telemetry using discrete day indices while meshes are interpolated → visible step at date boundaries (Sep 7/Nov 14 jump)
+
+**Problem 2**: Synthetic orbit path still influencing positions → Earth appears to complete >1 orbit in ~274-day window
+
+**Solution**: 
+- Use days as single time unit (1x speed = 1 day/sec)
+- Implement single `getInterpolatedSample()` function for all positions
+- Use fixed timestep accumulator pattern for stable boundary crossings
+- Remove synthetic orbit calculations
+
+### Issue Description
+
+**Root Cause**:
+- Using `framesPerDay = 9.0328467153` constant creates artificial time scaling
+- Camera modes use `Math.floor(localIndex)` for discrete indices
+- Multiple interpolation implementations cause inconsistency
+- No fixed timestep accumulator for stable frame timing
+
+**Impact**:
+- Visible jumps at Sep 7→8 and Nov 14→15 boundaries
+- Earth appears to complete more than 1 orbit in less than 365 days
+- Camera views snap instead of smoothly following comet
+
+### Branch
+
+**Feature Branch**: `fix/timeline-interpolation-fixes`
+**Commit**: `14d0291` - "docs: add timeline fix implementation plan with helper functions"
+
+### Next Steps
+
+1. Complete manual implementation of days-per-second calculation
+2. Update all camera modes to use `getInterpolatedSample()`
+3. Test Sep 7→8 and Nov 14→15 transitions for smoothness
+4. Verify Earth completes exactly 1 orbit in 365 days
+5. Get user approval before deploying to staging

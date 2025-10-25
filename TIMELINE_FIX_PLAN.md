@@ -51,4 +51,3 @@ Use `getInterpolatedSample()` for distance calculations (lines ~1162-1191)
 - Coding: 30 minutes
 - Testing: 15 minutes
 - Total: ~45 minutes
-
