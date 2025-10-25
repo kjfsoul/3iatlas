@@ -720,7 +720,7 @@ export default function Atlas3DTrackerEnhanced({
 
         const maxFrames = maxFrameCountRef.current;
         if (maxFrames > 0) {
-          localIndex += dt * speedRef.current * 1; // 1 frame per day (daily data)
+          localIndex += dt * speedRef.current * 0.1; // Much slower multiplier for testing
           if (localIndex >= maxFrames) {
             localIndex = localIndex % maxFrames;
           }
