@@ -153,10 +153,8 @@ export default function Atlas3DTrackerEnhanced({
   useEffect(() => {
     const entries = Object.entries(solarSystemData);
     objectEntriesRef.current = entries;
-    maxFrameCountRef.current = entries.reduce(
-      (max, [, vectors]) => (vectors.length > max ? vectors.length : max),
-      0
-    );
+    // Use 274 frames per object (274 days of data)
+    maxFrameCountRef.current = 274;
   }, [solarSystemData]);
 
   useEffect(() => {
@@ -721,8 +719,10 @@ export default function Atlas3DTrackerEnhanced({
         const maxFrames = maxFrameCountRef.current;
         if (maxFrames > 0) {
           localIndex += dt * speedRef.current * 0.1; // Much slower multiplier for testing
-          // Remove modulo operation to prevent September 7-8 skip
-          // Animation will loop naturally when it reaches the end
+          // Reset to 0 when reaching the end for seamless looping
+          if (localIndex >= maxFrames) {
+            localIndex = 0;
+          }
         } else {
           localIndex = 0;
         }
@@ -751,8 +751,9 @@ export default function Atlas3DTrackerEnhanced({
         const mesh = objects.get(key);
         if (!mesh) continue;
 
-        // Use proper interpolation as per R3F_ANIMATION_CALCULATIONS.json
-        const frameIndex = localIndex;
+        // Use proper interpolation as per R3F velocity guide
+        const normalizedFrame = localIndex % (vectors.length - 1);
+        const frameIndex = normalizedFrame;
         const boundedIndex = Math.min(
           Math.floor(frameIndex),
           vectors.length - 1
