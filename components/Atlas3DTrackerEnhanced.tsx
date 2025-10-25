@@ -398,6 +398,31 @@ export default function Atlas3DTrackerEnhanced({
 
     console.log("[3D Scene] Available data:", Object.keys(solarSystemData));
 
+    // Validate orbital data against R3F_ANIMATION_CALCULATIONS.json
+    const expectedOrbitalPeriods: Record<string, number> = {
+      mercury: 88.0,
+      venus: 224.7,
+      earth: 365.25,
+      mars: 687.0,
+      jupiter: 4332.7,
+      saturn: 10759.5,
+      uranus: 30688.5,
+      neptune: 60182.0,
+    };
+
+    Object.entries(solarSystemData).forEach(([key, data]) => {
+      if (expectedOrbitalPeriods[key] && data.length > 0) {
+        const totalDays = 274; // Our animation period
+        const expectedRotation =
+          (totalDays / expectedOrbitalPeriods[key]) * 360;
+        console.log(
+          `[Orbital Validation] ${key}: Expected rotation in 274 days = ${expectedRotation.toFixed(
+            1
+          )}° (period: ${expectedOrbitalPeriods[key]} days)`
+        );
+      }
+    });
+
     for (const [key, obj] of Object.entries(SOLAR_SYSTEM_OBJECTS)) {
       if (!solarSystemData[key]) {
         // console.log(`[3D Scene] ⚠️ Skipping ${key} - no data`);
@@ -729,7 +754,23 @@ export default function Atlas3DTrackerEnhanced({
 
         // Use proper interpolation as per R3F_ANIMATION_CALCULATIONS.json
         const frameIndex = localIndex % vectors.length;
-        const boundedIndex = Math.min(Math.floor(frameIndex), vectors.length - 1);
+        const boundedIndex = Math.min(
+          Math.floor(frameIndex),
+          vectors.length - 1
+        );
+
+        // Debug orbital motion for planets (not 3I/ATLAS)
+        if (
+          key !== "atlas" &&
+          key !== "sun" &&
+          currentIndexRef.current % 100 === 0
+        ) {
+          console.log(
+            `[Orbital Debug] ${key}: frameIndex=${frameIndex.toFixed(
+              2
+            )}, boundedIndex=${boundedIndex}, totalFrames=${vectors.length}`
+          );
+        }
         const currentVec = vectors[boundedIndex];
         if (!currentVec) continue;
 
