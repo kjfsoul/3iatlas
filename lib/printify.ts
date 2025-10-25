@@ -174,8 +174,8 @@ export function productImage(p: Product): string {
 
 export function productPrice(p: Product): string {
   if (!p.variants || p.variants.length === 0) return "";
-  const minPrice = Math.min(...p.variants.map((v) => v.price));
-  return `$${(minPrice / 100).toFixed(2)}`;
+  const defaultVariant = p.variants.find(v => v.is_default) || p.variants[0];
+  return `${(defaultVariant.price / 100).toFixed(2)}`;
 }
 
 export function productDescription(p: Product): string {

@@ -1,0 +1,108 @@
+{
+  "animation_framework": {
+    "description": "React Three Fiber animation parameters for solar system with 3I/ATLAS",
+    "time_scale": "1 day = 1 animation frame (configurable multiplier)",
+    "coordinate_system": "Heliocentric ecliptic J2000 (X, Y, Z in AU)",
+    "animation_duration_days": 274,
+    "total_frames": 2475,
+    "frame_rate_target_fps": 60
+  },
+  "orbital_velocities_for_r3f": {
+    "Mercury": {
+      "orbital_period_days": 88.0,
+      "rotation_degrees_per_frame": 4.090909090909091,
+      "orbital_speed_km_s": 47.36,
+      "animation_speed_multiplier": 1.0
+    },
+    "Venus": {
+      "orbital_period_days": 224.7,
+      "rotation_degrees_per_frame": 1.602136181575434,
+      "orbital_speed_km_s": 35.02,
+      "animation_speed_multiplier": 1.0
+    },
+    "Earth": {
+      "orbital_period_days": 365.25,
+      "rotation_degrees_per_frame": 0.9856262833675564,
+      "orbital_speed_km_s": 29.78,
+      "animation_speed_multiplier": 1.0
+    },
+    "Mars": {
+      "orbital_period_days": 687.0,
+      "rotation_degrees_per_frame": 0.5240174672489083,
+      "orbital_speed_km_s": 24.07,
+      "animation_speed_multiplier": 1.0
+    },
+    "Jupiter": {
+      "orbital_period_days": 4332.7,
+      "rotation_degrees_per_frame": 0.08308906686361853,
+      "orbital_speed_km_s": 13.07,
+      "animation_speed_multiplier": 1.0
+    },
+    "Saturn": {
+      "orbital_period_days": 10759.5,
+      "rotation_degrees_per_frame": 0.033458803847762446,
+      "orbital_speed_km_s": 9.68,
+      "animation_speed_multiplier": 1.0
+    },
+    "Uranus": {
+      "orbital_period_days": 30688.5,
+      "rotation_degrees_per_frame": 0.011730778630431595,
+      "orbital_speed_km_s": 6.81,
+      "animation_speed_multiplier": 1.0
+    },
+    "Neptune": {
+      "orbital_period_days": 60182.0,
+      "rotation_degrees_per_frame": 0.005981855039712871,
+      "orbital_speed_km_s": 5.43,
+      "animation_speed_multiplier": 1.0
+    },
+    "3I/ATLAS": {
+      "orbital_period_days": 608.8,
+      "rotation_degrees_per_frame": 0.5913272010512484,
+      "orbital_speed_km_s": 63.81,
+      "animation_speed_multiplier": 1.0,
+      "note": "Hyperbolic trajectory - does not return"
+    }
+  },
+  "position_interpolation_formula": {
+    "description": "Linear interpolation between NASA Horizons data points",
+    "formula": "P(t) = P_n + (P_{n+1} - P_n) * (t - t_n) / (t_{n+1} - t_n)",
+    "where": {
+      "P(t)": "Position at time t",
+      "P_n": "Position at data point n",
+      "P_{n+1}": "Position at data point n+1",
+      "t_n": "Time at data point n (in frame index)",
+      "t_{n+1}": "Time at data point n+1"
+    }
+  },
+  "velocity_calculation": {
+    "description": "Calculate velocity from position difference",
+    "formula": "V = (P_{n+1} - P_n) / \u0394t",
+    "where": {
+      "V": "Velocity vector (AU/day)",
+      "\u0394t": "Time difference in days (0.25 days for 6-hour intervals)"
+    }
+  },
+  "rotation_matrix_about_z": {
+    "description": "Rotate position around Z axis for 3D orbital animation",
+    "matrix": "[[cos(\u03b8), -sin(\u03b8), 0], [sin(\u03b8), cos(\u03b8), 0], [0, 0, 1]]",
+    "angle_per_frame_radians": "radians(angular_velocity_deg_day / 24)",
+    "note": "Z-axis is perpendicular to ecliptic plane"
+  },
+  "scale_factors": {
+    "position_scale": "1.0 (1 AU = 1 unit in R3F scene)",
+    "distance_scale_visual": "Logarithmic scale recommended for visibility",
+    "camera_distance_factor": 8.0,
+    "velocity_arrow_scale": 0.5,
+    "comet_size_multiplier": 5.6
+  },
+  "frame_timing": {
+    "total_animation_frames": 2475,
+    "total_days_simulated": 274,
+    "frames_per_day": 9.032846715328468,
+    "seconds_at_60fps": 41.25,
+    "seconds_at_30fps": 82.5,
+    "animation_speed_multiplier_for_realtime": 1.0,
+    "animation_speed_multiplier_for_1x_speedup": 9.03
+  }
+}
