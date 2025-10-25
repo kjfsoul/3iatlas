@@ -831,37 +831,34 @@ export default function Atlas3DTrackerEnhanced({
             )}, base=${base}, totalFrames=${vectors.length}`
           );
         }
-        const currentVec = vectors[base];
-        if (!currentVec) continue;
-
-        current.set(
-          currentVec.position.x,
-          currentVec.position.z,
-          -currentVec.position.y
-        );
-
         if (interpolationEnabled) {
-          const nextVecData = vectors[nextIndex];
-          if (nextVecData) {
-            next.set(
-              nextVecData.position.x,
-              nextVecData.position.z,
-              -nextVecData.position.y
-            );
-            final.copy(current).lerp(next, smoothT);
+          current.set(
+            vectors[base].position.x,
+            vectors[base].position.z,
+            -vectors[base].position.y
+          );
 
-            if (key === "atlas") {
-              offset
-                .copy(next)
-                .sub(current)
-                .multiplyScalar(cometMotionMultiplier - 1);
-              final.add(offset);
-            }
-          } else {
-            final.copy(current);
+          next.set(
+            vectors[nextIndex].position.x,
+            vectors[nextIndex].position.z,
+            -vectors[nextIndex].position.y
+          );
+
+          final.copy(current).lerp(next, smoothT);
+
+          if (key === "atlas") {
+            offset
+              .copy(next)
+              .sub(current)
+              .multiplyScalar(cometMotionMultiplier - 1);
+            final.add(offset);
           }
         } else {
-          final.copy(current);
+          final.set(
+            vectors[base].position.x,
+            vectors[base].position.z,
+            -vectors[base].position.y
+          );
         }
 
         mesh.position.copy(final);
