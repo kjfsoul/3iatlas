@@ -718,7 +718,9 @@ export default function Atlas3DTrackerEnhanced({
 
         const maxFrames = maxFrameCountRef.current;
         if (maxFrames > 0) {
-          localIndex += dt * speedRef.current * 0.1; // Much slower multiplier for testing
+          // CORRECTED: Use actual frames-per-day from NASA Horizons data
+          // 2475 total frames ÷ 274 days = 9.0328467153 frames/day
+          localIndex += dt * speedRef.current * 9.0328467153;
           // Reset to 0 when reaching the end for seamless looping
           if (localIndex >= maxFrames) {
             localIndex = 0;
