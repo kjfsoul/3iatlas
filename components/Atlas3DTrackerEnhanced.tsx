@@ -727,8 +727,9 @@ export default function Atlas3DTrackerEnhanced({
         const mesh = objects.get(key);
         if (!mesh) continue;
 
-        const frameIndex = Math.floor(localIndex);
-        const boundedIndex = Math.min(frameIndex, vectors.length - 1);
+        // Use proper interpolation as per R3F_ANIMATION_CALCULATIONS.json
+        const frameIndex = localIndex % vectors.length;
+        const boundedIndex = Math.min(Math.floor(frameIndex), vectors.length - 1);
         const currentVec = vectors[boundedIndex];
         if (!currentVec) continue;
 
@@ -746,7 +747,7 @@ export default function Atlas3DTrackerEnhanced({
               nextVec.position.z,
               -nextVec.position.y
             );
-            const t = localIndex - frameIndex;
+            const t = frameIndex - Math.floor(frameIndex);
             final.copy(current).lerp(next, t);
 
             if (key === "atlas") {
