@@ -721,9 +721,8 @@ export default function Atlas3DTrackerEnhanced({
         const maxFrames = maxFrameCountRef.current;
         if (maxFrames > 0) {
           localIndex += dt * speedRef.current * 0.1; // Much slower multiplier for testing
-          if (localIndex >= maxFrames) {
-            localIndex = localIndex % maxFrames;
-          }
+          // Remove modulo operation to prevent September 7-8 skip
+          // Animation will loop naturally when it reaches the end
         } else {
           localIndex = 0;
         }
@@ -753,7 +752,7 @@ export default function Atlas3DTrackerEnhanced({
         if (!mesh) continue;
 
         // Use proper interpolation as per R3F_ANIMATION_CALCULATIONS.json
-        const frameIndex = localIndex % vectors.length;
+        const frameIndex = localIndex;
         const boundedIndex = Math.min(
           Math.floor(frameIndex),
           vectors.length - 1
