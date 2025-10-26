@@ -182,13 +182,8 @@ export function productDescription(p: Product): string {
   if (!p.description) return "";
   // Remove HTML tags if any
   const text = p.description.replace(/<[^>]*>/g, "");
-  // Get first 2 sentences or 25 words
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-  const firstTwo = sentences.slice(0, 2).join(" ").trim();
-
-  if (firstTwo) return firstTwo;
-
-  // Fallback to 25 words if no sentences found
-  const words = text.split(/\s+/).slice(0, 25).join(" ");
-  return words + (text.split(/\s+/).length > 25 ? "..." : "");
+  // STRICT LIMIT: Maximum 100 characters for card display
+  const maxLength = 100;
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + "...";
 }
