@@ -1,14 +1,26 @@
 'use client';
 
-const PROD_TRACKER = 'https://tracker.3iatlas.mysticarcana.com';
-const DEV_TRACKER = 'http://localhost:5173';
+const ALIAS = (process.env.NEXT_PUBLIC_TRACKER_URL || 'https://tracker.3iatlas.mysticarcana.com').trim();
+const DEV = (process.env.NEXT_PUBLIC_TRACKER_DEV_URL || 'http://localhost:5173').trim();
 
 type Props = { autoPlay?: boolean; initialSpeed?: number; initialViewMode?: 'true-scale'|'ride-atlas'; };
 
 export default function Atlas3DTrackerIframe(_props: Props) {
-  // ALWAYS use production tracker - it works both locally and in production
-  // The tracker is deployed separately and loads the actual app
-  const src = PROD_TRACKER;
+  const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+  const src = isLocal ? DEV : ALIAS;
+
+  // avoid self-embed in case someone points the alias at this app by mistake
+  try {
+    const here = typeof window !== 'undefined' ? window.location.host : '';
+    const there = new URL(src).host;
+    if (here === there) {
+      return (
+        <a href={src} className="text-blue-400 underline" target="_blank" rel="noreferrer">
+          Open tracker
+        </a>
+      );
+    }
+  } catch {}
 
   return (
     <iframe
