@@ -1,13 +1,14 @@
 'use client';
 
-const PROD = typeof window !== 'undefined' && !window.location.hostname.includes('localhost');
 const PROD_TRACKER = 'https://tracker.3iatlas.mysticarcana.com';
 const DEV_TRACKER = 'http://localhost:5173';
 
 type Props = { autoPlay?: boolean; initialSpeed?: number; initialViewMode?: 'true-scale'|'ride-atlas'; };
 
 export default function Atlas3DTrackerIframe(_props: Props) {
-  const src = PROD ? PROD_TRACKER : DEV_TRACKER;
+  // ALWAYS use production tracker - it works both locally and in production
+  // The tracker is deployed separately and loads the actual app
+  const src = PROD_TRACKER;
 
   return (
     <iframe
