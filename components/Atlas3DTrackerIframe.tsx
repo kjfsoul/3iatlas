@@ -5,22 +5,22 @@ import { useMemo } from 'react';
 type Props = { autoPlay?: boolean; initialSpeed?: number; initialViewMode?: 'true-scale'|'ride-atlas'; };
 
 export default function Atlas3DTrackerIframe(_props: Props) {
-  const alias = (process.env.NEXT_PUBLIC_TRACKER_ALIAS || 'https://tracker.3iatlas.mysticarcana.com').trim();
-  const canonical = (process.env.NEXT_PUBLIC_TRACKER_CANONICAL || '').trim();
-
   const src = useMemo(() => {
-    const dev = 'http://localhost:5173';
-    if (typeof window === 'undefined') return process.env.NODE_ENV === 'development' ? dev : alias;
-      const here = window.location.hostname;
-      const aliasHost = new URL(alias).hostname;
-      const canonicalHost = canonical ? new URL(canonical).hostname : "";
-
-      if (process.env.NODE_ENV === "development") return dev;
-      // If we're already on the alias host, use the canonical to avoid self-embedding.
-      if (canonical && here === aliasHost) return canonical;
-      // Otherwise always embed the alias (so we never iframe *.vercel.app).
-      return alias;
-  }, [alias, canonical]);
+    if (typeof window === 'undefined') {
+      return 'https://tracker.3iatlas.mysticarcana.com';
+    }
+    
+    const here = window.location.hostname;
+    
+    // Development check
+    if (process.env.NODE_ENV === 'development' || here.includes('localhost')) {
+      return 'http://localhost:5173';
+    }
+    
+    // HARDCODE to prevent ANY recursion
+    // Always use the tracker domain, NEVER embed the main site
+    return 'https://tracker.3iatlas.mysticarcana.com';
+  }, []);
 
   return (
     <iframe
