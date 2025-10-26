@@ -1,6 +1,6 @@
 "use client";
 import SafeImage from "@/components/SafeImage";
-import { toPublicProductUrl } from "@/lib/printify";
+import { toPublicProductUrl, productPrice, productDescription, productImage } from "@/lib/printify";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ type Product = {
   title: string;
   description?: string;
   images?: { src: string; is_default?: boolean }[];
-  variants?: { id: number; price: number }[];
+  variants?: { id: number; price: number; is_default?: boolean }[];
   external?: { id?: string; handle?: string };
 };
 
@@ -45,29 +45,8 @@ export default function ProductCarousel({
     return toPublicProductUrl(storeBase, p);
   };
 
-  const getProductImage = (p: Product) => {
-    const defaultImg = p.images?.find((img) => img.is_default);
-    const firstImg = p.images?.[0];
-    return (
-      defaultImg?.src || firstImg?.src || "/images/placeholder-product.png"
-    );
-  };
-
-  const getProductPrice = (p: Product) => {
-    if (!p.variants || p.variants.length === 0) return "";
-    const minPrice = Math.min(...p.variants.map((v) => v.price));
-    return `$${(minPrice / 100).toFixed(2)}`;
-  };
-
-  const getProductDescription = (p: Product) => {
-    if (!p.description) return "";
-    const text = p.description.replace(/<[^>]*>/g, "");
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-    const firstTwo = sentences.slice(0, 2).join(" ").trim();
-    if (firstTwo) return firstTwo;
-    const words = text.split(/\s+/).slice(0, 25).join(" ");
-    return words + (text.split(/\s+/).length > 25 ? "..." : "");
-  };
+  // Use centralized functions from lib/printify.ts
+  // Note: productPrice returns a string without $, productImage returns image src, productDescription returns truncated description
 
   return (
     <section className="mt-4">
@@ -100,12 +79,10 @@ export default function ProductCarousel({
             // Use a unique key that includes currentPage to force re-render
             const uniqueKey = `${currentPage}-${i}-${p?.id || "placeholder"}`;
             const url = p ? getProductUrl(p) : storeBase || "#";
-            const img = p
-              ? getProductImage(p)
-              : "/images/placeholder-product.png";
+            const img = p ? productImage(p) : "/images/placeholder-product.png";
             const name = p?.title ?? "Product coming soon";
-            const price = p ? getProductPrice(p) : "";
-            const description = p ? getProductDescription(p) : "";
+            const price = p ? `$${productPrice(p)}` : "";
+            const description = p ? productDescription(p) : "";
 
             return (
                 <Link
