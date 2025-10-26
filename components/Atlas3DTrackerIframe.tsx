@@ -1,26 +1,13 @@
 'use client';
 
-import { useMemo } from 'react';
+const PROD = typeof window !== 'undefined' && !window.location.hostname.includes('localhost');
+const PROD_TRACKER = 'https://tracker.3iatlas.mysticarcana.com';
+const DEV_TRACKER = 'http://localhost:5173';
 
 type Props = { autoPlay?: boolean; initialSpeed?: number; initialViewMode?: 'true-scale'|'ride-atlas'; };
 
 export default function Atlas3DTrackerIframe(_props: Props) {
-  const src = useMemo(() => {
-    if (typeof window === 'undefined') {
-      return 'https://tracker.3iatlas.mysticarcana.com';
-    }
-    
-    const here = window.location.hostname;
-    
-    // Development check
-    if (process.env.NODE_ENV === 'development' || here.includes('localhost')) {
-      return 'http://localhost:5173';
-    }
-    
-    // HARDCODE to prevent ANY recursion
-    // Always use the tracker domain, NEVER embed the main site
-    return 'https://tracker.3iatlas.mysticarcana.com';
-  }, []);
+  const src = PROD ? PROD_TRACKER : DEV_TRACKER;
 
   return (
     <iframe
