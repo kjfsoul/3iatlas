@@ -10,7 +10,7 @@
     "lint": "echo 'lint disabled for starter'"
   },
   "dependencies": {
-    "@genkit-ai/mcp": "^1.21.0",
+    "@genkit-ai/mcp": "^1.22.0",
     "@react-three/drei": "^9.88.13",
     "@react-three/fiber": "^8.15.19",
     "@types/three": "^0.180.0",
