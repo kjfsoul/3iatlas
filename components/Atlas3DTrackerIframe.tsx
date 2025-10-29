@@ -1,6 +1,6 @@
 'use client';
 
-const TRACKER_URL = 'https://tracker.3iatlas.mysticarcana.com';
+const TRACKER_URL = process.env.NEXT_PUBLIC_TRACKER_URL || 'https://tracker.3iatlas.mysticarcana.com';
 
 type Props = { autoPlay?: boolean; initialSpeed?: number; initialViewMode?: 'true-scale'|'ride-atlas'; };
 
